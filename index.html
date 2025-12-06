@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Traffic Patrol - Карта ДТП и Патрулей</title>
+    <title>🚨 Traffic Patrol - Реальная карта ДТП и Патрулей</title>
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Яндекс.Карты API с вашим ключом -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU" type="text/javascript"></script>
     
     <style>
         /* Сброс и базовые стили */
@@ -52,7 +55,7 @@
             align-items: center;
             backdrop-filter: blur(10px);
             flex-shrink: 0;
-            z-index: 100;
+            z-index: 1000;
         }
         
         .header-left h1 {
@@ -108,84 +111,42 @@
             min-height: 0;
         }
         
-        /* Canvas карты */
-        #mapCanvas {
+        #yandexMap {
             width: 100%;
             height: 100%;
-            display: block;
-            cursor: crosshair;
         }
         
-        /* Контейнер для маркеров */
-        #markersContainer {
+        /* Загрузочный экран */
+        .map-loading {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-        
-        /* Стили маркеров */
-        .marker {
-            position: absolute;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
+            background: rgba(13, 27, 42, 0.95);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            font-size: 1.6rem;
-            cursor: move;
-            transform: translate(-50%, -50%);
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-            z-index: 20;
-            pointer-events: auto;
-            touch-action: none;
-            user-drag: none;
-            -webkit-user-drag: none;
+            align-items: center;
+            z-index: 500;
+            backdrop-filter: blur(10px);
         }
         
-        .marker:hover {
-            transform: translate(-50%, -50%) scale(1.12);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-            z-index: 30;
+        .map-loading i {
+            font-size: 3rem;
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
         }
         
-        .marker.police {
-            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-            animation: policePulse 1.5s infinite;
+        .map-loading p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
         }
         
-        .marker.accident {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-        }
-        
-        .marker.hazard {
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-        }
-        
-        .marker.dragging {
-            opacity: 0.9;
-            transform: translate(-50%, -50%) scale(1.25);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-        }
-        
-        @keyframes policePulse {
-            0%, 100% { 
-                box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
-            }
-            50% { 
-                box-shadow: 0 0 0 12px rgba(33, 150, 243, 0);
-            }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+        .map-loading small {
+            color: #81c784;
+            font-size: 0.9rem;
         }
         
         /* Панель инструментов */
@@ -281,7 +242,7 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
-            z-index: 1000;
+            z-index: 2000;
             display: none;
             align-items: flex-end;
             padding: 0;
@@ -442,7 +403,7 @@
             color: white;
             padding: 16px 24px;
             border-radius: 12px;
-            z-index: 2000;
+            z-index: 3000;
             animation: slideIn 0.3s ease-out;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             display: flex;
@@ -476,6 +437,16 @@
             }
         }
         
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
         /* Подсказка */
         .hint-box {
             position: absolute;
@@ -494,6 +465,25 @@
         .hint-box i {
             color: #4fc3f7;
             margin-right: 8px;
+        }
+        
+        /* Координаты */
+        .coords-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(13, 27, 42, 0.85);
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            text-align: center;
+        }
+        
+        .coords-box .coord-value {
+            color: #4fc3f7;
+            font-weight: 600;
         }
         
         /* Адаптивность */
@@ -530,12 +520,6 @@
                 font-size: 0.75rem;
             }
             
-            .marker {
-                width: 48px;
-                height: 48px;
-                font-size: 1.4rem;
-            }
-            
             .stats {
                 padding: 8px 10px;
             }
@@ -544,11 +528,16 @@
                 font-size: 1.2rem;
             }
             
-            .hint-box {
+            .hint-box, .coords-box {
                 bottom: 15px;
                 left: 15px;
                 font-size: 0.8rem;
                 max-width: 220px;
+            }
+            
+            .coords-box {
+                top: 15px;
+                right: 15px;
             }
         }
         
@@ -562,31 +551,42 @@
                 padding: 6px 8px;
             }
             
-            .marker {
-                width: 44px;
-                height: 44px;
-                font-size: 1.3rem;
-            }
-            
             .online-stats {
                 font-size: 0.75rem;
                 gap: 10px;
             }
+            
+            .coords-box {
+                display: none;
+            }
         }
         
-        /* Улучшение для тач-устройств */
-        @media (hover: none) and (pointer: coarse) {
-            .tool-btn:hover {
-                transform: none;
-            }
-            
-            .marker:hover {
-                transform: translate(-50%, -50%);
-            }
-            
-            .marker:active {
-                transform: translate(-50%, -50%) scale(1.1);
-            }
+        /* Стили для кастомных меток Яндекс */
+        .ymaps-2-1-79-balloon__content {
+            background: rgba(13, 27, 42, 0.95) !important;
+            color: white !important;
+            border-radius: 10px !important;
+            padding: 15px !important;
+            font-family: inherit !important;
+            backdrop-filter: blur(10px) !important;
+        }
+        
+        .ymaps-2-1-79-balloon__tail {
+            background: rgba(13, 27, 42, 0.95) !important;
+        }
+        
+        .ymaps-2-1-79-balloon__close-button {
+            background: #2196f3 !important;
+            border-radius: 50% !important;
+        }
+        
+        /* Кастомные иконки меток */
+        .custom-marker {
+            cursor: move !important;
+        }
+        
+        .custom-marker:hover {
+            filter: brightness(1.2);
         }
     </style>
 </head>
@@ -607,41 +607,61 @@
             </div>
         </header>
 
-        <!-- Контейнер карты -->
+        <!-- Контейнер Яндекс.Карты -->
         <div class="map-container">
-            <canvas id="mapCanvas"></canvas>
-            <div id="markersContainer"></div>
+            <div id="yandexMap"></div>
+            
+            <!-- Экран загрузки -->
+            <div class="map-loading" id="mapLoading">
+                <i class="fas fa-sync fa-spin"></i>
+                <p>Загрузка Яндекс.Карт...</p>
+                <small id="mapStatus">Подключение к API...</small>
+                <small>Координаты: 55.459619, 38.438920</small>
+            </div>
+            
+            <!-- Подсказка -->
             <div class="hint-box" id="hintBox">
                 <i class="fas fa-lightbulb"></i>
                 <span id="hintText">Выберите инструмент и кликните на карту</span>
+            </div>
+            
+            <!-- Координаты -->
+            <div class="coords-box" id="coordsBox">
+                <div>Центр карты:</div>
+                <div class="coord-value">55.459619, 38.438920</div>
             </div>
         </div>
 
         <!-- Панель инструментов -->
         <div class="toolbar">
-            <button class="tool-btn active" onclick="selectTool('police')" id="toolPolice">
+            <button class="tool-btn active" onclick="Game.selectTool('police')" id="toolPolice">
                 <i class="fas fa-car"></i>
                 <span>Патруль</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('accident')" id="toolAccident">
+            <button class="tool-btn" onclick="Game.selectTool('accident')" id="toolAccident">
                 <i class="fas fa-car-crash"></i>
                 <span>ДТП</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('hazard')" id="toolHazard">
+            <button class="tool-btn" onclick="Game.selectTool('hazard')" id="toolHazard">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Опасность</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('clear')" id="toolClear">
+            <button class="tool-btn" onclick="Game.selectTool('clear')" id="toolClear">
                 <i class="fas fa-trash-alt"></i>
                 <span>Удалить</span>
             </button>
             
-            <button class="tool-btn" onclick="showChat()" id="toolChat">
+            <button class="tool-btn" onclick="Game.showChat()" id="toolChat">
                 <i class="fas fa-comments"></i>
                 <span>Чат</span>
+            </button>
+            
+            <button class="tool-btn" onclick="Game.centerToUser()" id="toolLocation">
+                <i class="fas fa-location-arrow"></i>
+                <span>Моё место</span>
             </button>
         </div>
 
@@ -666,19 +686,19 @@
             <div class="chat-modal">
                 <div class="chat-header">
                     <h3><i class="fas fa-comments"></i> Чат патруля</h3>
-                    <button class="close-chat" onclick="hideChat()">×</button>
+                    <button class="close-chat" onclick="Game.hideChat()">×</button>
                 </div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="message system">
                         <div class="message-sender"><i class="fas fa-info-circle"></i> Система</div>
-                        <div class="message-text">Добро пожаловать в Traffic Patrol!</div>
-                        <div class="message-text">Добавляйте метки, перемещайте их и следите за дорогой!</div>
+                        <div class="message-text">Добро пожаловать в Traffic Patrol с Яндекс.Картами!</div>
+                        <div class="message-text">Добавляйте метки на реальную карту</div>
                         <div class="message-time">Только что</div>
                     </div>
                 </div>
                 <div class="chat-input">
                     <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="200">
-                    <button class="send-btn" onclick="sendMessage()">
+                    <button class="send-btn" onclick="Game.sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
@@ -688,56 +708,39 @@
 
     <script>
         // ============================================
-        // ТРАФИК ПАТРОЛЬ - ПОЛНАЯ ИГРА В ОДНОМ ФАЙЛЕ
+        // TRAFFIC PATROL С ЯНДЕКС.КАРТАМИ
         // ============================================
         
-        // Глобальное состояние игры
         const Game = {
             // Настройки
             config: {
-                centerLat: 55.459619,
-                centerLon: 38.438920,
-                initialZoom: 15,
-                markerRadius: 25,
-                minPoints: 0,
-                maxPoints: 1000
+                center: [55.459619, 38.438920], // Ваши координаты
+                zoom: 15,
+                minZoom: 10,
+                maxZoom: 19,
+                apiKey: '365e247d-d853-4425-b9cc-13bfa1169a49'
             },
             
             // Состояние игры
             state: {
-                markers: [],
+                yandexMap: null,
+                markers: [], // {id, type, user, coords, yandexPlacemark}
                 selectedTool: 'police',
                 userPoints: 100,
                 userActivity: 0,
                 totalMarkersAdded: 0,
                 totalMarkersRemoved: 0,
-                isDragging: false,
-                draggingMarker: null,
-                dragOffsetX: 0,
-                dragOffsetY: 0,
                 userName: 'Игрок',
                 chatMessages: [],
-                lastMarkerId: 0
-            },
-            
-            // DOM элементы
-            elements: {
-                canvas: null,
-                ctx: null,
-                markersContainer: null
+                isInitialized: false
             },
             
             // Инициализация
-            init() {
-                console.log('🚦 Инициализация Traffic Patrol...');
+            async init() {
+                console.log('🚦 Инициализация Traffic Patrol с Яндекс.Картами...');
                 
-                // Получаем DOM элементы
-                this.elements.canvas = document.getElementById('mapCanvas');
-                this.elements.ctx = this.elements.canvas.getContext('2d');
-                this.elements.markersContainer = document.getElementById('markersContainer');
-                
-                // Настраиваем размеры canvas
-                this.setupCanvas();
+                // Обновляем статус загрузки
+                document.getElementById('mapStatus').textContent = 'Проверка API ключа...';
                 
                 // Инициализируем Telegram
                 this.initTelegram();
@@ -745,10 +748,10 @@
                 // Загружаем сохраненные данные
                 this.loadGameData();
                 
-                // Рисуем карту
-                this.drawMap();
+                // Инициализируем Яндекс.Карты
+                await this.initYandexMap();
                 
-                // Настраиваем обработчики событий
+                // Настраиваем обработчики
                 this.setupEventListeners();
                 
                 // Обновляем UI
@@ -757,28 +760,25 @@
                 // Загружаем историю чата
                 this.loadChatHistory();
                 
-                console.log('✅ Игра готова!');
-                this.showNotification('Добро пожаловать в Traffic Patrol! 🚓', 'success');
+                console.log('✅ Игра готова с Яндекс.Картами!');
+                this.showNotification('Яндекс.Карты загружены! Добавляйте метки на реальную карту 🗺️', 'success');
             },
             
-            // Настройка Telegram Web App
+            // Инициализация Telegram Web App
             initTelegram() {
                 if (window.Telegram && window.Telegram.WebApp) {
                     const tg = window.Telegram.WebApp;
                     
-                    // Настройка приложения
                     tg.expand();
                     tg.enableClosingConfirmation();
                     tg.ready();
                     
-                    // Получаем данные пользователя
                     if (tg.initDataUnsafe.user) {
                         const user = tg.initDataUnsafe.user;
                         this.state.userName = user.first_name || 'Игрок';
                         document.getElementById('userName').textContent = this.state.userName;
                     }
                     
-                    // Настройка кнопки назад
                     tg.BackButton.show();
                     tg.BackButton.onClick(() => {
                         this.saveGameData();
@@ -789,253 +789,95 @@
                 }
             },
             
-            // Настройка canvas
-            setupCanvas() {
-                const resize = () => {
-                    const container = this.elements.canvas.parentElement;
-                    this.elements.canvas.width = container.clientWidth;
-                    this.elements.canvas.height = container.clientHeight;
-                    this.drawMap();
-                    this.renderMarkers();
-                };
-                
-                resize();
-                window.addEventListener('resize', resize);
-            },
-            
-            // Рисование карты (симуляция Яндекс.Карт)
-            drawMap() {
-                const ctx = this.elements.ctx;
-                const width = this.elements.canvas.width;
-                const height = this.elements.canvas.height;
-                
-                // Очистка canvas
-                ctx.clearRect(0, 0, width, height);
-                
-                // Фон - синий как у карты
-                ctx.fillStyle = '#0d47a1';
-                ctx.fillRect(0, 0, width, height);
-                
-                // Рисуем дороги
-                this.drawRoads();
-                
-                // Рисуем здания/ориентиры
-                this.drawLandmarks();
-                
-                // Рисуем сетку (для наглядности)
-                this.drawGrid();
-            },
-            
-            // Рисование дорог
-            drawRoads() {
-                const ctx = this.elements.ctx;
-                const width = this.elements.canvas.width;
-                const height = this.elements.canvas.height;
-                
-                // Основные дороги
-                ctx.strokeStyle = '#37474f';
-                ctx.lineWidth = 40;
-                ctx.lineCap = 'round';
-                
-                // Горизонтальные дороги (3 штуки)
-                const hRoads = 3;
-                const hSpacing = height / (hRoads + 1);
-                
-                for (let i = 1; i <= hRoads; i++) {
-                    const y = i * hSpacing;
+            // Инициализация Яндекс.Карт
+            initYandexMap() {
+                return new Promise((resolve, reject) => {
+                    if (!window.ymaps) {
+                        document.getElementById('mapStatus').textContent = 'Ошибка: Яндекс.Карты не загрузились';
+                        this.showNotification('Ошибка загрузки Яндекс.Карт', 'error');
+                        reject(new Error('Yandex Maps not loaded'));
+                        return;
+                    }
                     
-                    // Дорога
-                    ctx.beginPath();
-                    ctx.moveTo(-50, y);
-                    ctx.lineTo(width + 50, y);
-                    ctx.stroke();
-                    
-                    // Разметка (прерывистая линия)
-                    ctx.strokeStyle = '#ffd740';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([25, 15]);
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(width, y);
-                    ctx.stroke();
-                    
-                    ctx.strokeStyle = '#37474f';
-                    ctx.lineWidth = 40;
-                    ctx.setLineDash([]);
-                }
-                
-                // Вертикальные дороги (3 штуки)
-                const vRoads = 3;
-                const vSpacing = width / (vRoads + 1);
-                
-                for (let i = 1; i <= vRoads; i++) {
-                    const x = i * vSpacing;
-                    
-                    // Дорога
-                    ctx.beginPath();
-                    ctx.moveTo(x, -50);
-                    ctx.lineTo(x, height + 50);
-                    ctx.stroke();
-                    
-                    // Разметка
-                    ctx.strokeStyle = '#ffd740';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([25, 15]);
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, height);
-                    ctx.stroke();
-                    
-                    ctx.strokeStyle = '#37474f';
-                    ctx.lineWidth = 40;
-                    ctx.setLineDash([]);
-                }
-            },
-            
-            // Рисование ориентиров (зданий, парков и т.д.)
-            drawLandmarks() {
-                const ctx = this.elements.ctx;
-                const width = this.elements.canvas.width;
-                const height = this.elements.canvas.height;
-                
-                // Здания (квадраты)
-                ctx.fillStyle = '#546e7a';
-                const buildings = [
-                    { x: width * 0.2, y: height * 0.2, size: 50 },
-                    { x: width * 0.8, y: height * 0.2, size: 60 },
-                    { x: width * 0.3, y: height * 0.7, size: 45 },
-                    { x: width * 0.7, y: height * 0.7, size: 55 },
-                    { x: width * 0.5, y: height * 0.5, size: 70 }
-                ];
-                
-                buildings.forEach(building => {
-                    // Здание
-                    ctx.fillRect(
-                        building.x - building.size/2,
-                        building.y - building.size/2,
-                        building.size,
-                        building.size
-                    );
-                    
-                    // Окна
-                    ctx.fillStyle = '#ffb74d';
-                    const windowSize = 8;
-                    const windowSpacing = 15;
-                    
-                    for (let i = 0; i < 3; i++) {
-                        for (let j = 0; j < 3; j++) {
-                            ctx.fillRect(
-                                building.x - building.size/2 + windowSpacing * (i + 0.5),
-                                building.y - building.size/2 + windowSpacing * (j + 0.5),
-                                windowSize,
-                                windowSize
-                            );
+                    ymaps.ready(() => {
+                        try {
+                            document.getElementById('mapStatus').textContent = 'Создание карты...';
+                            
+                            // Создаем карту
+                            this.state.yandexMap = new ymaps.Map('yandexMap', {
+                                center: this.config.center,
+                                zoom: this.config.zoom,
+                                controls: ['zoomControl', 'fullscreenControl', 'typeSelector', 'searchControl']
+                            }, {
+                                suppressMapOpenBlock: true
+                            });
+                            
+                            // Настройка элементов управления
+                            this.state.yandexMap.controls.get('zoomControl').options.set({
+                                size: 'small',
+                                position: { right: 10, top: 150 }
+                            });
+                            
+                            this.state.yandexMap.controls.get('fullscreenControl').options.set({
+                                position: { right: 10, top: 100 }
+                            });
+                            
+                            // Добавляем слой пробок
+                            const trafficLayer = new ymaps.layer.TrafficLayer();
+                            this.state.yandexMap.layers.add(trafficLayer);
+                            
+                            // Скрываем экран загрузки
+                            setTimeout(() => {
+                                document.getElementById('mapLoading').style.display = 'none';
+                                document.getElementById('mapStatus').textContent = 'Карта готова!';
+                            }, 500);
+                            
+                            // Настраиваем обработчики событий карты
+                            this.setupMapEvents();
+                            
+                            // Загружаем сохраненные метки на карту
+                            this.loadMarkersToMap();
+                            
+                            this.state.isInitialized = true;
+                            resolve();
+                            
+                        } catch (error) {
+                            console.error('Ошибка создания карты:', error);
+                            document.getElementById('mapStatus').textContent = 'Ошибка создания карты';
+                            this.showNotification('Ошибка создания Яндекс.Карт', 'error');
+                            reject(error);
                         }
-                    }
-                    
-                    ctx.fillStyle = '#546e7a';
-                });
-                
-                // Парки (зеленые круги)
-                ctx.fillStyle = '#388e3c';
-                const parks = [
-                    { x: width * 0.1, y: height * 0.9, radius: 30 },
-                    { x: width * 0.9, y: height * 0.1, radius: 25 }
-                ];
-                
-                parks.forEach(park => {
-                    ctx.beginPath();
-                    ctx.arc(park.x, park.y, park.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Деревья в парке
-                    ctx.fillStyle = '#558b2f';
-                    for (let i = 0; i < 5; i++) {
-                        const angle = (i / 5) * Math.PI * 2;
-                        const treeX = park.x + Math.cos(angle) * (park.radius * 0.6);
-                        const treeY = park.y + Math.sin(angle) * (park.radius * 0.6);
-                        
-                        ctx.beginPath();
-                        ctx.arc(treeX, treeY, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.fillStyle = '#388e3c';
+                    });
                 });
             },
             
-            // Рисование сетки (для наглядности)
-            drawGrid() {
-                const ctx = this.elements.ctx;
-                const width = this.elements.canvas.width;
-                const height = this.elements.canvas.height;
+            // Настройка событий карты
+            setupMapEvents() {
+                const map = this.state.yandexMap;
                 
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                ctx.lineWidth = 1;
-                
-                // Вертикальные линии
-                for (let x = 0; x <= width; x += 50) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, height);
-                    ctx.stroke();
-                }
-                
-                // Горизонтальные линии
-                for (let y = 0; y <= height; y += 50) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(width, y);
-                    ctx.stroke();
-                }
-            },
-            
-            // Рендеринг маркеров
-            renderMarkers() {
-                const container = this.elements.markersContainer;
-                container.innerHTML = '';
-                
-                this.state.markers.forEach(marker => {
-                    const markerDiv = document.createElement('div');
-                    markerDiv.className = `marker ${marker.type}`;
-                    markerDiv.id = marker.id;
-                    markerDiv.style.left = `${marker.x}px`;
-                    markerDiv.style.top = `${marker.y}px`;
-                    markerDiv.setAttribute('data-marker-id', marker.id);
-                    markerDiv.title = `${marker.user}: ${this.getToolName(marker.type)}`;
+                // Клик по карте для добавления меток
+                map.events.add('click', (e) => {
+                    const coords = e.get('coords');
                     
-                    // Иконка маркера
-                    let icon = '';
-                    switch(marker.type) {
-                        case 'police': icon = '🚓'; break;
-                        case 'accident': icon = '💥'; break;
-                        case 'hazard': icon = '⚠️'; break;
+                    if (this.state.selectedTool === 'clear') {
+                        this.findAndRemoveMarker(coords);
+                    } else {
+                        this.addMarkerToMap(coords, this.state.selectedTool);
                     }
-                    markerDiv.innerHTML = icon;
-                    
-                    // Обработчики для перетаскивания
-                    markerDiv.addEventListener('mousedown', (e) => this.startDrag(e, marker.id));
-                    markerDiv.addEventListener('touchstart', (e) => this.startDragTouch(e, marker.id), { passive: false });
-                    
-                    container.appendChild(markerDiv);
+                });
+                
+                // Обновление координат при движении карты
+                map.events.add('boundschange', () => {
+                    const center = map.getCenter();
+                    document.getElementById('coordsBox').innerHTML = `
+                        <div>Центр карты:</div>
+                        <div class="coord-value">${center[0].toFixed(6)}, ${center[1].toFixed(6)}</div>
+                    `;
                 });
             },
             
             // Настройка обработчиков событий
             setupEventListeners() {
-                const canvas = this.elements.canvas;
-                
-                // Клик по карте
-                canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
-                
-                // Тач события для мобильных
-                canvas.addEventListener('touchend', (e) => this.handleCanvasTouch(e), { passive: false });
-                
-                // События перетаскивания
-                document.addEventListener('mousemove', (e) => this.handleDrag(e));
-                document.addEventListener('mouseup', () => this.stopDrag());
-                document.addEventListener('touchmove', (e) => this.handleDragTouch(e), { passive: false });
-                document.addEventListener('touchend', () => this.stopDrag());
-                
                 // Чат
                 const chatInput = document.getElementById('chatInput');
                 if (chatInput) {
@@ -1043,137 +885,10 @@
                         if (e.key === 'Enter') this.sendMessage();
                     });
                 }
-                
-                // Обработка клика по маркерам для удаления
-                document.addEventListener('click', (e) => {
-                    const markerElement = e.target.closest('.marker');
-                    if (markerElement && this.state.selectedTool === 'clear') {
-                        const markerId = markerElement.getAttribute('data-marker-id');
-                        this.removeMarker(markerId);
-                    }
-                });
             },
             
-            // Обработка клика по canvas
-            handleCanvasClick(e) {
-                const rect = this.elements.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                this.processMapClick(x, y);
-            },
-            
-            // Обработка тача по canvas
-            handleCanvasTouch(e) {
-                e.preventDefault();
-                const rect = this.elements.canvas.getBoundingClientRect();
-                const touch = e.changedTouches[0];
-                const x = touch.clientX - rect.left;
-                const y = touch.clientY - rect.top;
-                
-                this.processMapClick(x, y);
-            },
-            
-            // Обработка клика по карте
-            processMapClick(x, y) {
-                // Если мы перетаскиваем маркер - игнорируем клик
-                if (this.state.isDragging) {
-                    this.state.isDragging = false;
-                    if (this.state.draggingMarker) {
-                        document.getElementById(this.state.draggingMarker.id)?.classList.remove('dragging');
-                        this.state.draggingMarker = null;
-                    }
-                    return;
-                }
-                
-                // Если выбран режим удаления - проверяем, попали ли в маркер
-                if (this.state.selectedTool === 'clear') {
-                    // Проверяем, есть ли маркер под курсором
-                    const clickedMarker = this.getMarkerAtPosition(x, y);
-                    if (clickedMarker) {
-                        this.removeMarker(clickedMarker.id);
-                    } else {
-                        this.showNotification('Кликните по метке для удаления', 'warning');
-                    }
-                } else {
-                    // Добавляем новый маркер
-                    this.addMarker(x, y, this.state.selectedTool);
-                }
-            },
-            
-            // Начало перетаскивания
-            startDrag(e, markerId) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const marker = this.state.markers.find(m => m.id === markerId);
-                if (!marker) return;
-                
-                this.state.isDragging = true;
-                this.state.draggingMarker = marker;
-                
-                const rect = this.elements.canvas.getBoundingClientRect();
-                this.state.dragOffsetX = e.clientX - rect.left - marker.x;
-                this.state.dragOffsetY = e.clientY - rect.top - marker.y;
-                
-                document.getElementById(markerId).classList.add('dragging');
-            },
-            
-            startDragTouch(e, markerId) {
-                e.preventDefault();
-                if (e.touches[0]) {
-                    this.startDrag(e.touches[0], markerId);
-                }
-            },
-            
-            // Перетаскивание маркера
-            handleDrag(e) {
-                if (!this.state.isDragging || !this.state.draggingMarker) return;
-                
-                const rect = this.elements.canvas.getBoundingClientRect();
-                const newX = e.clientX - rect.left - this.state.dragOffsetX;
-                const newY = e.clientY - rect.top - this.state.dragOffsetY;
-                
-                // Ограничиваем перемещение в пределах карты
-                this.state.draggingMarker.x = Math.max(25, Math.min(newX, this.elements.canvas.width - 25));
-                this.state.draggingMarker.y = Math.max(25, Math.min(newY, this.elements.canvas.height - 25));
-                
-                this.renderMarkers();
-            },
-            
-            handleDragTouch(e) {
-                e.preventDefault();
-                if (e.touches[0]) {
-                    this.handleDrag(e.touches[0]);
-                }
-            },
-            
-            // Окончание перетаскивания
-            stopDrag() {
-                if (this.state.isDragging && this.state.draggingMarker) {
-                    // Начисляем очки за перемещение
-                    this.state.userPoints += 2;
-                    this.state.userActivity++;
-                    
-                    // Сохраняем игру
-                    this.saveGameData();
-                    this.updateUI();
-                    
-                    const markerDiv = document.getElementById(this.state.draggingMarker.id);
-                    if (markerDiv) {
-                        markerDiv.classList.remove('dragging');
-                        setTimeout(() => {
-                            this.showNotification('Метка перемещена! +2 очка', 'info');
-                        }, 100);
-                    }
-                }
-                
-                this.state.isDragging = false;
-                this.state.draggingMarker = null;
-            },
-            
-            // Добавление маркера
-            addMarker(x, y, type) {
+            // Добавление метки на Яндекс.Карту
+            addMarkerToMap(coords, type) {
                 // Проверяем стоимость
                 const cost = this.getMarkerCost(type);
                 if (this.state.userPoints < cost) {
@@ -1184,19 +899,84 @@
                 // Генерируем ID
                 const markerId = `marker_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 
-                // Создаем маркер
-                const marker = {
+                // Настройки метки в зависимости от типа
+                let preset, iconColor, iconGlyph;
+                switch(type) {
+                    case 'police':
+                        preset = 'islands#blueStretchyIcon';
+                        iconColor = '#2196F3';
+                        iconGlyph = 'car';
+                        break;
+                    case 'accident':
+                        preset = 'islands#redStretchyIcon';
+                        iconColor = '#F44336';
+                        iconGlyph = 'crash';
+                        break;
+                    case 'hazard':
+                        preset = 'islands#orangeStretchyIcon';
+                        iconColor = '#FF9800';
+                        iconGlyph = 'triangle';
+                        break;
+                }
+                
+                // Создаем метку Яндекс
+                const placemark = new ymaps.Placemark(coords, {
+                    hintContent: `${this.state.userName}: ${this.getToolName(type)}`,
+                    balloonContent: `
+                        <div style="color: white; font-family: inherit; padding: 10px; max-width: 250px;">
+                            <strong style="color: #4fc3f7; font-size: 1.1rem;">${this.getToolName(type)}</strong><br>
+                            <small>Добавил: ${this.state.userName}</small><br>
+                            <small>Время: ${new Date().toLocaleTimeString()}</small><br>
+                            <small>Координаты: ${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}</small><br>
+                            <div style="margin-top: 10px;">
+                                <button onclick="window.Game.removeMarker('${markerId}')" 
+                                        style="background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; width: 100%;">
+                                    <i class="fas fa-trash-alt"></i> Удалить эту метку
+                                </button>
+                            </div>
+                        </div>
+                    `,
+                    markerId: markerId,
+                    type: type,
+                    user: this.state.userName
+                }, {
+                    preset: preset,
+                    iconColor: iconColor,
+                    draggable: true, // Разрешаем перетаскивание
+                    hasBalloon: true,
+                    hasHint: true
+                });
+                
+                // Событие перетаскивания
+                placemark.events.add('dragend', (e) => {
+                    const newCoords = placemark.geometry.getCoordinates();
+                    
+                    // Обновляем координаты в сохраненных данных
+                    const marker = this.state.markers.find(m => m.id === markerId);
+                    if (marker) {
+                        marker.coords = newCoords;
+                        this.saveGameData();
+                        this.showNotification('Метка перемещена! +2 очка', 'info');
+                        
+                        // Начисляем очки за перемещение
+                        this.state.userPoints += 2;
+                        this.state.userActivity++;
+                        this.updateUI();
+                    }
+                });
+                
+                // Добавляем метку на карту
+                this.state.yandexMap.geoObjects.add(placemark);
+                
+                // Сохраняем в состоянии
+                this.state.markers.push({
                     id: markerId,
-                    x: x,
-                    y: y,
                     type: type,
                     user: this.state.userName,
+                    coords: coords,
                     timestamp: Date.now(),
-                    moved: false
-                };
-                
-                // Добавляем в массив
-                this.state.markers.push(marker);
+                    yandexPlacemark: placemark
+                });
                 
                 // Обновляем статистику
                 this.state.userPoints -= cost;
@@ -1204,26 +984,61 @@
                 this.state.totalMarkersAdded++;
                 
                 // Обновляем интерфейс
-                this.renderMarkers();
                 this.updateUI();
                 this.saveGameData();
                 
                 // Показываем уведомление
-                this.showNotification(`${this.getToolName(type)} добавлен! -${cost} очков`, 'success');
+                this.showNotification(`${this.getToolName(type)} добавлен на карту! -${cost} очков`, 'success');
                 
                 // Добавляем сообщение в чат
                 this.addChatMessage('system', `${this.state.userName} добавил ${this.getToolName(type)} на карту`);
             },
             
-            // Удаление маркера
+            // Поиск и удаление ближайшей метки
+            findAndRemoveMarker(coords) {
+                // Ищем ближайшую метку в пределах 50 метров
+                const objects = this.state.yandexMap.geoObjects;
+                let closestMarker = null;
+                let minDistance = 0.0005; // ~50 метров в градусах
+                
+                objects.each((object) => {
+                    if (object.geometry && object.properties) {
+                        const markerCoords = object.geometry.getCoordinates();
+                        const distance = Math.sqrt(
+                            Math.pow(markerCoords[0] - coords[0], 2) +
+                            Math.pow(markerCoords[1] - coords[1], 2)
+                        );
+                        
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestMarker = object;
+                        }
+                    }
+                });
+                
+                if (closestMarker) {
+                    const markerId = closestMarker.properties.get('markerId');
+                    this.removeMarker(markerId);
+                } else {
+                    this.showNotification('Метка не найдена рядом. Подвиньтесь ближе или выберите метку точнее.', 'warning');
+                }
+            },
+            
+            // Удаление метки по ID
             removeMarker(markerId) {
-                const index = this.state.markers.findIndex(m => m.id === markerId);
-                if (index === -1) return;
+                // Находим маркер в состоянии
+                const markerIndex = this.state.markers.findIndex(m => m.id === markerId);
+                if (markerIndex === -1) return;
                 
-                const marker = this.state.markers[index];
+                const marker = this.state.markers[markerIndex];
                 
-                // Удаляем маркер
-                this.state.markers.splice(index, 1);
+                // Удаляем с Яндекс.Карты
+                if (marker.yandexPlacemark) {
+                    this.state.yandexMap.geoObjects.remove(marker.yandexPlacemark);
+                }
+                
+                // Удаляем из состояния
+                this.state.markers.splice(markerIndex, 1);
                 
                 // Начисляем очки
                 this.state.userPoints += 5;
@@ -1231,28 +1046,117 @@
                 this.state.totalMarkersRemoved++;
                 
                 // Обновляем интерфейс
-                this.renderMarkers();
                 this.updateUI();
                 this.saveGameData();
                 
                 // Показываем уведомление
-                this.showNotification('Метка удалена! +5 очков', 'success');
+                this.showNotification('Метка удалена с карты! +5 очков', 'success');
                 
                 // Добавляем сообщение в чат
                 this.addChatMessage('system', `${this.state.userName} удалил ${this.getToolName(marker.type)} с карты`);
             },
             
-            // Поиск маркера по координатам
-            getMarkerAtPosition(x, y, threshold = 30) {
-                for (let marker of this.state.markers) {
-                    const distance = Math.sqrt(
-                        Math.pow(marker.x - x, 2) + Math.pow(marker.y - y, 2)
-                    );
-                    if (distance < threshold) {
-                        return marker;
+            // Загрузка сохраненных меток на карту
+            loadMarkersToMap() {
+                this.state.markers.forEach(markerData => {
+                    // Настройки в зависимости от типа
+                    let preset, iconColor;
+                    switch(markerData.type) {
+                        case 'police':
+                            preset = 'islands#blueStretchyIcon';
+                            iconColor = '#2196F3';
+                            break;
+                        case 'accident':
+                            preset = 'islands#redStretchyIcon';
+                            iconColor = '#F44336';
+                            break;
+                        case 'hazard':
+                            preset = 'islands#orangeStretchyIcon';
+                            iconColor = '#FF9800';
+                            break;
                     }
+                    
+                    // Создаем метку Яндекс
+                    const placemark = new ymaps.Placemark(markerData.coords, {
+                        hintContent: `${markerData.user}: ${this.getToolName(markerData.type)}`,
+                        balloonContent: `
+                            <div style="color: white; font-family: inherit; padding: 10px; max-width: 250px;">
+                                <strong style="color: #4fc3f7; font-size: 1.1rem;">${this.getToolName(markerData.type)}</strong><br>
+                                <small>Добавил: ${markerData.user}</small><br>
+                                <small>Время: ${new Date(markerData.timestamp).toLocaleTimeString()}</small><br>
+                                <small>Координаты: ${markerData.coords[0].toFixed(6)}, ${markerData.coords[1].toFixed(6)}</small><br>
+                                <div style="margin-top: 10px;">
+                                    <button onclick="window.Game.removeMarker('${markerData.id}')" 
+                                            style="background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; width: 100%;">
+                                        <i class="fas fa-trash-alt"></i> Удалить эту метку
+                                    </button>
+                                </div>
+                            </div>
+                        `,
+                        markerId: markerData.id,
+                        type: markerData.type,
+                        user: markerData.user
+                    }, {
+                        preset: preset,
+                        iconColor: iconColor,
+                        draggable: true,
+                        hasBalloon: true,
+                        hasHint: true
+                    });
+                    
+                    // Событие перетаскивания
+                    placemark.events.add('dragend', (e) => {
+                        const newCoords = placemark.geometry.getCoordinates();
+                        markerData.coords = newCoords;
+                        this.saveGameData();
+                        this.showNotification('Метка перемещена! +2 очка', 'info');
+                        
+                        this.state.userPoints += 2;
+                        this.state.userActivity++;
+                        this.updateUI();
+                    });
+                    
+                    // Добавляем на карту и сохраняем ссылку
+                    this.state.yandexMap.geoObjects.add(placemark);
+                    markerData.yandexPlacemark = placemark;
+                });
+            },
+            
+            // Центрирование на пользователе
+            centerToUser() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const userCoords = [position.coords.latitude, position.coords.longitude];
+                            this.state.yandexMap.setCenter(userCoords, 16);
+                            this.showNotification('Карта центрирована на вашем местоположении', 'info');
+                            
+                            // Добавляем временную метку пользователя
+                            const userMarker = new ymaps.Placemark(userCoords, {
+                                hintContent: 'Ваше местоположение',
+                                balloonContent: 'Вы здесь!'
+                            }, {
+                                preset: 'islands#blueCircleDotIcon',
+                                draggable: false
+                            });
+                            
+                            this.state.yandexMap.geoObjects.add(userMarker);
+                            
+                            // Убираем через 10 секунд
+                            setTimeout(() => {
+                                this.state.yandexMap.geoObjects.remove(userMarker);
+                            }, 10000);
+                        },
+                        (error) => {
+                            this.showNotification('Не удалось получить местоположение. Проверьте разрешения.', 'warning');
+                            // Возвращаем на центр по умолчанию
+                            this.state.yandexMap.setCenter(this.config.center, this.config.zoom);
+                        }
+                    );
+                } else {
+                    this.showNotification('Геолокация не поддерживается вашим браузером', 'warning');
+                    this.state.yandexMap.setCenter(this.config.center, this.config.zoom);
                 }
-                return null;
             },
             
             // Выбор инструмента
@@ -1399,8 +1303,17 @@
             // Сохранение и загрузка данных
             saveGameData() {
                 try {
+                    // Подготавливаем данные для сохранения (без объектов Яндекс)
+                    const saveData = this.state.markers.map(marker => ({
+                        id: marker.id,
+                        type: marker.type,
+                        user: marker.user,
+                        coords: marker.coords,
+                        timestamp: marker.timestamp
+                    }));
+                    
                     const gameData = {
-                        markers: this.state.markers,
+                        markers: saveData,
                         userPoints: this.state.userPoints,
                         userActivity: this.state.userActivity,
                         totalMarkersAdded: this.state.totalMarkersAdded,
@@ -1409,7 +1322,7 @@
                         lastSave: Date.now()
                     };
                     
-                    localStorage.setItem('traffic_patrol_game_data', JSON.stringify(gameData));
+                    localStorage.setItem('traffic_patrol_yandex_data', JSON.stringify(gameData));
                 } catch (error) {
                     console.error('Ошибка сохранения игры:', error);
                 }
@@ -1417,11 +1330,13 @@
             
             loadGameData() {
                 try {
-                    const savedData = localStorage.getItem('traffic_patrol_game_data');
+                    const savedData = localStorage.getItem('traffic_patrol_yandex_data');
                     if (savedData) {
                         const data = JSON.parse(savedData);
                         
+                        // Загружаем маркеры (объекты Яндекс будут созданы позже)
                         this.state.markers = data.markers || [];
+                        
                         this.state.userPoints = data.userPoints || 100;
                         this.state.userActivity = data.userActivity || 0;
                         this.state.totalMarkersAdded = data.totalMarkersAdded || 0;
@@ -1514,25 +1429,38 @@
             }
         };
         
+        // Сделаем Game доступной глобально для кнопок удаления
+        window.Game = Game;
+        
         // ============================================
-        // ИНИЦИАЛИЗАЦИЯ ИГРЫ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+        // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
         // ============================================
         
-        document.addEventListener('DOMContentLoaded', () => {
-            // Инициализируем игру
-            Game.init();
-            
-            // Показываем стартовую подсказку
-            setTimeout(() => {
-                Game.showNotification('🚓 Перетаскивайте метки на новые места!', 'info');
-                Game.addChatMessage('system', 'Игра загружена. Добавляйте метки на карту!');
-            }, 1000);
-            
-            // Глобальные функции для кнопок
-            window.selectTool = (tool) => Game.selectTool(tool);
-            window.showChat = () => Game.showChat();
-            window.hideChat = () => Game.hideChat();
-            window.sendMessage = () => Game.sendMessage();
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await Game.init();
+                
+                // Показываем стартовую подсказку
+                setTimeout(() => {
+                    Game.showNotification('🗺️ Яндекс.Карты загружены! Кликайте на карту для добавления меток', 'info');
+                    Game.addChatMessage('system', 'Яндекс.Карты загружены. Центр карты: 55.459619, 38.438920');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                document.getElementById('mapStatus').textContent = 'Ошибка загрузки. Обновите страницу.';
+                Game.showNotification('Ошибка загрузки карт. Проверьте подключение к интернету.', 'error');
+                
+                // Показываем альтернативный интерфейс
+                document.getElementById('mapLoading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Не удалось загрузить Яндекс.Карты</p>
+                    <small>Попробуйте обновить страницу или проверьте API ключ</small>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Обновить страницу
+                    </button>
+                `;
+            }
         });
     </script>
 </body>
