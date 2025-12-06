@@ -3,145 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Traffic Patrol Online | Telegram Game</title>
+    <title>🚨 Traffic Patrol Online | Яндекс.Карты</title>
+    
+    <!-- Стили -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Яндекс.Карты API с вашим ключом -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU" type="text/javascript"></script>
+    
     <style>
-        /* Временные стили, пока не создан style.css */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #1a237e; color: white; }
-        .container { padding: 20px; text-align: center; }
-        h1 { color: #00bcd4; margin-bottom: 20px; }
-        .map { width: 100%; height: 300px; background: #0d47a1; border: 2px solid #00bcd4; margin: 20px 0; position: relative; }
-        .tools { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        .tool-btn { padding: 10px 20px; background: #2196f3; border: none; color: white; border-radius: 5px; cursor: pointer; }
-        .stats { display: flex; justify-content: space-around; margin-top: 20px; }
+        /* Временные стили пока грузится карта */
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            background: #0d47a1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .map-loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .map-loading i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #00bcd4;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Скрываем рекламу Яндекс */
+        .ymaps-2-1-79-map-copyrights-promo,
+        .ymaps-2-1-79-copyright__content,
+        .ymaps-2-1-79-copyright__layout {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><i class="fas fa-traffic-light"></i> Traffic Patrol Online</h1>
-        <p>Добро пожаловать! Добавляйте метки на карту в реальном времени.</p>
-        
-        <div id="map" class="map">
-            <!-- Карта будет здесь -->
-            <div id="markersContainer"></div>
+    <div class="app-container">
+        <!-- Хедер -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1><i class="fas fa-map-marked-alt"></i> Traffic Patrol</h1>
+                <p class="online-count">
+                    <i class="fas fa-users"></i> Онлайн: <span id="onlineCount">1</span> | 
+                    <i class="fas fa-map-marker-alt"></i> Меток: <span id="markerCount">0</span>
+                </p>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="userName">Игрок</span>
+                    <div class="user-rank" id="userRank">Новичок 🚦</div>
+                </div>
+                <button class="btn-location" onclick="centerToUser()" title="Мое местоположение">
+                    <i class="fas fa-location-arrow"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Секция карты -->
+            <div class="map-section">
+                <!-- Контейнер Яндекс.Карты -->
+                <div id="map">
+                    <div class="map-loading">
+                        <i class="fas fa-sync fa-spin"></i>
+                        <p>Загрузка карты...</p>
+                    </div>
+                </div>
+                
+                <!-- Легенда карты -->
+                <div class="map-legend">
+                    <h3><i class="fas fa-map-signs"></i> Легенда:</h3>
+                    <div class="legend-items">
+                        <div class="legend-item" onclick="selectTool('police')">
+                            <div class="legend-icon police-icon"><i class="fas fa-car"></i></div>
+                            <div class="legend-text">
+                                <strong>Патруль 🚓</strong>
+                                <small>Клик - добавить, Перетащить - переместить</small>
+                            </div>
+                        </div>
+                        <div class="legend-item" onclick="selectTool('accident')">
+                            <div class="legend-icon accident-icon"><i class="fas fa-car-crash"></i></div>
+                            <div class="legend-text">
+                                <strong>ДТП 💥</strong>
+                                <small>Удерживайте 2 сек для добавления</small>
+                            </div>
+                        </div>
+                        <div class="legend-item" onclick="selectTool('hazard')">
+                            <div class="legend-icon hazard-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="legend-text">
+                                <strong>Опасность ⚠️</strong>
+                                <small>Ямы, препятствия, ремонт</small>
+                            </div>
+                        </div>
+                        <div class="legend-item" onclick="selectTool('clear')">
+                            <div class="legend-icon clear-icon"><i class="fas fa-trash-alt"></i></div>
+                            <div class="legend-text">
+                                <strong>Удалить 🗑️</strong>
+                                <small>Клик на метку для удаления</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="legend-info">
+                        <p><i class="fas fa-info-circle"></i> Координаты центра: 55.459619, 38.438920</p>
+                        <p><i class="fas fa-mouse-pointer"></i> Перетаскивайте метки на новые места!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Панель инструментов -->
+            <div class="toolbar">
+                <button class="tool-btn active" data-tool="police" onclick="selectTool('police')">
+                    <div class="tool-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">Патруль</span>
+                        <span class="tool-cost">-10 очков</span>
+                    </div>
+                </button>
+                
+                <button class="tool-btn" data-tool="accident" onclick="selectTool('accident')">
+                    <div class="tool-icon">
+                        <i class="fas fa-car-crash"></i>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">ДТП</span>
+                        <span class="tool-cost">-15 очков</span>
+                    </div>
+                </button>
+                
+                <button class="tool-btn" data-tool="hazard" onclick="selectTool('hazard')">
+                    <div class="tool-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">Опасность</span>
+                        <span class="tool-cost">-8 очков</span>
+                    </div>
+                </button>
+                
+                <button class="tool-btn" data-tool="clear" onclick="selectTool('clear')">
+                    <div class="tool-icon">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">Удалить</span>
+                        <span class="tool-cost">+5 очков</span>
+                    </div>
+                </button>
+                
+                <button class="tool-btn" onclick="showChat()" id="chatButton">
+                    <div class="tool-icon">
+                        <i class="fas fa-comments"></i>
+                        <span class="badge" id="chatBadge">0</span>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">Чат</span>
+                    </div>
+                </button>
+                
+                <button class="tool-btn" onclick="showHelp()">
+                    <div class="tool-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="tool-info">
+                        <span class="tool-name">Помощь</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Информационная панель -->
+            <div class="info-panel">
+                <div class="info-card">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="info-content">
+                        <h4>Как использовать:</h4>
+                        <p>1. <strong>Выберите инструмент</strong> на панели выше</p>
+                        <p>2. <strong>Нажмите на карту</strong> для добавления метки</p>
+                        <p>3. <strong>Перетащите метку</strong> для перемещения</p>
+                        <p>4. <strong>Выберите "Удалить"</strong> и кликните на метку для удаления</p>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <i class="fas fa-coins"></i>
+                            <div>
+                                <span class="stat-label">Ваши очки:</span>
+                                <span class="stat-value" id="userPoints">100</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-bolt"></i>
+                            <div>
+                                <span class="stat-label">Активность:</span>
+                                <span class="stat-value" id="userActivity">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="pointsProgress" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-text">Прогресс: <span id="progressPercent">100%</span></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Чат -->
+        <div class="chat-modal" id="chatModal">
+            <div class="chat-header">
+                <h3><i class="fas fa-comments"></i> Чат патруля</h3>
+                <button class="close-chat" onclick="hideChat()">&times;</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="system-message">
+                    <i class="fas fa-info-circle"></i> Добро пожаловать в чат Traffic Patrol!
+                </div>
+                <div class="system-message">
+                    <i class="fas fa-map-marker-alt"></i> Текущие координаты карты: 55.459619, 38.438920
+                </div>
+                <div class="system-message">
+                    <i class="fas fa-lightbulb"></i> Подсказка: Перетаскивайте метки на новые места!
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Напишите сообщение патрулю..." maxlength="200">
+                <button onclick="sendMessage()" title="Отправить">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
         
-        <div class="tools">
-            <button class="tool-btn" onclick="addMarker('police')"><i class="fas fa-car"></i> Патруль</button>
-            <button class="tool-btn" onclick="addMarker('accident')"><i class="fas fa-car-crash"></i> ДТП</button>
-            <button class="tool-btn" onclick="addMarker('hazard')"><i class="fas fa-exclamation-triangle"></i> Опасность</button>
-            <button class="tool-btn" onclick="clearMarker()"><i class="fas fa-trash"></i> Очистить</button>
+        <!-- Помощь -->
+        <div class="help-modal" id="helpModal">
+            <div class="help-content">
+                <div class="help-header">
+                    <h3><i class="fas fa-question-circle"></i> Помощь по игре</h3>
+                    <button class="close-help" onclick="hideHelp()">&times;</button>
+                </div>
+                <div class="help-body">
+                    <div class="help-section">
+                        <h4><i class="fas fa-gamepad"></i> Управление:</h4>
+                        <ul>
+                            <li><strong>Добавить метку:</strong> Выберите тип → кликните на карту</li>
+                            <li><strong>Переместить метку:</strong> Зажмите метку и перетащите</li>
+                            <li><strong>Удалить метку:</strong> Выберите "Удалить" → кликните на метку</li>
+                            <li><strong>ДТП:</strong> Удерживайте палец/мышь 2 секунды на карте</li>
+                        </ul>
+                    </div>
+                    <div class="help-section">
+                        <h4><i class="fas fa-star"></i> Система очков:</h4>
+                        <ul>
+                            <li>Патруль: -10 очков</li>
+                            <li>ДТП: -15 очков</li>
+                            <li>Опасность: -8 очков</li>
+                            <li>Удаление метки: +5 очков</li>
+                            <li>Перемещение метки: +2 очка</li>
+                        </ul>
+                    </div>
+                    <div class="help-section">
+                        <h4><i class="fas fa-trophy"></i> Ранги:</h4>
+                        <ul>
+                            <li>0-99 очков: Новичок 🚦</li>
+                            <li>100-199 очков: Патрульный 🚓</li>
+                            <li>200-499 очков: Офицер 🚔</li>
+                            <li>500-999 очков: Сержант 👮</li>
+                            <li>1000+ очков: Комиссар 👮‍♂️</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div class="stats">
-            <div>Меток: <span id="markerCount">0</span></div>
-            <div>Онлайн: <span id="onlineCount">1</span></div>
-            <div>Очки: <span id="points">100</span></div>
-        </div>
-        
-        <div style="margin-top: 20px;">
-            <p><small>Для игры в Telegram откройте через @BotFather</small></p>
-        </div>
+        <!-- Уведомления -->
+        <div id="notificationContainer"></div>
     </div>
 
+    <!-- JavaScript файлы -->
+    <script src="js/app.js"></script>
+    <script src="js/yandex-map.js"></script>
+    
     <script>
-        // Простая версия игры для начала
-        let markers = [];
-        let points = 100;
-        
-        function addMarker(type) {
-            if (points < 10) {
-                alert('Недостаточно очков!');
-                return;
-            }
-            
-            // Случайная позиция на карте
-            const x = Math.random() * 80 + 10; // 10-90%
-            const y = Math.random() * 80 + 10;
-            
-            const marker = {
-                type: type,
-                x: x,
-                y: y,
-                id: Date.now()
-            };
-            
-            markers.push(marker);
-            points -= 10;
-            updateDisplay();
-        }
-        
-        function clearMarker() {
-            if (markers.length > 0) {
-                markers.pop();
-                points += 5;
-                updateDisplay();
+        // Глобальные функции
+        function selectTool(tool) {
+            if (window.mapManager) {
+                window.mapManager.selectTool(tool);
+            } else {
+                showNotification('Карта еще загружается...', 'warning');
             }
         }
         
-        function updateDisplay() {
-            document.getElementById('markerCount').textContent = markers.length;
-            document.getElementById('points').textContent = points;
-            
-            // Отрисовка маркеров
-            const container = document.getElementById('markersContainer');
-            container.innerHTML = '';
-            
-            markers.forEach(marker => {
-                const div = document.createElement('div');
-                div.style.position = 'absolute';
-                div.style.left = marker.x + '%';
-                div.style.top = marker.y + '%';
-                div.style.width = '30px';
-                div.style.height = '30px';
-                div.style.borderRadius = '50%';
-                div.style.display = 'flex';
-                div.style.alignItems = 'center';
-                div.style.justifyContent = 'center';
-                div.style.transform = 'translate(-50%, -50%)';
+        function centerToUser() {
+            if (window.mapManager) {
+                window.mapManager.centerToUser();
+            }
+        }
+        
+        function showChat() {
+            if (window.mapManager) {
+                window.mapManager.showChat();
+            }
+        }
+        
+        function hideChat() {
+            if (window.mapManager) {
+                window.mapManager.hideChat();
+            }
+        }
+        
+        function sendMessage() {
+            if (window.mapManager) {
+                window.mapManager.sendMessage();
+            }
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+        
+        function hideHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+        
+        function showNotification(message, type = 'success') {
+            if (window.mapManager && window.mapManager.showNotification) {
+                window.mapManager.showNotification(message, type);
+            } else {
+                // Простая нотификация если карта не загрузилась
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    ${message}
+                `;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#4caf50'};
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    z-index: 10000;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    max-width: 300px;
+                `;
                 
-                if (marker.type === 'police') {
-                    div.style.background = '#2196f3';
-                    div.innerHTML = '🚓';
-                    div.style.animation = 'blink 1s infinite';
-                } else if (marker.type === 'accident') {
-                    div.style.background = '#f44336';
-                    div.innerHTML = '💥';
-                } else if (marker.type === 'hazard') {
-                    div.style.background = '#ff9800';
-                    div.innerHTML = '⚠️';
-                }
+                document.getElementById('notificationContainer').appendChild(notification);
                 
-                container.appendChild(div);
-            });
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-20px)';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
         }
         
-        // Инициализация Telegram
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.expand();
-            tg.ready();
+        // Открываем чат по нажатию на иконку в тулбаре
+        document.getElementById('chatButton').addEventListener('click', showChat);
+        
+        // Закрываем help при клике вне окна
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideHelp();
+            }
+        });
+        
+        // Отправка сообщения по Enter
+        document.getElementById('chatInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Проверка API ключа при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚨 Traffic Patrol Online загружается...');
+            console.log('🗺️ Яндекс.Карты API ключ: 365e247d-d853-4425-b9cc-13bfa1169a49');
+            console.log('📍 Центр карты: 55.459619, 38.438920');
             
-            if (tg.initDataUnsafe.user) {
-                const user = tg.initDataUnsafe.user;
-                document.querySelector('p').innerHTML = `Привет, <strong>${user.first_name}</strong>! Добавляйте метки на карту.`;
-            }
-        }
-        
-        // CSS анимация для мигалки
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.3; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        updateDisplay();
+            // Показываем начальную подсказку
+            setTimeout(() => {
+                showNotification('Добро пожаловать в Traffic Patrol! Выберите инструмент и кликните на карту.', 'success');
+            }, 1000);
+        });
     </script>
 </body>
 </html>
