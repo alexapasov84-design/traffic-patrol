@@ -3,54 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Traffic Patrol - Яндекс.Карты</title>
+    <title>Полиция Майями👮‍♂️🚔👮‍♂️</title>
     
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #1a237e; 
-            color: white;
-            height: 100vh;
-            overflow: hidden;
+        /* Telegram оптимизация */
+        :root {
+            --tg-theme-bg-color: #0a1931;
+            --tg-theme-text-color: #ffffff;
+            --tg-theme-hint-color: #aaaaaa;
+            --tg-theme-link-color: #4fc3f7;
+            --tg-theme-button-color: #2196f3;
+            --tg-theme-button-text-color: #ffffff;
         }
         
-        .app { display: flex; flex-direction: column; height: 100vh; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
         
-        /* Хедер */
-        .header { 
-            background: #0d1b2a; 
-            padding: 15px; 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background: var(--tg-theme-bg-color, #0a1931);
+            color: var(--tg-theme-text-color, white);
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+                     env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        
+        /* Заставка */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a1931 0%, #1a237e 100%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .splash-content {
             text-align: center;
+            max-width: 90%;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .splash-title {
+            font-size: 2.2rem;
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+        
+        .user-welcome {
+            color: #81c784;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .start-btn {
+            margin-top: 30px;
+            padding: 16px 40px;
+            background: linear-gradient(90deg, #2196f3, #1976d2);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+        }
+        
+        .tg-badge {
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: rgba(33, 150, 243, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #4fc3f7;
+        }
+        
+        /* Основной интерфейс */
+        .app { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .app.active {
+            opacity: 1;
+        }
+        
+        .header { 
+            padding: 15px 20px;
+            text-align: center;
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(10px);
             border-bottom: 3px solid #2196f3;
         }
         
         .header h1 { 
             color: #4fc3f7; 
-            margin: 0 0 5px 0;
+            margin: 0 0 8px 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+            font-size: 1.6rem;
         }
         
         .header-stats {
             color: #81c784;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         
-        /* Карта */
         .map-container {
             flex: 1;
             margin: 10px;
-            border: 3px solid #2196f3;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
             position: relative;
+            border: 3px solid #2196f3;
         }
         
         #yandex-map {
@@ -58,107 +151,126 @@
             height: 100%;
         }
         
-        /* Инструменты */
         .tools {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             padding: 15px;
-            background: #0d1b2a;
-            flex-wrap: wrap;
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(10px);
         }
         
         .tool-btn {
-            padding: 12px 20px;
-            background: #2196f3;
-            border: none;
-            border-radius: 8px;
+            padding: 12px 5px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196f3;
+            border-radius: 10px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.85rem;
             cursor: pointer;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-        
-        .tool-btn:hover {
-            background: #1976d2;
+            gap: 5px;
+            transition: all 0.2s;
         }
         
         .tool-btn.active {
-            background: #1976d2;
+            background: #2196f3;
             box-shadow: 0 0 15px #2196f3;
-            transform: translateY(-2px);
         }
         
-        /* Статистика */
         .stats {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            background: rgba(0,0,0,0.5);
-            font-size: 0.9rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 12px;
+            background: rgba(13, 27, 42, 0.9);
+            border-top: 2px solid #2196f3;
+            text-align: center;
         }
         
         .stat-value {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #4fc3f7;
         }
         
-        /* Уведомление */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            z-index: 1000;
-            animation: slideIn 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        /* Адаптивность для Telegram */
+        @media (max-height: 700px) {
+            .splash-title { font-size: 1.8rem; }
+            .header { padding: 12px 15px; }
+            .header h1 { font-size: 1.4rem; }
+            .tools { padding: 10px; }
+            .tool-btn { padding: 10px 3px; font-size: 0.8rem; }
         }
         
-        .notification.error { background: #f44336; }
-        .notification.warning { background: #ff9800; }
+        @media (max-height: 600px) {
+            .stats { display: none; }
+            .map-container { margin: 8px; }
+        }
         
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div class="app">
+    <!-- Заставка с приветствием -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h1 class="splash-title">👮‍♂️ Полиция Майями 🚔</h1>
+            <div class="user-welcome" id="userWelcome">Загрузка...</div>
+            
+            <div style="margin: 25px 0; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px;">
+                <h3 style="color: #4fc3f7; margin-bottom: 10px;">🎯 Задача:</h3>
+                <p>Контролируйте дорожную ситуацию, расставляйте патрули и следите за порядком!</p>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">
+                <i class="fas fa-play-circle"></i>
+                НАЧАТЬ ПАТРУЛИРОВАНИЕ
+            </button>
+            
+            <div class="tg-badge">
+                <i class="fab fa-telegram"></i> Telegram Mini App
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основной игровой интерфейс -->
+    <div class="app" id="mainApp">
         <div class="header">
-            <h1><i class="fas fa-traffic-light"></i> Traffic Patrol</h1>
+            <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
             <div class="header-stats">
-                Меток: <span id="markerCount">0</span> | Очки: <span id="points">100</span>
+                Патрулей: <span id="markerCount">0</span> | Очки: <span id="points">100</span>
             </div>
         </div>
         
         <div class="map-container">
             <div id="yandex-map"></div>
             <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                <i class="fas fa-sync fa-spin" style="font-size: 2rem; margin-bottom: 15px;"></i>
-                <p>Загрузка Яндекс.Карт...</p>
+                <i class="fas fa-sync fa-spin" style="font-size: 2.5rem; margin-bottom: 20px; color: #4fc3f7;"></i>
+                <p style="color: #81c784; font-size: 1.1rem;">Загрузка карт...</p>
             </div>
         </div>
         
         <div class="tools">
             <button class="tool-btn active" onclick="selectTool('police')">
-                <i class="fas fa-car"></i> Патруль
+                <i class="fas fa-police-car"></i>
+                <span>Патруль</span>
             </button>
             <button class="tool-btn" onclick="selectTool('accident')">
-                <i class="fas fa-car-crash"></i> ДТП
+                <i class="fas fa-car-crash"></i>
+                <span>ДТП</span>
             </button>
             <button class="tool-btn" onclick="selectTool('hazard')">
-                <i class="fas fa-exclamation-triangle"></i> Опасность
+                <i class="fas fa-traffic-light"></i>
+                <span>Пробка</span>
             </button>
             <button class="tool-btn" onclick="selectTool('clear')">
-                <i class="fas fa-trash-alt"></i> Удалить
+                <i class="fas fa-trash-alt"></i>
+                <span>Удалить</span>
             </button>
         </div>
         
@@ -179,149 +291,259 @@
     </div>
 
     <script>
-        // ============ ПРОСТАЯ РАБОЧАЯ ВЕРСИЯ ============
+        // ============ TELEGRAM INITIALIZATION ============
+        const tg = window.Telegram.WebApp;
+        let telegramUser = null;
         
+        // Инициализация Telegram Web App
+        function initTelegram() {
+            console.log('Initializing Telegram Web App...');
+            
+            // Расширяем на весь экран
+            tg.expand();
+            
+            // Настраиваем цвета
+            tg.setHeaderColor('#0d1b2a');
+            tg.setBackgroundColor('#0a1931');
+            
+            // Получаем данные пользователя
+            telegramUser = tg.initDataUnsafe?.user;
+            
+            if (telegramUser) {
+                const userName = telegramUser.first_name || telegramUser.username || 'Игрок';
+                const userId = telegramUser.id;
+                
+                document.getElementById('userWelcome').innerHTML = `
+                    Добро пожаловать, <strong style="color: #4fc3f7">${userName}</strong>!<br>
+                    <small style="color: #aaa">Ваш ID: ${userId}</small>
+                `;
+                
+                console.log('Telegram User:', telegramUser);
+                
+                // Используем ID пользователя для сохранений
+                window.userId = userId;
+            } else {
+                document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
+                window.userId = 'guest_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            // Настройка кнопки "Назад"
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                tg.showConfirm('Закрыть игру?', (confirmed) => {
+                    if (confirmed) {
+                        tg.close();
+                    }
+                });
+            });
+            
+            // Обработка изменения размера
+            tg.onEvent('viewportChanged', updateViewport);
+            
+            // Инициализация основной игры
+            setTimeout(initGame, 1000);
+        }
+        
+        function updateViewport() {
+            console.log('Viewport changed:', tg.viewportHeight);
+        }
+        
+        // ============ GAME INITIALIZATION ============
         let ymap = null;
         let markers = [];
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
+        let pendingComment = null;
         
-        // Инициализация
-        function init() {
-            console.log('Запуск Traffic Patrol...');
-            
-            // Telegram
-            if (window.Telegram?.WebApp) {
-                const tg = window.Telegram.WebApp;
-                tg.expand();
-                console.log('Telegram OK');
-            }
+        function initGame() {
+            console.log('🚔 Запуск системы патрулирования...');
             
             // Загрузка сохранений
             loadGame();
             
-            // Яндекс.Карты
+            // Инициализация Яндекс.Карт
             if (window.ymaps) {
                 ymaps.ready(initMap);
             } else {
-                showError('Яндекс.Карты не загрузились');
+                showError('❌ Яндекс.Карты не загрузились');
             }
         }
         
-        // Инициализация карты
+        function startGame() {
+            const splash = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
+            
+            // Анимация перехода
+            splash.style.opacity = '0';
+            
+            setTimeout(() => {
+                splash.style.display = 'none';
+                mainApp.classList.add('active');
+                
+                // Отправляем событие в Telegram
+                if (telegramUser) {
+                    tg.sendData(JSON.stringify({
+                        action: 'game_started',
+                        user_id: telegramUser.id,
+                        timestamp: Date.now()
+                    }));
+                }
+            }, 500);
+        }
+        
+        // ============ YANDEX MAP ============
         function initMap() {
             try {
-                console.log('Создание карты...');
-                
-                // ПРОСТАЯ КАРТА БЕЗ TrafficLayer
                 ymap = new ymaps.Map('yandex-map', {
                     center: [55.459619, 38.438920],
                     zoom: 15,
                     controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
                 });
                 
-                // Скрываем загрузку
                 document.getElementById('loading').style.display = 'none';
                 
                 // Обработчик кликов
                 ymap.events.add('click', function(e) {
                     const coords = e.get('coords');
+                    
                     if (selectedTool === 'clear') {
                         removeNearMarker(coords);
+                    } else if (selectedTool === 'police') {
+                        // Для патруля спрашиваем комментарий
+                        pendingComment = { coords, type: selectedTool };
+                        showCommentPrompt();
                     } else {
-                        addMarker(coords, selectedTool);
+                        addMarker(coords, selectedTool, null);
                     }
                 });
                 
-                // Загружаем сохраненные маркеры
                 loadMarkers();
-                
-                // Обновляем UI
                 updateUI();
                 
-                showNotification('✅ Яндекс.Карты загружены! Кликайте на карту');
+                showNotification('✅ Карта загружена! Кликайте для добавления патрулей', 'info');
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
-                showError('Ошибка создания карты');
+                showError('❌ Ошибка загрузки карты');
             }
         }
         
-        // Добавление маркера
-        function addMarker(coords, type) {
+        // ============ COMMENT SYSTEM ============
+        function showCommentPrompt() {
+            const comment = prompt('💬 Введите комментарий для патруля (до 30 символов):', '');
+            
+            if (comment !== null) {
+                if (comment.length > 30) {
+                    showNotification('❌ Максимум 30 символов!', 'error');
+                    return;
+                }
+                
+                if (pendingComment) {
+                    addMarker(pendingComment.coords, pendingComment.type, comment.trim());
+                    pendingComment = null;
+                }
+            } else {
+                showNotification('ℹ️ Добавление патруля отменено', 'info');
+            }
+        }
+        
+        // ============ MARKERS ============
+        function addMarker(coords, type, comment = null) {
             const cost = getCost(type);
             if (points < cost) {
-                showNotification(`Нужно ${cost} очков!`, 'error');
+                showNotification(`❌ Нужно ${cost} очков!`, 'error');
                 return;
             }
             
             const markerId = 'marker_' + Date.now();
-            let iconColor;
+            let preset, iconColor;
             
             switch(type) {
-                case 'police': iconColor = '#2196F3'; break;
-                case 'accident': iconColor = '#F44336'; break;
-                case 'hazard': iconColor = '#FF9800'; break;
+                case 'police':
+                    preset = 'islands#blueAutoIcon';
+                    iconColor = '#2196F3';
+                    break;
+                case 'accident':
+                    preset = 'islands#redAutoIcon';
+                    iconColor = '#F44336';
+                    break;
+                case 'hazard':
+                    preset = 'islands#orangeAutoIcon';
+                    iconColor = '#FF9800';
+                    break;
             }
             
             // Создаем метку
             const placemark = new ymaps.Placemark(coords, {
                 hintContent: getToolName(type),
-                balloonContent: `
-                    <div style="padding: 10px; max-width: 200px;">
-                        <strong>${getToolName(type)}</strong><br>
-                        <button onclick="deleteMarker('${markerId}')" 
-                                style="margin-top: 5px; padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                            Удалить
-                        </button>
-                    </div>
-                `
+                balloonContent: createBalloonContent(type, comment, markerId, iconColor)
             }, {
-                preset: 'islands#icon',
+                preset: preset,
                 iconColor: iconColor,
                 draggable: true
             });
             
-            // Перетаскивание
             placemark.events.add('dragend', function() {
                 const newCoords = placemark.geometry.getCoordinates();
                 updateMarkerCoords(markerId, newCoords);
-                showNotification('Метка перемещена! +2 очка');
+                showNotification('🚗 Метка перемещена! +2 очка', 'info');
                 points += 2;
                 activity++;
                 updateUI();
                 saveGame();
             });
             
-            // Добавляем на карту
             ymap.geoObjects.add(placemark);
             
-            // Сохраняем
             markers.push({
                 id: markerId,
                 type: type,
                 coords: coords,
-                placemark: placemark
+                comment: comment,
+                placemark: placemark,
+                timestamp: Date.now()
             });
             
-            // Обновляем очки
+            // Показываем комментарий временно
+            if (comment) {
+                showTemporaryComment(placemark, comment);
+            }
+            
             points -= cost;
             activity++;
             
-            // Сохраняем и обновляем
             saveGame();
             updateUI();
-            showNotification(`${getToolName(type)} добавлен! -${cost} очков`);
+            showNotification(`✅ ${getToolName(type)} добавлен! -${cost} очков`);
         }
         
-        // Удаление ближайшей метки
+        function createBalloonContent(type, comment, markerId, color) {
+            return `
+                <div style="padding: 15px; max-width: 250px; background: #0d1b2a; color: white; border-radius: 10px; border-left: 5px solid ${color}">
+                    <strong style="color: ${color}; font-size: 1.1em;">${getToolName(type)}</strong><br>
+                    ${comment ? `<hr style="margin: 8px 0; border-color: ${color}"><div style="font-style: italic; color: #81c784;">💬 "${comment}"</div>` : ''}
+                    <button onclick="window.deleteMarker('${markerId}')" 
+                            style="margin-top: 10px; padding: 8px 15px; background: linear-gradient(90deg, #f44336, #c62828); 
+                                   color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        <i class="fas fa-trash"></i> Удалить (-10 очков)
+                    </button>
+                </div>
+            `;
+        }
+        
+        function showTemporaryComment(placemark, comment) {
+            // Можно реализовать всплывающие подсказки при желании
+            console.log('Комментарий:', comment);
+        }
+        
+        // ============ GAME FUNCTIONS ============
         function removeNearMarker(coords) {
             if (!ymap) return;
             
             const objects = ymap.geoObjects;
             let closest = null;
-            let minDist = 0.0005; // ~50 метров
+            let minDist = 0.0005;
             
             objects.each(function(obj) {
                 if (obj.geometry) {
@@ -339,61 +561,57 @@
             });
             
             if (closest) {
-                // Удаляем с карты
-                ymap.geoObjects.remove(closest);
-                
-                // Удаляем из массива
                 const markerId = findMarkerId(closest);
                 if (markerId) {
-                    markers = markers.filter(m => m.id !== markerId);
-                    points += 5;
-                    activity++;
-                    saveGame();
-                    updateUI();
-                    showNotification('Метка удалена! +5 очков');
+                    deleteMarker(markerId);
                 }
             } else {
-                showNotification('Кликните ближе к метке', 'warning');
+                showNotification('⚠️ Кликните ближе к метке', 'warning');
             }
         }
         
-        // Удаление по ID (из балуна)
         function deleteMarker(markerId) {
             const marker = markers.find(m => m.id === markerId);
-            if (marker && marker.placemark) {
+            if (marker) {
                 ymap.geoObjects.remove(marker.placemark);
                 markers = markers.filter(m => m.id !== markerId);
-                points += 5;
+                points += 10;
                 activity++;
                 saveGame();
                 updateUI();
-                showNotification('Метка удалена! +5 очков');
+                showNotification('✅ Метка удалена! +10 очков', 'info');
             }
         }
         
-        // Загрузка сохраненных маркеров
         function loadMarkers() {
             markers.forEach(markerData => {
-                let iconColor;
+                let preset, iconColor;
+                
                 switch(markerData.type) {
-                    case 'police': iconColor = '#2196F3'; break;
-                    case 'accident': iconColor = '#F44336'; break;
-                    case 'hazard': iconColor = '#FF9800'; break;
+                    case 'police':
+                        preset = 'islands#blueAutoIcon';
+                        iconColor = '#2196F3';
+                        break;
+                    case 'accident':
+                        preset = 'islands#redAutoIcon';
+                        iconColor = '#F44336';
+                        break;
+                    case 'hazard':
+                        preset = 'islands#orangeAutoIcon';
+                        iconColor = '#FF9800';
+                        break;
                 }
                 
                 const placemark = new ymaps.Placemark(markerData.coords, {
                     hintContent: getToolName(markerData.type),
-                    balloonContent: `
-                        <div style="padding: 10px; max-width: 200px;">
-                            <strong>${getToolName(markerData.type)}</strong><br>
-                            <button onclick="deleteMarker('${markerData.id}')" 
-                                    style="margin-top: 5px; padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
-                                Удалить
-                            </button>
-                        </div>
-                    `
+                    balloonContent: createBalloonContent(
+                        markerData.type, 
+                        markerData.comment, 
+                        markerData.id, 
+                        iconColor
+                    )
                 }, {
-                    preset: 'islands#icon',
+                    preset: preset,
                     iconColor: iconColor,
                     draggable: true
                 });
@@ -401,7 +619,7 @@
                 placemark.events.add('dragend', function() {
                     const newCoords = placemark.geometry.getCoordinates();
                     updateMarkerCoords(markerData.id, newCoords);
-                    showNotification('Метка перемещена! +2 очка');
+                    showNotification('🚗 Метка перемещена! +2 очка', 'info');
                     points += 2;
                     activity++;
                     updateUI();
@@ -413,7 +631,60 @@
             });
         }
         
-        // Вспомогательные функции
+        // ============ UI FUNCTIONS ============
+        function selectTool(tool) {
+            selectedTool = tool;
+            
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showNotification(`🔧 Выбрано: ${getToolName(tool)}`, 'info');
+        }
+        
+        function updateUI() {
+            document.getElementById('markerCount').textContent = markers.length;
+            document.getElementById('points').textContent = points;
+            document.getElementById('activity').textContent = activity;
+            
+            const rank = getRank();
+            document.getElementById('userRank').textContent = rank;
+            
+            const progress = Math.min(points / 1000, 1) * 100;
+            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
+        }
+        
+        function getRank() {
+            if (points >= 5000) return '👑 ШЕФ';
+            if (points >= 3000) return '🦅 КАПИТАН';
+            if (points >= 1500) return '⭐ ЛЕЙТЕНАНТ';
+            if (points >= 800) return '👮 СЕРЖАНТ';
+            if (points >= 300) return '🚓 ОФИЦЕР';
+            if (points >= 100) return '👮‍♂️ ПАТРУЛЬНЫЙ';
+            return '🎓 НОВИЧОК';
+        }
+        
+        function getToolName(tool) {
+            const names = {
+                police: '🚓 ПАТРУЛЬ',
+                accident: '💥 ДТП',
+                hazard: '🚦 ПРОБКА',
+                clear: '🗑️ УДАЛЕНИЕ'
+            };
+            return names[tool] || tool;
+        }
+        
+        function getCost(type) {
+            const costs = {
+                police: 20,
+                accident: 30,
+                hazard: 15
+            };
+            return costs[type] || 20;
+        }
+        
+        // ============ UTILITIES ============
         function findMarkerId(placemark) {
             const marker = markers.find(m => m.placemark === placemark);
             return marker ? marker.id : null;
@@ -427,97 +698,57 @@
             }
         }
         
-        function selectTool(tool) {
-            selectedTool = tool;
-            
-            // Обновляем кнопки
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            showNotification(`Выбран: ${getToolName(tool)}`);
-        }
-        
-        function updateUI() {
-            document.getElementById('markerCount').textContent = markers.length;
-            document.getElementById('points').textContent = points;
-            document.getElementById('activity').textContent = activity;
-            
-            // Ранг
-            const rank = getRank();
-            document.getElementById('userRank').textContent = rank;
-            
-            // Прогресс
-            const progress = Math.min(points / 100, 1) * 100;
-            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
-        }
-        
-        function getRank() {
-            if (points >= 1000) return 'Комиссар';
-            if (points >= 500) return 'Сержант';
-            if (points >= 200) return 'Офицер';
-            if (points >= 100) return 'Патрульный';
-            return 'Новичок';
-        }
-        
-        function getToolName(tool) {
-            return {
-                police: 'Патруль',
-                accident: 'ДТП',
-                hazard: 'Опасность',
-                clear: 'Удаление'
-            }[tool] || tool;
-        }
-        
-        function getCost(type) {
-            return {
-                police: 10,
-                accident: 15,
-                hazard: 8
-            }[type] || 10;
-        }
-        
         function showNotification(message, type = 'success') {
-            // Удаляем старые
-            document.querySelectorAll('.notification').forEach(n => n.remove());
-            
-            // Создаем новое
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+            // Простая реализация для Telegram
+            if (type === 'error') {
+                tg.showPopup({
+                    title: 'Ошибка',
+                    message: message,
+                    buttons: [{ type: 'ok' }]
+                });
+            } else {
+                tg.showAlert(message);
+            }
         }
         
         function showError(message) {
             document.getElementById('loading').innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="color: #f44336;"></i>
-                <p>${message}</p>
-                <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Обновить
+                <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 3rem;"></i>
+                <p style="color: #f44336;">${message}</p>
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px;">
+                    Перезагрузить
                 </button>
             `;
         }
         
-        // Сохранение/загрузка
+        // ============ SAVE/LOAD ============
         function saveGame() {
             try {
                 const data = {
                     markers: markers.map(m => ({
                         id: m.id,
                         type: m.type,
-                        coords: m.coords
+                        coords: m.coords,
+                        comment: m.comment,
+                        timestamp: m.timestamp
                     })),
                     points: points,
-                    activity: activity
+                    activity: activity,
+                    userId: window.userId
                 };
-                localStorage.setItem('traffic_game', JSON.stringify(data));
+                
+                localStorage.setItem(`miami_police_${window.userId}`, JSON.stringify(data));
+                
+                // Отправляем статистику в Telegram
+                if (telegramUser) {
+                    tg.sendData(JSON.stringify({
+                        action: 'save_score',
+                        points: points,
+                        activity: activity,
+                        markers: markers.length
+                    }));
+                }
+                
             } catch (e) {
                 console.error('Ошибка сохранения:', e);
             }
@@ -525,28 +756,35 @@
         
         function loadGame() {
             try {
-                const saved = localStorage.getItem('traffic_game');
+                const saved = localStorage.getItem(`miami_police_${window.userId}`);
                 if (saved) {
                     const data = JSON.parse(saved);
                     markers = data.markers || [];
                     points = data.points || 100;
                     activity = data.activity || 0;
-                    
-                    document.getElementById('markerCount').textContent = markers.length;
-                    document.getElementById('points').textContent = points;
-                    document.getElementById('activity').textContent = activity;
+                    updateUI();
                 }
             } catch (e) {
                 console.error('Ошибка загрузки:', e);
             }
         }
         
-        // Глобальные функции
+        // ============ GLOBAL FUNCTIONS ============
         window.selectTool = selectTool;
         window.deleteMarker = deleteMarker;
+        window.startGame = startGame;
         
-        // Запуск
-        document.addEventListener('DOMContentLoaded', init);
+        // ============ START EVERYTHING ============
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.Telegram?.WebApp) {
+                initTelegram();
+            } else {
+                // Если не в Telegram, показываем обычную версию
+                document.getElementById('userWelcome').textContent = 'Добро пожаловать в браузерную версию!';
+                window.userId = 'browser_user';
+                setTimeout(initGame, 1000);
+            }
+        });
     </script>
 </body>
 </html>
