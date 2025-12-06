@@ -12,7 +12,6 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
-        /* СТИЛИ ОСТАЮТСЯ ТАКИМИ ЖЕ */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -37,8 +36,9 @@
         }
         
         body {
-            background: var(--tg-theme-bg-color, #0a1931);
+            background: linear-gradient(135deg, #0a1931 0%, #162447 50%, #1f4068 100%);
             color: var(--tg-theme-text-color, white);
+            perspective: 1000px;
         }
         
         .splash-screen {
@@ -51,6 +51,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            background: linear-gradient(135deg, #0a1931 0%, #162447 100%);
         }
         
         .splash-image {
@@ -61,6 +62,8 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
+            opacity: 0.7;
+            filter: blur(2px);
         }
         
         .image-overlay {
@@ -71,10 +74,10 @@
             height: 100%;
             background: linear-gradient(
                 to bottom,
-                rgba(10, 25, 49, 0.9) 0%,
-                rgba(10, 25, 49, 0.7) 30%,
-                rgba(10, 25, 49, 0.5) 50%,
-                rgba(10, 25, 49, 0.8) 100%
+                rgba(10, 25, 49, 0.95) 0%,
+                rgba(10, 25, 49, 0.8) 30%,
+                rgba(10, 25, 49, 0.6) 50%,
+                rgba(10, 25, 49, 0.9) 100%
             );
             z-index: 2;
         }
@@ -99,29 +102,35 @@
             font-size: 2.5rem;
             color: #4fc3f7;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.8), 0 0 40px rgba(79, 195, 247, 0.4);
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         
         .splash-subtitle {
             color: #81c784;
             font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
         }
         
         .online-status {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid rgba(76, 175, 80, 0.5);
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid rgba(76, 175, 80, 0.6);
             color: #81c784;
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 25px;
             font-size: 0.9rem;
-            margin-top: 10px;
+            margin-top: 15px;
             display: inline-block;
             animation: pulse 2s infinite;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
         }
         
         .online-count {
             color: #4fc3f7;
             font-weight: bold;
+            font-size: 1.1rem;
         }
         
         .splash-center {
@@ -134,19 +143,23 @@
         }
         
         .game-info {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #2196f3;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #2196f3;
             max-width: 90%;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(15px);
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
+            transform-style: preserve-3d;
+            transform: translateZ(10px);
         }
         
         .game-info h3 {
             color: #4fc3f7;
             margin-bottom: 15px;
             font-size: 1.4rem;
+            text-shadow: 0 0 15px rgba(79, 195, 247, 0.6);
         }
         
         .controls-list {
@@ -156,15 +169,25 @@
         }
         
         .controls-list p {
-            margin: 8px 0;
+            margin: 10px 0;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .controls-list p:hover {
+            background: rgba(79, 195, 247, 0.1);
+            transform: translateX(5px);
         }
         
         .controls-list i {
             color: #4fc3f7;
             width: 24px;
+            font-size: 1.1rem;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
         }
         
         .splash-buttons {
@@ -181,7 +204,7 @@
         
         .start-btn {
             padding: 18px 35px;
-            background: linear-gradient(90deg, #2196f3, #1976d2);
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
             border: none;
             border-radius: 30px;
             color: white;
@@ -192,21 +215,26 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6);
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.7), 0 0 40px rgba(33, 150, 243, 0.3);
             transition: all 0.3s;
+            transform-style: preserve-3d;
         }
         
         .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 35px rgba(33, 150, 243, 0.8);
+            transform: scale(1.05) translateZ(10px);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.9), 0 0 60px rgba(33, 150, 243, 0.5);
+        }
+        
+        .start-btn i {
+            animation: spinSlow 3s linear infinite;
         }
         
         .skip-intro-btn {
             padding: 14px 25px;
             background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 25px;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             font-size: 1rem;
             cursor: pointer;
             display: flex;
@@ -214,24 +242,28 @@
             justify-content: center;
             gap: 10px;
             transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
         
         .skip-intro-btn:hover {
             background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: translateZ(5px);
         }
         
         .tg-badge-bottom {
             margin-top: 5px;
-            padding: 8px 16px;
-            background: rgba(33, 150, 243, 0.2);
-            border-radius: 20px;
+            padding: 10px 20px;
+            background: rgba(33, 150, 243, 0.3);
+            border-radius: 25px;
             font-size: 0.9rem;
             color: #4fc3f7;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             margin-bottom: 10px;
+            border: 2px solid rgba(79, 195, 247, 0.4);
+            backdrop-filter: blur(10px);
         }
         
         .auto-start-timer {
@@ -240,13 +272,14 @@
             right: 20px;
             background: rgba(0, 0, 0, 0.7);
             color: #81c784;
-            padding: 10px 18px;
-            border-radius: 25px;
+            padding: 12px 22px;
+            border-radius: 30px;
             font-size: 0.95rem;
             z-index: 4;
-            border: 1px solid rgba(129, 199, 132, 0.4);
-            backdrop-filter: blur(5px);
+            border: 2px solid rgba(129, 199, 132, 0.6);
+            backdrop-filter: blur(10px);
             animation: fadeIn 1s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
         
         .app { 
@@ -262,40 +295,64 @@
         }
         
         .header { 
-            padding: 15px 20px;
+            padding: 20px 25px;
             text-align: center;
-            background: rgba(13, 27, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 3px solid #2196f3;
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(22, 36, 71, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            border-bottom: 4px solid #2196f3;
             position: relative;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
         }
         
         .header h1 { 
             color: #4fc3f7; 
-            margin: 0 0 8px 0;
+            margin: 0 0 15px 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            font-size: 1.5rem;
+            gap: 15px;
+            font-size: 1.6rem;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
+            font-weight: 700;
         }
         
         .header-stats {
             color: #81c784;
-            font-size: 0.9rem;
+            font-size: 1rem;
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 25px;
             flex-wrap: wrap;
+            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
+        }
+        
+        .header-stats span {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 15px;
+            border-radius: 15px;
+            border: 2px solid rgba(79, 195, 247, 0.3);
         }
         
         .map-container {
             flex: 1;
-            margin: 10px;
-            border-radius: 12px;
+            margin: 15px;
+            border-radius: 15px;
             overflow: hidden;
             position: relative;
-            border: 3px solid #2196f3;
+            border: 4px solid #2196f3;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(33, 150, 243, 0.2);
+            transform-style: preserve-3d;
         }
         
         #yandex-map {
@@ -305,151 +362,201 @@
         
         .online-indicator {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.8);
             color: #81c784;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             z-index: 1000;
-            border: 1px solid rgba(129, 199, 132, 0.4);
+            border: 2px solid rgba(129, 199, 132, 0.6);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
         }
         
         .connection-status {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             z-index: 1000;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
         }
         
         .tools {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            padding: 12px;
-            background: rgba(13, 27, 42, 0.95);
-            backdrop-filter: blur(10px);
+            gap: 10px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(22, 36, 71, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            border-top: 4px solid #2196f3;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
         }
         
         .tool-btn {
-            padding: 10px 5px;
-            background: rgba(33, 150, 243, 0.2);
-            border: 2px solid #2196f3;
-            border-radius: 8px;
+            padding: 12px 8px;
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.3) 0%, rgba(79, 195, 247, 0.2) 100%);
+            border: 3px solid #2196f3;
+            border-radius: 15px;
             color: white;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
+            gap: 8px;
+            transition: all 0.3s;
+            transform-style: preserve-3d;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .tool-btn i {
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
         .tool-btn.active {
-            background: #2196f3;
-            box-shadow: 0 0 15px #2196f3;
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            box-shadow: 0 0 25px #2196f3, 0 0 40px rgba(33, 150, 243, 0.5);
+            transform: translateZ(10px);
+        }
+        
+        .tool-btn:hover:not(.active):not(:disabled) {
+            transform: translateZ(5px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6);
         }
         
         .tool-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
             border-color: #666;
+            box-shadow: none;
+            transform: none;
         }
         
         .marker-limit {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            background: rgba(255, 152, 0, 0.9);
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.9) 0%, rgba(239, 108, 0, 0.9) 100%);
             color: white;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-size: 0.9rem;
             z-index: 1000;
             animation: pulse 2s infinite;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+            transform: translateZ(20px);
+            backdrop-filter: blur(10px);
         }
         
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            padding: 10px;
-            background: rgba(13, 27, 42, 0.9);
-            border-top: 2px solid #2196f3;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(13, 27, 42, 0.9) 0%, rgba(22, 36, 71, 0.9) 100%);
+            border-top: 4px solid #2196f3;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+        }
+        
+        .stat-item {
+            transform: translateZ(5px);
         }
         
         .stat-value {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #4fc3f7;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
+            margin-bottom: 5px;
         }
         
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(90deg, #4caf50, #2E7D32);
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #4caf50 0%, #2E7D32 100%);
             color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            z-index: 1000;
+            padding: 20px 25px;
+            border-radius: 15px;
+            z-index: 10000;
             animation: slideIn 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-            max-width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            max-width: 350px;
             display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            transform-style: preserve-3d;
+            transform: translateZ(50px);
         }
         
         .notification.error { 
-            background: linear-gradient(90deg, #f44336, #c62828); 
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%); 
         }
         
         .notification.warning { 
-            background: linear-gradient(90deg, #ff9800, #ef6c00); 
+            background: linear-gradient(135deg, #ff9800 0%, #ef6c00 100%); 
         }
         
         .notification.info { 
-            background: linear-gradient(90deg, #2196f3, #1976d2); 
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); 
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateZ(-50px); }
+            to { opacity: 1; transform: translateZ(0); }
         }
         
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(-30px) translateZ(-50px); }
+            to { opacity: 1; transform: translateY(0) translateZ(0); }
         }
         
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px) translateZ(-50px); }
+            to { opacity: 1; transform: translateY(0) translateZ(0); }
         }
         
         @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from { transform: translateX(100%) translateZ(-50px); opacity: 0; }
+            to { transform: translateX(0) translateZ(0); opacity: 1; }
         }
         
         @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+            0% { box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 5px 30px rgba(255, 255, 255, 0.6); }
+            100% { box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3); }
+        }
+        
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateZ(10px); }
+            50% { transform: translateY(-10px) translateZ(20px); }
         }
         
         @media (max-height: 700px) {
@@ -492,7 +599,7 @@
         <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
              class="splash-image" 
              alt="Полиция Майями"
-             onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='#0a1931';">
+             onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='linear-gradient(135deg, #0a1931 0%, #162447 100%)';">
         
         <div class="image-overlay"></div>
         
@@ -545,8 +652,8 @@
         <div class="header">
             <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
             <div class="header-stats">
-                <span>Патрулей: <span id="markerCount">0</span>/40</span>
-                <span>Очки: <span id="points">100</span></span>
+                <span>Патрулей: <span id="markerCount">0</span>/15</span>
+                <span>Очки: <span id="points">1000</span></span>
                 <span>Истекает: <span id="expiringCount">0</span></span>
             </div>
         </div>
@@ -559,7 +666,7 @@
                 <p id="syncStatus" style="color: #4fc3f7; font-size: 0.9rem; margin-top: 10px;">Подключение к серверу...</p>
             </div>
             <div class="marker-limit" id="markerLimit" style="display: none;">
-                🔴 Лимит: 40 меток
+                🔴 Лимит: 15 патрулей
             </div>
             <div class="online-indicator" id="gameOnlineIndicator">
                 <i class="fas fa-wifi"></i> <span id="onlinePlayers">1</span>
@@ -591,41 +698,25 @@
                 <i class="fas fa-trash-alt"></i>
                 <span>Удалить</span>
             </button>
-            <button class="tool-btn" onclick="testFirebaseConnection()">
-                <i class="fas fa-sync-alt"></i>
-                <span>Тест связи</span>
-            </button>
         </div>
         
         <div class="stats">
-            <div>
+            <div class="stat-item">
                 <div class="stat-value" id="activity">0</div>
                 <div>Активность</div>
             </div>
-            <div>
+            <div class="stat-item">
                 <div class="stat-value" id="rankPoints">100%</div>
                 <div>Прогресс</div>
             </div>
-            <div>
+            <div class="stat-item">
                 <div class="stat-value" id="userRank">Новичок</div>
                 <div>Ранг</div>
             </div>
         </div>
     </div>
 
-    <!-- ОТЛАДОЧНАЯ ПАНЕЛЬ -->
-    <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; display: none; max-width: 300px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <strong>🔧 Отладка Firebase</strong>
-            <button onclick="document.getElementById('debugPanel').style.display='none'" style="background: none; border: none; color: white; cursor: pointer;">×</button>
-        </div>
-        <div id="debugInfo">Загрузка...</div>
-        <button onclick="forceSync()" style="margin-top: 5px; padding: 3px 8px; background: #2196f3; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔄 Синхронизация</button>
-        <button onclick="forceRefresh()" style="margin-top: 5px; padding: 3px 8px; background: #4CAF50; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔄 Обновить метки</button>
-        <button onclick="clearAllMarkers()" style="margin-top: 5px; padding: 3px 8px; background: #f44336; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🗑️ Очистить все</button>
-        <button onclick="repairDatabase()" style="margin-top: 5px; padding: 3px 8px; background: #FF9800; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔧 Исправить БД</button>
-    </div>
-    <button onclick="toggleDebug()" style="position: fixed; bottom: 10px; right: 10px; background: #2196f3; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; z-index: 9998; font-size: 18px;">🔧</button>
+    <!-- Убрана панель отладки и кнопка для всех пользователей -->
 
     <script>
         // ============ КОНФИГУРАЦИЯ FIREBASE ============
@@ -643,7 +734,9 @@
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000;
-        const MAX_MARKERS = 40;
+        const MAX_MARKERS = 15; // Уменьшено до 15
+        const STARTING_POINTS = 1000; // Начальные очки 1000
+        const POINTS_PER_REMOVE = 1; // Очки за удаление 1 (было 10)
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
@@ -653,7 +746,7 @@
         let markerPlacemarks = new Map(); // markerId -> ymaps.Placemark
         let deletedMarkers = new Set();
         let selectedTool = 'police';
-        let points = 100;
+        let points = STARTING_POINTS;
         let activity = 0;
         let pendingCommentData = null;
         
@@ -847,7 +940,6 @@
             updateUI();
             updateExpiringCount();
             checkMarkerLimit();
-            updateDebugInfo();
         }
 
         function addMarkerToMap(markerData) {
@@ -898,9 +990,9 @@
                         Добавлено: ${new Date(markerData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
                     <button onclick="window.deleteMarker('${markerData.id}')" 
-                            style="margin-top: 10px; padding: 8px 15px; background: linear-gradient(90deg, #f44336, #c62828); 
+                            style="margin-top: 10px; padding: 8px 15px; background: linear-gradient(135deg, #f44336, #c62828); 
                                    color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">
-                        <i class="fas fa-trash"></i> Удалить (+10 очков)
+                        <i class="fas fa-trash"></i> Удалить (+${POINTS_PER_REMOVE} очко)
                     </button>
                 </div>
             `;
@@ -931,7 +1023,7 @@
         // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
         function addMarker(coords, type, comment = null) {
             if (markers.size >= MAX_MARKERS) {
-                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
+                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} патрулей!`, 'error');
                 return;
             }
             
@@ -948,7 +1040,7 @@
             );
             
             if (existingMarker) {
-                showNotification('❌ На этой позиции уже есть метка!', 'error');
+                showNotification('❌ На этой позиции уже есть патруль!', 'error');
                 return;
             }
             
@@ -997,8 +1089,8 @@
                     await firebaseDb.ref('markers/' + markerId).remove();
                 }
                 
-                // Начисляем очки
-                points += 10;
+                // Начисляем очки (1 вместо 10)
+                points += POINTS_PER_REMOVE;
                 activity++;
                 
                 // Сохраняем пользовательские данные
@@ -1008,31 +1100,13 @@
                 updateUI();
                 checkMarkerLimit();
                 
-                showNotification('✅ Метка удалена! +10 очков', 'info');
+                showNotification(`✅ Патруль удален! +${POINTS_PER_REMOVE} очко`, 'info');
                 
                 console.log(`✅ Метка ${markerId} успешно удалена`);
                 
             } catch (error) {
                 console.error('❌ Ошибка удаления метки:', error);
-                showNotification('❌ Ошибка удаления метки', 'error');
-            }
-        }
-
-        function clearAllMarkers() {
-            if (confirm('Очистить ВСЕ метки? Это действие нельзя отменить.')) {
-                markers.forEach((marker, markerId) => {
-                    deletedMarkers.add(markerId);
-                    removeMarkerFromMap(markerId);
-                });
-                
-                markers.clear();
-                
-                if (firebaseInitialized) {
-                    firebaseDb.ref('markers').remove();
-                }
-                
-                updateUI();
-                showNotification('🗑️ Все метки очищены', 'info');
+                showNotification('❌ Ошибка удаления патруля', 'error');
             }
         }
 
@@ -1051,11 +1125,10 @@
             document.getElementById('activity').textContent = activity;
             document.getElementById('userRank').textContent = getRank();
             
-            const progress = Math.min(points / 1000, 1) * 100;
+            const progress = Math.min(points / 5000, 1) * 100;
             document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
             
             updateToolButtons();
-            updateDebugInfo();
         }
 
         function checkMarkerLimit() {
@@ -1068,7 +1141,7 @@
                 return false;
             } else if (currentMarkers >= MAX_MARKERS * 0.8) {
                 limitElement.style.display = 'block';
-                limitElement.style.background = 'rgba(255, 152, 0, 0.9)';
+                limitElement.style.background = 'linear-gradient(135deg, rgba(255, 152, 0, 0.9) 0%, rgba(239, 108, 0, 0.9) 100%)';
                 limitElement.innerHTML = `⚠️ Лимит: ${currentMarkers}/${MAX_MARKERS}`;
                 return true;
             } else {
@@ -1083,7 +1156,7 @@
             
             toolButtons.forEach(btn => {
                 btn.disabled = atLimit;
-                btn.style.opacity = atLimit ? '0.5' : '1';
+                btn.style.opacity = atLimit ? '0.4' : '1';
                 btn.style.cursor = atLimit ? 'not-allowed' : 'pointer';
             });
         }
@@ -1111,12 +1184,12 @@
 
         function getCost(type) {
             const costs = {
-                police: 20,
-                accident: 30,
-                help: 25,
-                hazard: 15
+                police: 2,    // Было 20
+                accident: 3,  // Было 30
+                help: 2.5,    // Было 25
+                hazard: 1.5   // Было 15
             };
-            return costs[type] || 20;
+            return costs[type] || 2;
         }
 
         // ============ ОНЛАЙН ИГРОКИ ============
@@ -1177,77 +1250,6 @@
             if (syncStatus) {
                 syncStatus.textContent = message;
                 syncStatus.style.color = color;
-            }
-        }
-
-        // ============ ОТЛАДКА ============
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function updateDebugInfo() {
-            const debugInfo = document.getElementById('debugInfo');
-            if (!debugInfo) return;
-            
-            debugInfo.innerHTML = `
-                <div>Firebase: ${firebaseInitialized ? '✅' : '❌'}</div>
-                <div>Меток: ${markers.size}</div>
-                <div>Удалено: ${deletedMarkers.size}</div>
-                <div>Онлайн: ${onlinePlayers}</div>
-                <div>Синхр.: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'никогда'}</div>
-            `;
-        }
-
-        async function testFirebaseConnection() {
-            try {
-                if (!firebaseInitialized) {
-                    showNotification('❌ Firebase не инициализирован', 'error');
-                    return;
-                }
-                
-                const testRef = firebaseDb.ref('connectionTest');
-                await testRef.set({
-                    timestamp: Date.now(),
-                    user: window.userName,
-                    message: 'Тест связи'
-                });
-                
-                showNotification('✅ Связь с Firebase работает!', 'info');
-                console.log('✅ Тест Firebase пройден');
-                
-            } catch (error) {
-                showNotification('❌ Ошибка подключения к Firebase', 'error');
-                console.error('❌ Тест Firebase не пройден:', error);
-            }
-        }
-
-        function forceSync() {
-            console.log('🔄 Принудительная синхронизация...');
-            syncMarkersToFirebase();
-            showNotification('🔄 Принудительная синхронизация', 'info');
-        }
-
-        function forceRefresh() {
-            console.log('🔄 Принудительное обновление меток...');
-            loadMarkersFromFirebase();
-            showNotification('🔄 Метки обновлены', 'info');
-        }
-
-        async function repairDatabase() {
-            try {
-                if (!firebaseInitialized) return;
-                
-                showNotification('🔧 Исправление базы данных...', 'info');
-                
-                // Просто синхронизируем текущие метки
-                await syncMarkersToFirebase();
-                
-                showNotification('✅ База данных исправлена', 'success');
-                
-            } catch (error) {
-                console.error('❌ Ошибка исправления базы данных:', error);
-                showNotification('❌ Ошибка исправления БД', 'error');
             }
         }
 
@@ -1423,7 +1425,7 @@
             if (closestMarkerId) {
                 deleteMarker(closestMarkerId);
             } else {
-                showNotification('❌ Нет меток для удаления рядом', 'warning');
+                showNotification('❌ Нет патрулей для удаления рядом', 'warning');
             }
         }
 
@@ -1443,7 +1445,7 @@
             
             setTimeout(() => {
                 notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100px)';
+                notification.style.transform = 'translateX(100px) translateZ(-50px)';
                 setTimeout(() => {
                     notification.remove();
                 }, 300);
@@ -1454,7 +1456,7 @@
             document.getElementById('loading').innerHTML = `
                 <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 3rem;"></i>
                 <p style="color: #f44336;">${message}</p>
-                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 5px;">
+                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #2196f3, #1976d2); color: white; border: none; border-radius: 5px;">
                     Перезагрузить
                 </button>
             `;
@@ -1502,11 +1504,15 @@
                 const saved = localStorage.getItem(`miami_police_user_${window.userId}`);
                 if (saved) {
                     const data = JSON.parse(saved);
-                    points = data.points || 100;
+                    points = data.points || STARTING_POINTS;
                     activity = data.activity || 0;
                     if (data.deletedMarkers) {
                         deletedMarkers = new Set(data.deletedMarkers);
                     }
+                    updateUI();
+                } else {
+                    // Первый вход - дарим 1000 очков
+                    points = STARTING_POINTS;
                     updateUI();
                 }
             } catch (e) {
@@ -1541,11 +1547,6 @@
         window.deleteMarker = deleteMarker;
         window.startGame = startGame;
         window.skipIntro = skipIntro;
-        window.testFirebaseConnection = testFirebaseConnection;
-        window.forceSync = forceSync;
-        window.forceRefresh = forceRefresh;
-        window.clearAllMarkers = clearAllMarkers;
-        window.repairDatabase = repairDatabase;
     </script>
 </body>
 </html>
