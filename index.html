@@ -50,7 +50,7 @@
             z-index: 10000;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             padding: 15px;
             overflow: hidden;
@@ -62,6 +62,7 @@
             animation: fadeIn 0.8s ease;
             z-index: 2;
             width: 100%;
+            margin-top: 20px;
         }
         
         .splash-title {
@@ -74,15 +75,15 @@
         .splash-subtitle {
             color: #81c784;
             font-size: 1.1rem;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         /* Видео контейнер */
         .video-container {
             width: 100%;
-            max-width: 800px;
-            height: 250px;
-            margin: 15px auto;
+            max-width: 320px;
+            height: 180px;
+            margin: 10px auto;
             border-radius: 15px;
             overflow: hidden;
             border: 3px solid #2196f3;
@@ -96,9 +97,19 @@
             object-fit: cover;
         }
         
+        /* Кнопки заставки */
+        .splash-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            margin: 10px auto;
+            z-index: 2;
+        }
+        
         .start-btn {
-            margin-top: 25px;
-            padding: 15px 35px;
+            padding: 16px 30px;
             background: linear-gradient(90deg, #2196f3, #1976d2);
             border: none;
             border-radius: 25px;
@@ -108,19 +119,60 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
-            z-index: 2;
+            transition: all 0.3s;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6);
+        }
+        
+        .skip-intro-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+        
+        .skip-intro-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
         }
         
         .tg-badge {
-            margin-top: 15px;
+            margin-top: 10px;
             padding: 6px 12px;
             background: rgba(33, 150, 243, 0.2);
             border-radius: 15px;
             font-size: 0.85rem;
             color: #4fc3f7;
             z-index: 2;
+        }
+        
+        /* Таймер автозапуска */
+        .auto-start-timer {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #81c784;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 2;
+            border: 1px solid rgba(129, 199, 132, 0.3);
         }
         
         /* Таймер удаления меток */
@@ -370,17 +422,26 @@
         @media (max-height: 700px) {
             .splash-title { font-size: 1.8rem; }
             .splash-subtitle { font-size: 1rem; }
-            .video-container { height: 200px; margin: 10px auto; }
+            .video-container { 
+                max-width: 280px; 
+                height: 160px; 
+                margin: 8px auto; 
+            }
             .header { padding: 12px 15px; }
             .header h1 { font-size: 1.3rem; }
             .tools { padding: 10px; }
             .tool-btn { padding: 8px 3px; font-size: 0.75rem; }
+            .splash-content { margin-top: 15px; }
         }
         
         @media (max-height: 600px) {
-            .video-container { height: 150px; }
+            .video-container { 
+                max-width: 240px; 
+                height: 135px; 
+            }
             .stats { display: none; }
             .map-container { margin: 5px; }
+            .auto-start-timer { bottom: 80px; }
         }
         
         @keyframes fadeIn {
@@ -398,16 +459,18 @@
             
             <!-- Видео из ВК -->
             <div class="video-container">
+                <!-- Основной вариант -->
                 <iframe 
-                    src="https://vkvideo.ru/video_ext.php?oid=38768513&id=456239180&hash=941434ffe69fc5b1&hd=3" 
+                    src="https://vkvideo.ru/video_ext.php?oid=-234460125&id=456239017&autoplay=1" 
                     class="splash-video"
+                    style="background-color: #000"
                     frameborder="0" 
                     allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" 
                     allowfullscreen>
                 </iframe>
             </div>
             
-            <div style="margin: 15px 0; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 2px solid #2196f3;">
+            <div style="margin: 10px 0; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 2px solid #2196f3;">
                 <h3 style="color: #4fc3f7; margin-bottom: 8px; font-size: 1.1rem;">🎮 Управление:</h3>
                 <div style="text-align: left; display: inline-block; font-size: 0.9rem;">
                     <p>• <strong>Клик</strong> - добавить патруль</p>
@@ -415,15 +478,26 @@
                     <p>• <strong>Автоудаление</strong> - через 24 часа</p>
                 </div>
             </div>
-            
+        </div>
+        
+        <div class="splash-buttons">
             <button class="start-btn" onclick="startGame()">
                 <i class="fas fa-play-circle"></i>
                 НАЧАТЬ ПАТРУЛИРОВАНИЕ
             </button>
             
+            <button class="skip-intro-btn" onclick="skipIntro()">
+                <i class="fas fa-forward"></i>
+                Пропустить заставку
+            </button>
+            
             <div class="tg-badge">
                 <i class="fab fa-telegram"></i> Telegram Mini App
             </div>
+        </div>
+        
+        <div class="auto-start-timer" id="autoStartTimer">
+            Автозапуск через: <span id="countdown">15</span> сек
         </div>
     </div>
     
@@ -517,6 +591,9 @@
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
         let autoDeleteInterval = null;
+        let autoStartInterval = null;
+        let countdownSeconds = 15;
+        let videoLoaded = false;
         
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
@@ -531,9 +608,13 @@
                 const userName = telegramUser.first_name || telegramUser.username || 'Игрок';
                 document.getElementById('userWelcome').textContent = `Добро пожаловать, ${userName}!`;
                 window.userId = telegramUser.id;
+                
+                // Проверяем, есть ли сохранения у пользователя
+                checkUserHasProgress();
             } else {
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
                 window.userId = 'browser_user';
+                checkUserHasProgress();
             }
             
             tg.BackButton.show();
@@ -543,16 +624,88 @@
                 });
             });
             
-            setTimeout(initGame, 1000);
+            // Запускаем таймер автозапуска
+            startAutoStartTimer();
+            
+            // Пытаемся загрузить видео
+            setTimeout(checkVideoLoad, 2000);
         }
         
-        // ============ GAME VARIABLES ============
-        let ymap = null;
-        let markers = [];
-        let selectedTool = 'police';
-        let points = 100;
-        let activity = 0;
-        let pendingCommentData = null;
+        // Проверяем загрузку видео
+        function checkVideoLoad() {
+            const videoContainer = document.querySelector('.video-container iframe');
+            if (videoContainer && !videoLoaded) {
+                // Если видео не загрузилось за 2 секунды, показываем запасной вариант
+                videoContainer.onerror = function() {
+                    console.log('Основное видео не загрузилось, пробуем запасное...');
+                    videoContainer.src = "https://vk.com/video_ext.php?oid=-234460125&id=456239017&autoplay=1";
+                    videoLoaded = true;
+                };
+            }
+        }
+        
+        // Проверяем, есть ли у пользователя сохраненный прогресс
+        function checkUserHasProgress() {
+            try {
+                const saved = localStorage.getItem(`miami_police_${window.userId}`);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    const hasMarkers = data.markers && data.markers.length > 0;
+                    
+                    if (hasMarkers) {
+                        // Показываем дополнительную кнопку для опытных игроков
+                        document.getElementById('userWelcome').innerHTML += 
+                            '<br><small style="color: #4fc3f7">У вас есть сохраненный прогресс!</small>';
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка проверки прогресса:', e);
+            }
+        }
+        
+        // Таймер автозапуска
+        function startAutoStartTimer() {
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.textContent = countdownSeconds;
+            
+            autoStartInterval = setInterval(() => {
+                countdownSeconds--;
+                countdownElement.textContent = countdownSeconds;
+                
+                if (countdownSeconds <= 0) {
+                    clearInterval(autoStartInterval);
+                    if (document.getElementById('splashScreen').style.display !== 'none') {
+                        startGame();
+                    }
+                }
+            }, 1000);
+        }
+        
+        // Пропуск заставки
+        function skipIntro() {
+            clearInterval(autoStartInterval);
+            const splash = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
+            
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                mainApp.classList.add('active');
+                
+                // Показываем быструю загрузку
+                showNotification('🚀 Быстрый запуск! Добро пожаловать обратно!', 'info');
+                
+                // Инициализируем игру
+                initGame();
+                
+                if (telegramUser) {
+                    tg.sendData(JSON.stringify({
+                        action: 'quick_start',
+                        user_id: telegramUser.id
+                    }));
+                }
+            }, 300);
+        }
         
         // ============ GAME FUNCTIONS ============
         function initGame() {
@@ -570,6 +723,7 @@
         }
         
         function startGame() {
+            clearInterval(autoStartInterval);
             const splash = document.getElementById('splashScreen');
             const mainApp = document.getElementById('mainApp');
             
@@ -584,6 +738,9 @@
                         user_id: telegramUser.id
                     }));
                 }
+                
+                // Инициализируем игру
+                initGame();
             }, 500);
         }
         
@@ -1178,6 +1335,7 @@
         window.selectTool = selectTool;
         window.deleteMarker = deleteMarker;
         window.startGame = startGame;
+        window.skipIntro = skipIntro;
         window.confirmComment = confirmComment;
         window.skipComment = skipComment;
         window.cancelComment = cancelComment;
@@ -1203,21 +1361,21 @@
             } else {
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в браузерную версию!';
                 window.userId = 'browser_user';
-                setTimeout(initGame, 1000);
+                setTimeout(() => {
+                    checkUserHasProgress();
+                    startAutoStartTimer();
+                    checkVideoLoad();
+                }, 1000);
             }
-            
-            // Автозапуск через 15 секунд
-            setTimeout(() => {
-                if (document.getElementById('splashScreen').style.display !== 'none') {
-                    startGame();
-                }
-            }, 15000);
         });
         
-        // Очистка интервала при закрытии
+        // Очистка интервалов при закрытии
         window.addEventListener('beforeunload', function() {
             if (autoDeleteInterval) {
                 clearInterval(autoDeleteInterval);
+            }
+            if (autoStartInterval) {
+                clearInterval(autoStartInterval);
             }
         });
     </script>
