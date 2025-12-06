@@ -645,9 +645,10 @@
         let countdownSeconds = 20;
         
         let ymap = null;
-        let markers = new Map(); // Используем Map вместо массива для быстрого доступа
+        let markers = new Map(); // Map: markerId -> {data, placemark}
+        let markerPlacemarks = new Map(); // Map: markerId -> ymaps.Placemark
         let deletedMarkers = new Set();
-        let pendingOperations = new Set(); // Защита от дублирования операций
+        let pendingOperations = new Set();
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
@@ -659,43 +660,6 @@
         let firebaseInitialized = false;
         let firebaseApp = null;
         let firebaseDb = null;
-
-        // ============ ЗАЩИТА ОТ ДУБЛИРОВАНИЯ ============
-        class OperationLock {
-            constructor() {
-                this.locks = new Set();
-                this.timeouts = new Map();
-            }
-            
-            acquire(operationId) {
-                if (this.locks.has(operationId)) {
-                    console.log(`🔒 Операция ${operationId} уже выполняется, пропускаем`);
-                    return false;
-                }
-                this.locks.add(operationId);
-                
-                // Автоматически разблокируем через 5 секунд на случай зависания
-                this.timeouts[operationId] = setTimeout(() => {
-                    this.release(operationId);
-                }, 5000);
-                
-                return true;
-            }
-            
-            release(operationId) {
-                this.locks.delete(operationId);
-                if (this.timeouts[operationId]) {
-                    clearTimeout(this.timeouts[operationId]);
-                    delete this.timeouts[operationId];
-                }
-            }
-            
-            isLocked(operationId) {
-                return this.locks.has(operationId);
-            }
-        }
-        
-        const operationLock = new OperationLock();
 
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
@@ -789,26 +753,12 @@
                     if (data) {
                         const markersArray = Object.values(data);
                         
-                        // Фильтруем удаленные метки и проверяем дубликаты
+                        // Фильтруем удаленные метки
                         const filteredMarkers = markersArray.filter(marker => {
                             if (deletedMarkers.has(marker.id)) {
                                 console.log(`Пропускаем удаленную метку: ${marker.id}`);
                                 return false;
                             }
-                            
-                            // Проверяем на дубликаты по координатам
-                            const duplicate = Array.from(markers.values()).find(m => 
-                                m.coords[0] === marker.coords[0] && 
-                                m.coords[1] === marker.coords[1] &&
-                                m.type === marker.type &&
-                                m.id !== marker.id
-                            );
-                            
-                            if (duplicate) {
-                                console.log(`⚠️ Обнаружен дубликат метки: ${marker.id}`);
-                                return false;
-                            }
-                            
                             return true;
                         });
                         
@@ -832,7 +782,7 @@
                 console.log('🔄 Синхронизация меток в Firebase...');
                 
                 const markersObj = {};
-                markers.forEach((marker, markerId) => {
+                markers.forEach((markerData, markerId) => {
                     if (deletedMarkers.has(markerId)) {
                         console.log(`Не синхронизируем удаленную метку: ${markerId}`);
                         return;
@@ -840,13 +790,12 @@
                     
                     markersObj[markerId] = {
                         id: markerId,
-                        type: marker.type || '',
-                        coords: marker.coords || [0, 0],
-                        comment: marker.comment || null,
-                        timestamp: marker.timestamp || Date.now(),
-                        author: marker.author || window.userName || '',
-                        authorId: marker.authorId || window.userId || '',
-                        version: marker.version || 1,
+                        type: markerData.type || '',
+                        coords: markerData.coords || [0, 0],
+                        comment: markerData.comment || null,
+                        timestamp: markerData.timestamp || Date.now(),
+                        author: markerData.author || window.userName || '',
+                        authorId: markerData.authorId || window.userId || '',
                         status: 'active'
                     };
                 });
@@ -864,18 +813,18 @@
             }
         }
 
-        // ============ ФУНКЦИИ ИГРЫ (С ЗАЩИТОЙ) ============
+        // ============ ФУНКЦИИ ИГРЫ (ИСПРАВЛЕННЫЕ) ============
         function updateLocalMarkers(cloudMarkers) {
             if (!ymap) return;
             
             const now = Date.now();
+            const existingMarkerIds = new Set(markers.keys());
+            const newMarkerIds = new Set(cloudMarkers.map(m => m.id));
             
-            // Удаляем устаревшие метки
-            markers.forEach((marker, markerId) => {
-                if (!cloudMarkers.find(m => m.id === markerId)) {
-                    if (marker.placemark) {
-                        ymap.geoObjects.remove(marker.placemark);
-                    }
+            // Удаляем метки, которых нет в cloudMarkers
+            existingMarkerIds.forEach(markerId => {
+                if (!newMarkerIds.has(markerId)) {
+                    removeMarkerFromMap(markerId);
                     markers.delete(markerId);
                 }
             });
@@ -886,9 +835,8 @@
                     return;
                 }
                 
-                const existingMarker = markers.get(markerData.id);
-                if (!existingMarker) {
-                    createMarkerOnMap(markerData);
+                if (!markers.has(markerData.id)) {
+                    addMarkerToMap(markerData);
                     markers.set(markerData.id, markerData);
                 }
             });
@@ -899,25 +847,8 @@
             updateDebugInfo();
         }
 
-        function createMarkerOnMap(markerData) {
+        function addMarkerToMap(markerData) {
             if (!ymap) return;
-            
-            // Проверяем, нет ли уже такой метки на карте
-            const existingPlacemark = Array.from(ymap.geoObjects.getClosest(
-                [markerData.coords[0], markerData.coords[1]]
-            ));
-            
-            if (existingPlacemark.length > 0) {
-                const distance = Math.sqrt(
-                    Math.pow(markerData.coords[0] - existingPlacemark[0].geometry.getCoordinates()[0], 2) + 
-                    Math.pow(markerData.coords[1] - existingPlacemark[0].geometry.getCoordinates()[1], 2)
-                );
-                
-                if (distance < 0.0001) {
-                    console.log(`⚠️ Метка уже существует по этим координатам: ${markerData.id}`);
-                    return;
-                }
-            }
             
             let preset, iconColor;
             
@@ -966,128 +897,109 @@
             }, {
                 preset: preset,
                 iconColor: iconColor,
-                draggable: false, // Отключаем перетаскивание
+                draggable: false,
                 hasBalloon: true,
                 openBalloonOnClick: true
             });
             
             ymap.geoObjects.add(placemark);
-            
-            markerData.placemark = placemark;
+            markerPlacemarks.set(markerData.id, placemark);
+        }
+
+        function removeMarkerFromMap(markerId) {
+            const placemark = markerPlacemarks.get(markerId);
+            if (placemark && ymap) {
+                ymap.geoObjects.remove(placemark);
+                markerPlacemarks.delete(markerId);
+            }
         }
 
         function addMarker(coords, type, comment = null) {
-            const operationId = `add_${coords[0]}_${coords[1]}_${type}`;
-            
-            if (!operationLock.acquire(operationId)) {
-                showNotification('⏳ Подождите, операция выполняется...', 'warning');
+            if (markers.size >= MAX_MARKERS) {
+                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
                 return;
             }
             
-            try {
-                if (markers.size >= MAX_MARKERS) {
-                    showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
-                    return;
-                }
-                
-                const cost = getCost(type);
-                if (points < cost) {
-                    showNotification(`❌ Нужно ${cost} очков! У вас: ${points}`, 'error');
-                    return;
-                }
-                
-                // Проверяем, нет ли уже метки на этих координатах
-                const existingMarker = Array.from(markers.values()).find(marker => 
-                    Math.abs(marker.coords[0] - coords[0]) < 0.0001 && 
-                    Math.abs(marker.coords[1] - coords[1]) < 0.0001
-                );
-                
-                if (existingMarker) {
-                    showNotification('❌ На этой позиции уже есть метка!', 'error');
-                    return;
-                }
-                
-                const markerId = 'marker_' + Date.now() + '_' + window.userId + '_' + Math.random().toString(36).substr(2, 5);
-                const timestamp = Date.now();
-                
-                const markerData = {
-                    id: markerId,
-                    type: type,
-                    coords: coords,
-                    comment: comment,
-                    timestamp: timestamp,
-                    author: window.userName,
-                    authorId: window.userId,
-                    version: 1
-                };
-                
-                createMarkerOnMap(markerData);
-                markers.set(markerId, markerData);
-                
-                points -= cost;
-                activity++;
-                
-                saveUserData();
-                
-                // Сразу синхронизируем
-                syncMarkersToFirebase();
-                
-                updateUI();
-                checkMarkerLimit();
-                
-                showNotification(`✅ ${getToolName(type)} добавлен! Виден всем игрокам`, 'info');
-                
-            } finally {
-                // Разблокируем операцию через 1 секунду
-                setTimeout(() => {
-                    operationLock.release(operationId);
-                }, 1000);
+            const cost = getCost(type);
+            if (points < cost) {
+                showNotification(`❌ Нужно ${cost} очков! У вас: ${points}`, 'error');
+                return;
             }
+            
+            // Проверяем, нет ли уже метки на этих координатах
+            const existingMarker = Array.from(markers.values()).find(marker => 
+                Math.abs(marker.coords[0] - coords[0]) < 0.0001 && 
+                Math.abs(marker.coords[1] - coords[1]) < 0.0001
+            );
+            
+            if (existingMarker) {
+                showNotification('❌ На этой позиции уже есть метка!', 'error');
+                return;
+            }
+            
+            const markerId = 'marker_' + Date.now() + '_' + window.userId + '_' + Math.random().toString(36).substr(2, 5);
+            const timestamp = Date.now();
+            
+            const markerData = {
+                id: markerId,
+                type: type,
+                coords: coords,
+                comment: comment,
+                timestamp: timestamp,
+                author: window.userName,
+                authorId: window.userId
+            };
+            
+            addMarkerToMap(markerData);
+            markers.set(markerId, markerData);
+            
+            points -= cost;
+            activity++;
+            
+            saveUserData();
+            syncMarkersToFirebase();
+            updateUI();
+            checkMarkerLimit();
+            
+            showNotification(`✅ ${getToolName(type)} добавлен! Виден всем игрокам`, 'info');
         }
 
         async function deleteMarker(markerId) {
-            const operationId = `delete_${markerId}`;
-            
-            if (!operationLock.acquire(operationId)) {
-                showNotification('⏳ Подождите, операция выполняется...', 'warning');
-                return;
-            }
-            
             try {
-                const marker = markers.get(markerId);
-                if (marker) {
-                    // Удаляем с карты
-                    if (marker.placemark) {
-                        ymap.geoObjects.remove(marker.placemark);
-                    }
-                    
-                    // Удаляем из локального хранилища
-                    markers.delete(markerId);
-                    
-                    // Добавляем в список удаленных
-                    deletedMarkers.add(markerId);
-                    
-                    // Удаляем из Firebase
-                    if (firebaseInitialized) {
-                        await firebaseDb.ref('markers/' + markerId).remove();
-                    }
-                    
-                    // Начисляем очки
-                    points += 10;
-                    activity++;
-                    
-                    // Сохраняем пользовательские данные
-                    saveUserData();
-                    
-                    // Обновляем UI
-                    updateUI();
-                    checkMarkerLimit();
-                    
-                    showNotification('✅ Метка удалена! +10 очков', 'info');
+                console.log(`🗑️ Удаление метки: ${markerId}`);
+                
+                // Удаляем с карты
+                removeMarkerFromMap(markerId);
+                
+                // Удаляем из локального хранилища
+                markers.delete(markerId);
+                
+                // Добавляем в список удаленных
+                deletedMarkers.add(markerId);
+                
+                // Удаляем из Firebase
+                if (firebaseInitialized) {
+                    await firebaseDb.ref('markers/' + markerId).remove();
                 }
                 
-            } finally {
-                operationLock.release(operationId);
+                // Начисляем очки
+                points += 10;
+                activity++;
+                
+                // Сохраняем пользовательские данные
+                saveUserData();
+                
+                // Обновляем UI
+                updateUI();
+                checkMarkerLimit();
+                
+                showNotification('✅ Метка удалена! +10 очков', 'info');
+                
+                console.log(`✅ Метка ${markerId} успешно удалена`);
+                
+            } catch (error) {
+                console.error('❌ Ошибка удаления метки:', error);
+                showNotification('❌ Ошибка удаления метки', 'error');
             }
         }
 
@@ -1096,9 +1008,7 @@
                 // Добавляем все метки в список удаленных
                 markers.forEach((marker, markerId) => {
                     deletedMarkers.add(markerId);
-                    if (marker.placemark) {
-                        ymap.geoObjects.remove(marker.placemark);
-                    }
+                    removeMarkerFromMap(markerId);
                 });
                 
                 markers.clear();
@@ -1129,25 +1039,24 @@
                     return;
                 }
                 
-                const markersArray = Object.values(data);
-                const uniqueMarkers = {};
-                const coordinateMap = new Map();
-                
-                // Удаляем дубликаты по координатам
-                markersArray.forEach(marker => {
-                    const coordKey = `${marker.coords[0].toFixed(6)}_${marker.coords[1].toFixed(6)}_${marker.type}`;
-                    
-                    if (!coordinateMap.has(coordKey)) {
-                        coordinateMap.set(coordKey, marker.id);
-                        uniqueMarkers[marker.id] = marker;
-                    } else {
-                        console.log(`Удаляем дубликат: ${marker.id} (дубликат ${coordinateMap.get(coordKey)})`);
-                    }
+                // Просто сохраняем текущие данные (удаляя дубликаты из Firebase)
+                const markersObj = {};
+                markers.forEach((markerData, markerId) => {
+                    markersObj[markerId] = {
+                        id: markerId,
+                        type: markerData.type || '',
+                        coords: markerData.coords || [0, 0],
+                        comment: markerData.comment || null,
+                        timestamp: markerData.timestamp || Date.now(),
+                        author: markerData.author || window.userName || '',
+                        authorId: markerData.authorId || window.userId || '',
+                        status: 'active'
+                    };
                 });
                 
-                await markersRef.set(uniqueMarkers);
+                await markersRef.set(markersObj);
                 
-                showNotification(`✅ База данных исправлена. Оставлено ${Object.keys(uniqueMarkers).length} уникальных меток`, 'success');
+                showNotification(`✅ База данных исправлена. Оставлено ${markers.size} меток`, 'success');
                 
                 // Перезагружаем метки
                 forceRefresh();
@@ -1327,7 +1236,6 @@
                 <div>Меток: ${markers.size}</div>
                 <div>Удалено: ${deletedMarkers.size}</div>
                 <div>Онлайн: ${onlinePlayers}</div>
-                <div>Блокировки: ${operationLock.locks.size}</div>
                 <div>Синхр.: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'никогда'}</div>
             `;
         }
@@ -1392,16 +1300,16 @@
 
         function checkExpiredMarkers() {
             const now = Date.now();
-            const expiredMarkers = [];
+            const expiredMarkerIds = [];
             
             markers.forEach((marker, markerId) => {
                 if (now - marker.timestamp > EXPIRATION_TIME) {
-                    expiredMarkers.push(markerId);
+                    expiredMarkerIds.push(markerId);
                 }
             });
             
-            if (expiredMarkers.length > 0) {
-                deleteExpiredMarkers(expiredMarkers);
+            if (expiredMarkerIds.length > 0) {
+                deleteExpiredMarkers(expiredMarkerIds);
             }
             
             updateExpiringCount();
@@ -1410,10 +1318,7 @@
         function deleteExpiredMarkers(expiredMarkerIds) {
             expiredMarkerIds.forEach(markerId => {
                 deletedMarkers.add(markerId);
-                const marker = markers.get(markerId);
-                if (marker && marker.placemark && ymap) {
-                    ymap.geoObjects.remove(marker.placemark);
-                }
+                removeMarkerFromMap(markerId);
                 if (firebaseInitialized) {
                     firebaseDb.ref('markers/' + markerId).remove();
                 }
