@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Traffic Patrol Online | Telegram Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Временные стили, пока не создан style.css */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #1a237e; color: white; }
+        .container { padding: 20px; text-align: center; }
+        h1 { color: #00bcd4; margin-bottom: 20px; }
+        .map { width: 100%; height: 300px; background: #0d47a1; border: 2px solid #00bcd4; margin: 20px 0; position: relative; }
+        .tools { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .tool-btn { padding: 10px 20px; background: #2196f3; border: none; color: white; border-radius: 5px; cursor: pointer; }
+        .stats { display: flex; justify-content: space-around; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-traffic-light"></i> Traffic Patrol Online</h1>
+        <p>Добро пожаловать! Добавляйте метки на карту в реальном времени.</p>
+        
+        <div id="map" class="map">
+            <!-- Карта будет здесь -->
+            <div id="markersContainer"></div>
+        </div>
+        
+        <div class="tools">
+            <button class="tool-btn" onclick="addMarker('police')"><i class="fas fa-car"></i> Патруль</button>
+            <button class="tool-btn" onclick="addMarker('accident')"><i class="fas fa-car-crash"></i> ДТП</button>
+            <button class="tool-btn" onclick="addMarker('hazard')"><i class="fas fa-exclamation-triangle"></i> Опасность</button>
+            <button class="tool-btn" onclick="clearMarker()"><i class="fas fa-trash"></i> Очистить</button>
+        </div>
+        
+        <div class="stats">
+            <div>Меток: <span id="markerCount">0</span></div>
+            <div>Онлайн: <span id="onlineCount">1</span></div>
+            <div>Очки: <span id="points">100</span></div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <p><small>Для игры в Telegram откройте через @BotFather</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Простая версия игры для начала
+        let markers = [];
+        let points = 100;
+        
+        function addMarker(type) {
+            if (points < 10) {
+                alert('Недостаточно очков!');
+                return;
+            }
+            
+            // Случайная позиция на карте
+            const x = Math.random() * 80 + 10; // 10-90%
+            const y = Math.random() * 80 + 10;
+            
+            const marker = {
+                type: type,
+                x: x,
+                y: y,
+                id: Date.now()
+            };
+            
+            markers.push(marker);
+            points -= 10;
+            updateDisplay();
+        }
+        
+        function clearMarker() {
+            if (markers.length > 0) {
+                markers.pop();
+                points += 5;
+                updateDisplay();
+            }
+        }
+        
+        function updateDisplay() {
+            document.getElementById('markerCount').textContent = markers.length;
+            document.getElementById('points').textContent = points;
+            
+            // Отрисовка маркеров
+            const container = document.getElementById('markersContainer');
+            container.innerHTML = '';
+            
+            markers.forEach(marker => {
+                const div = document.createElement('div');
+                div.style.position = 'absolute';
+                div.style.left = marker.x + '%';
+                div.style.top = marker.y + '%';
+                div.style.width = '30px';
+                div.style.height = '30px';
+                div.style.borderRadius = '50%';
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.justifyContent = 'center';
+                div.style.transform = 'translate(-50%, -50%)';
+                
+                if (marker.type === 'police') {
+                    div.style.background = '#2196f3';
+                    div.innerHTML = '🚓';
+                    div.style.animation = 'blink 1s infinite';
+                } else if (marker.type === 'accident') {
+                    div.style.background = '#f44336';
+                    div.innerHTML = '💥';
+                } else if (marker.type === 'hazard') {
+                    div.style.background = '#ff9800';
+                    div.innerHTML = '⚠️';
+                }
+                
+                container.appendChild(div);
+            });
+        }
+        
+        // Инициализация Telegram
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
+            
+            if (tg.initDataUnsafe.user) {
+                const user = tg.initDataUnsafe.user;
+                document.querySelector('p').innerHTML = `Привет, <strong>${user.first_name}</strong>! Добавляйте метки на карту.`;
+            }
+        }
+        
+        // CSS анимация для мигалки
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        updateDisplay();
+    </script>
+</body>
+</html>
