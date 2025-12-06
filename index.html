@@ -40,7 +40,7 @@
             color: var(--tg-theme-text-color, white);
         }
         
-        /* Заставка с видео на весь экран */
+        /* Заставка с картинкой на весь экран */
         .splash-screen {
             position: fixed;
             top: 0;
@@ -53,40 +53,19 @@
             overflow: hidden;
         }
         
-        /* Контейнер для видео с контролем звука */
-        .video-wrapper {
+        /* Картинка на весь экран */
+        .splash-image {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-            overflow: hidden;
-        }
-        
-        /* Скрытый iframe для видео без звука */
-        #silentVideo {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        /* Статичное фоновое изображение вместо видео */
-        .video-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0a1931 0%, #1a237e 100%);
+            object-fit: cover;
             z-index: 1;
         }
         
-        .video-overlay {
+        /* Затемнение поверх картинки */
+        .image-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -100,29 +79,6 @@
                 rgba(10, 25, 49, 0.8) 100%
             );
             z-index: 2;
-        }
-        
-        /* Анимированные полицейские машины */
-        .police-animation {
-            position: absolute;
-            z-index: 1;
-        }
-        
-        .police-car-animated {
-            font-size: 3rem;
-            position: absolute;
-            animation: driveAcross 15s linear infinite;
-        }
-        
-        .car-1 { top: 20%; left: -100px; animation-delay: 0s; color: #2196f3; }
-        .car-2 { top: 40%; left: -100px; animation-delay: 3s; color: #4fc3f7; }
-        .car-3 { top: 60%; left: -100px; animation-delay: 6s; color: #2196f3; }
-        .car-4 { top: 80%; left: -100px; animation-delay: 9s; color: #4fc3f7; }
-        .car-5 { top: 30%; left: -100px; animation-delay: 12s; color: #2196f3; }
-        
-        @keyframes driveAcross {
-            0% { transform: translateX(0) rotate(0deg); }
-            100% { transform: translateX(calc(100vw + 200px)) rotate(0deg); }
         }
         
         .splash-content {
@@ -206,7 +162,7 @@
             gap: 15px;
             width: 100%;
             max-width: 400px;
-            margin: 0 auto 30px;
+            margin: 0 auto 15px;
             animation: fadeInUp 0.8s ease;
         }
         
@@ -252,8 +208,9 @@
             border-color: rgba(255, 255, 255, 0.5);
         }
         
-        .tg-badge {
-            margin-top: 10px;
+        /* Бейдж Telegram в самом низу */
+        .tg-badge-bottom {
+            margin-top: 5px;
             padding: 8px 16px;
             background: rgba(33, 150, 243, 0.2);
             border-radius: 20px;
@@ -262,6 +219,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 10px;
         }
         
         /* Таймер автозапуска */
@@ -467,6 +425,7 @@
             .game-info { display: none; }
             .splash-center { justify-content: flex-start; padding-top: 20px; }
             .tools { grid-template-columns: repeat(5, 1fr); }
+            .tg-badge-bottom { margin-bottom: 5px; }
         }
         
         @media (max-width: 768px) {
@@ -480,40 +439,31 @@
             .tool-btn span { font-size: 0.65rem; }
             .header-stats { gap: 10px; font-size: 0.8rem; }
         }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
-    <!-- Заставка с анимированными полицейскими машинами -->
+    <!-- Заставка с картинкой на весь экран -->
     <div id="splashScreen" class="splash-screen">
-        <!-- Фоновый градиент вместо видео -->
-        <div class="video-background"></div>
+        <!-- Картинка на весь экран -->
+        <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
+             class="splash-image" 
+             alt="Полиция Майями"
+             onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='#0a1931';">
         
-        <!-- Анимированные полицейские машины -->
-        <div class="police-animation">
-            <div class="police-car-animated car-1">🚓</div>
-            <div class="police-car-animated car-2">🚔</div>
-            <div class="police-car-animated car-3">🚓</div>
-            <div class="police-car-animated car-4">🚔</div>
-            <div class="police-car-animated car-5">🚓</div>
-        </div>
+        <!-- Затемнение поверх картинки -->
+        <div class="image-overlay"></div>
         
-        <!-- Затемнение поверх фона -->
-        <div class="video-overlay"></div>
-        
-        <!-- Скрытый iframe для видео (будет остановлен через 10 сек) -->
-        <iframe 
-            id="silentVideo"
-            src="https://vkvideo.ru/video_ext.php?oid=-234460125&id=456239017&autoplay=1&muted=1"
-            frameborder="0"
-            allow="autoplay; encrypted-media"
-            allowfullscreen>
-        </iframe>
-        
-        <!-- Контент поверх фона -->
+        <!-- Контент поверх картинки -->
         <div class="splash-content">
             <!-- Таймер автозапуска -->
             <div class="auto-start-timer" id="autoStartTimer">
-                Автозапуск через: <span id="countdown">10</span> сек
+                Автозапуск через: <span id="countdown">20</span> сек
             </div>
             
             <!-- Заголовок сверху -->
@@ -534,10 +484,6 @@
                         <p><i class="fas fa-flag"></i> <strong>Максимум меток</strong> - 40 штук</p>
                     </div>
                 </div>
-                
-                <div class="tg-badge">
-                    <i class="fab fa-telegram"></i> Telegram Mini App
-                </div>
             </div>
             
             <!-- Кнопки внизу -->
@@ -551,6 +497,11 @@
                     <i class="fas fa-forward"></i>
                     Пропустить заставку
                 </button>
+                
+                <!-- Бейдж Telegram в самом низу -->
+                <div class="tg-badge-bottom">
+                    <i class="fab fa-telegram"></i> Telegram Mini App
+                </div>
             </div>
         </div>
     </div>
@@ -624,14 +575,13 @@
         const MAX_MARKERS = 40; // Максимум меток
         let autoDeleteInterval = null;
         let autoStartInterval = null;
-        let countdownSeconds = 10;
-        let videoStopTimer = null;
+        let countdownSeconds = 20; // Увеличили до 20 секунд
         
         // Глобальные переменные игры
         let ymap = null;
         let markers = [];
         let selectedTool = 'police';
-        let points = 100;
+        let points = 100; // Начальные очки
         let activity = 0;
         let pendingCommentData = null;
         
@@ -663,53 +613,8 @@
                 });
             });
             
-            // Запускаем таймер автозапуска
+            // Запускаем таймер автозапуска (20 секунд)
             startAutoStartTimer();
-            
-            // Останавливаем видео через 10 секунд
-            videoStopTimer = setTimeout(stopVideo, 10000);
-        }
-        
-        // Принудительная остановка видео
-        function stopVideo() {
-            const silentVideo = document.getElementById('silentVideo');
-            if (silentVideo) {
-                try {
-                    // Останавливаем видео
-                    silentVideo.src = '';
-                    silentVideo.remove();
-                    console.log('Видео остановлено');
-                } catch (e) {
-                    console.log('Ошибка остановки видео:', e);
-                }
-            }
-            
-            // Останавливаем все аудио
-            stopAllAudio();
-        }
-        
-        // Остановка всех аудио элементов
-        function stopAllAudio() {
-            const audioElements = document.getElementsByTagName('audio');
-            for (let audio of audioElements) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
-            
-            const videoElements = document.getElementsByTagName('video');
-            for (let video of videoElements) {
-                video.pause();
-                video.currentTime = 0;
-            }
-            
-            const iframes = document.getElementsByTagName('iframe');
-            for (let iframe of iframes) {
-                if (iframe.src.includes('video') || iframe.src.includes('vk')) {
-                    try {
-                        iframe.src = '';
-                    } catch (e) {}
-                }
-            }
         }
         
         function checkUserHasProgress() {
@@ -729,7 +634,7 @@
             }
         }
         
-        // Таймер автозапуска
+        // Таймер автозапуска (20 секунд)
         function startAutoStartTimer() {
             const countdownElement = document.getElementById('countdown');
             countdownElement.textContent = countdownSeconds;
@@ -750,8 +655,6 @@
         // Пропуск заставки
         function skipIntro() {
             clearInterval(autoStartInterval);
-            if (videoStopTimer) clearTimeout(videoStopTimer);
-            stopVideo();
             
             const splash = document.getElementById('splashScreen');
             const mainApp = document.getElementById('mainApp');
@@ -791,8 +694,6 @@
         
         function startGame() {
             clearInterval(autoStartInterval);
-            if (videoStopTimer) clearTimeout(videoStopTimer);
-            stopVideo();
             
             const splash = document.getElementById('splashScreen');
             const mainApp = document.getElementById('mainApp');
@@ -929,6 +830,8 @@
                 updateExpiringCount();
                 checkMarkerLimit();
                 
+                showNotification('✅ Карта загружена! Кликайте для добавления патрулей', 'info');
+                
             } catch (error) {
                 console.error('Ошибка карты:', error);
                 showError('❌ Ошибка загрузки карты');
@@ -945,93 +848,36 @@
             
             const cost = getCost(type);
             if (points < cost) {
-                showNotification(`❌ Нужно ${cost} очков!`, 'error');
+                showNotification(`❌ Нужно ${cost} очков! У вас: ${points}`, 'error');
                 return;
             }
             
             const markerId = 'marker_' + Date.now();
-            let preset, iconColor, iconContent;
+            let preset, iconColor;
             
             switch(type) {
                 case 'police':
                     preset = 'islands#blueAutoIcon';
                     iconColor = '#2196F3';
-                    iconContent = '🚓 Патруль';
                     break;
                 case 'accident':
                     preset = 'islands#redAutoIcon';
                     iconColor = '#F44336';
-                    iconContent = '💥 ДТП';
                     break;
                 case 'help':
                     preset = 'islands#greenAutoIcon';
                     iconColor = '#4CAF50';
-                    iconContent = '🆘 Помощь';
                     break;
                 case 'hazard':
                     preset = 'islands#orangeAutoIcon';
                     iconColor = '#FF9800';
-                    iconContent = '🚦 Пробка';
                     break;
             }
             
-            const placemark = new ymaps.Placemark(coords, {
-                hintContent: iconContent,
-                balloonContent: createBalloonContent(type, comment, markerId, iconColor, iconContent)
-            }, { 
-                preset: preset,
-                iconColor: iconColor,
-                draggable: true,
-                iconLayout: 'default#image',
-                iconImageHref: getIconUrl(type),
-                iconImageSize: [40, 40],
-                iconImageOffset: [-20, -20]
-            });
-            
-            placemark.events.add('dragend', function() {
-                updateMarkerCoords(markerId, placemark.geometry.getCoordinates());
-                showNotification('🚗 Метка перемещена! +2 очка', 'info');
-                points += 2;
-                activity++;
-                updateUI();
-                saveGame();
-            });
-            
-            ymap.geoObjects.add(placemark);
-            
-            markers.push({ 
-                id: markerId, 
-                type: type, 
-                coords: coords, 
-                comment: comment, 
-                placemark: placemark, 
-                timestamp: Date.now() 
-            });
-            
-            points -= cost;
-            activity++;
-            
-            saveGame();
-            updateUI();
-            updateExpiringCount();
-            checkMarkerLimit();
-            
-            const message = comment ? 
-                `✅ ${iconContent} добавлен! Удалится через 24 часа` :
-                `✅ ${iconContent} добавлен! Удалится через 24 часа`;
-            
-            showNotification(message);
-        }
-        
-        function getIconUrl(type) {
-            // Можно использовать свои иконки, но пока используем стандартные
-            return '';
-        }
-        
-        function createBalloonContent(type, comment, markerId, color, title) {
-            return `
-                <div style="padding: 15px; max-width: 250px; background: #0d1b2a; color: white; border-radius: 10px; border-left: 5px solid ${color}">
-                    <strong style="color: ${color}; font-size: 1.1em;">${title}</strong>
+            // Создаем содержимое балуна
+            const balloonContent = `
+                <div style="padding: 15px; max-width: 250px; background: #0d1b2a; color: white; border-radius: 10px; border-left: 5px solid ${iconColor}">
+                    <strong style="color: ${iconColor}; font-size: 1.1em;">${getToolName(type)}</strong>
                     ${comment ? `<div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 5px; font-style: italic; color: #81c784;">
                         💬 "${comment}"
                     </div>` : ''}
@@ -1048,6 +894,56 @@
                     </button>
                 </div>
             `;
+            
+            // Создаем метку с правильными параметрами
+            const placemark = new ymaps.Placemark(coords, {
+                hintContent: getToolName(type),
+                balloonContent: balloonContent
+            }, {
+                preset: preset,
+                iconColor: iconColor,
+                draggable: true
+            });
+            
+            // Обработчик перетаскивания
+            placemark.events.add('dragend', function() {
+                const newCoords = placemark.geometry.getCoordinates();
+                updateMarkerCoords(markerId, newCoords);
+                showNotification('🚗 Метка перемещена! +2 очка', 'info');
+                points += 2;
+                activity++;
+                updateUI();
+                saveGame();
+            });
+            
+            // Добавляем на карту
+            ymap.geoObjects.add(placemark);
+            
+            // Сохраняем метку
+            markers.push({ 
+                id: markerId, 
+                type: type, 
+                coords: coords, 
+                comment: comment, 
+                placemark: placemark, 
+                timestamp: Date.now() 
+            });
+            
+            // Обновляем очки и активность
+            points -= cost;
+            activity++;
+            
+            // Сохраняем и обновляем UI
+            saveGame();
+            updateUI();
+            updateExpiringCount();
+            checkMarkerLimit();
+            
+            const message = comment ? 
+                `✅ ${getToolName(type)} добавлен! Удалится через 24 часа` :
+                `✅ ${getToolName(type)} добавлен! Удалится через 24 часа`;
+            
+            showNotification(message);
         }
         
         function removeNearMarker(coords) {
@@ -1101,52 +997,80 @@
             const now = Date.now();
             
             markers.forEach(markerData => {
-                if (now - markerData.timestamp > EXPIRATION_TIME) return;
+                // Пропускаем уже истекшие метки
+                if (now - markerData.timestamp > EXPIRATION_TIME) {
+                    return;
+                }
                 
-                let preset, iconColor, iconContent;
+                let preset, iconColor;
                 
                 switch(markerData.type) {
                     case 'police':
                         preset = 'islands#blueAutoIcon';
                         iconColor = '#2196F3';
-                        iconContent = '🚓 Патруль';
                         break;
                     case 'accident':
                         preset = 'islands#redAutoIcon';
                         iconColor = '#F44336';
-                        iconContent = '💥 ДТП';
                         break;
                     case 'help':
                         preset = 'islands#greenAutoIcon';
                         iconColor = '#4CAF50';
-                        iconContent = '🆘 Помощь';
                         break;
                     case 'hazard':
                         preset = 'islands#orangeAutoIcon';
                         iconColor = '#FF9800';
-                        iconContent = '🚦 Пробка';
                         break;
                 }
                 
+                // Создаем содержимое балуна для загружаемой метки
+                const balloonContent = `
+                    <div style="padding: 15px; max-width: 250px; background: #0d1b2a; color: white; border-radius: 10px; border-left: 5px solid ${iconColor}">
+                        <strong style="color: ${iconColor}; font-size: 1.1em;">${getToolName(markerData.type)}</strong>
+                        ${markerData.comment ? `<div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 5px; font-style: italic; color: #81c784;">
+                            💬 "${markerData.comment}"
+                        </div>` : ''}
+                        <div style="margin-top: 10px; padding: 6px; background: rgba(255, 152, 0, 0.1); border-radius: 5px; font-size: 0.85rem;">
+                            <i class="fas fa-clock" style="color: #ff9800;"></i> Автоудаление через 24 часа
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.85em; color: #aaa;">
+                            Добавлено: ${new Date(markerData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                        <button onclick="window.deleteMarker('${markerData.id}')" 
+                                style="margin-top: 10px; padding: 8px 15px; background: linear-gradient(90deg, #f44336, #c62828); 
+                                       color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">
+                            <i class="fas fa-trash"></i> Удалить сейчас (+10 очков)
+                        </button>
+                    </div>
+                `;
+                
+                // Создаем метку
                 const placemark = new ymaps.Placemark(markerData.coords, {
-                    hintContent: iconContent,
-                    balloonContent: createBalloonContent(
-                        markerData.type, 
-                        markerData.comment, 
-                        markerData.id, 
-                        iconColor,
-                        iconContent
-                    )
-                }, { 
+                    hintContent: getToolName(markerData.type),
+                    balloonContent: balloonContent
+                }, {
                     preset: preset,
                     iconColor: iconColor,
                     draggable: true
                 });
                 
+                // Обработчик перетаскивания
+                placemark.events.add('dragend', function() {
+                    const newCoords = placemark.geometry.getCoordinates();
+                    updateMarkerCoords(markerData.id, newCoords);
+                    showNotification('🚗 Метка перемещена! +2 очка', 'info');
+                    points += 2;
+                    activity++;
+                    updateUI();
+                    saveGame();
+                });
+                
+                // Добавляем на карту
                 ymap.geoObjects.add(placemark);
                 markerData.placemark = placemark;
             });
             
+            // Удаляем истекшие метки из массива
             markers = markers.filter(m => now - m.timestamp <= EXPIRATION_TIME);
         }
         
@@ -1178,7 +1102,7 @@
         }
         
         function updateToolButtons() {
-            const toolButtons = document.querySelectorAll('.tool-btn:not(.clear)');
+            const toolButtons = document.querySelectorAll('.tool-btn:not([onclick*="clear"])');
             const atLimit = markers.length >= MAX_MARKERS;
             
             toolButtons.forEach(btn => {
@@ -1215,12 +1139,13 @@
             return names[tool] || tool;
         }
         
+        // Стоимость меток в очках:
         function getCost(type) {
             const costs = {
-                police: 20,
-                accident: 30,
-                help: 25,
-                hazard: 15
+                police: 20,    // Патруль - 20 очков
+                accident: 30,  // ДТП - 30 очков
+                help: 25,      // Помощь - 25 очков
+                hazard: 15     // Пробка - 15 очков
             };
             return costs[type] || 20;
         }
@@ -1269,6 +1194,28 @@
                     Перезагрузить
                 </button>
             `;
+        }
+        
+        // ============ MODAL WINDOW FOR COMMENTS ============
+        function showCommentModal() {
+            // Простое модальное окно с prompt
+            const comment = prompt(`💬 Введите комментарий для ${getToolName(pendingCommentData.type)} (до 30 символов, необязательно):`, '');
+            
+            if (comment !== null) {
+                if (comment.length > 30) {
+                    showNotification('❌ Максимум 30 символов!', 'error');
+                    return;
+                }
+                
+                if (pendingCommentData) {
+                    addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim() || null);
+                    pendingCommentData = null;
+                }
+            } else if (pendingCommentData) {
+                // Если отменили, добавляем без комментария
+                addMarker(pendingCommentData.coords, pendingCommentData.type, null);
+                pendingCommentData = null;
+            }
         }
         
         // ============ SAVE/LOAD ============
@@ -1341,8 +1288,6 @@
         window.addEventListener('beforeunload', function() {
             if (autoDeleteInterval) clearInterval(autoDeleteInterval);
             if (autoStartInterval) clearInterval(autoStartInterval);
-            if (videoStopTimer) clearTimeout(videoStopTimer);
-            stopVideo();
         });
         
         // Глобальные функции
