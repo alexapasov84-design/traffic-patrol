@@ -716,8 +716,6 @@
         </div>
     </div>
 
-    <!-- Убрана панель отладки и кнопка для всех пользователей -->
-
     <script>
         // ============ КОНФИГУРАЦИЯ FIREBASE ============
         const firebaseConfig = {
@@ -734,21 +732,22 @@
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000;
-        const MAX_MARKERS = 15; // Уменьшено до 15
-        const STARTING_POINTS = 1000; // Начальные очки 1000
-        const POINTS_PER_REMOVE = 1; // Очки за удаление 1 (было 10)
+        const MAX_MARKERS = 15;
+        const STARTING_POINTS = 1000;
+        const POINTS_PER_REMOVE = 1;
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
         let ymap = null;
-        let markers = new Map(); // markerId -> markerData
-        let markerPlacemarks = new Map(); // markerId -> ymaps.Placemark
+        let markers = new Map();
+        let markerPlacemarks = new Map();
         let deletedMarkers = new Set();
         let selectedTool = 'police';
         let points = STARTING_POINTS;
         let activity = 0;
         let pendingCommentData = null;
+        let isWaitingForComment = false;
         
         let onlinePlayers = 1;
         let lastSyncTime = 0;
@@ -849,10 +848,8 @@
                     if (data) {
                         const markersArray = Object.values(data);
                         
-                        // Фильтруем удаленные метки
                         const filteredMarkers = markersArray.filter(marker => {
                             if (deletedMarkers.has(marker.id)) {
-                                console.log(`Пропускаем удаленную метку: ${marker.id}`);
                                 return false;
                             }
                             return true;
@@ -880,7 +877,6 @@
                 const markersObj = {};
                 markers.forEach((markerData, markerId) => {
                     if (deletedMarkers.has(markerId)) {
-                        console.log(`Не синхронизируем удаленную метку: ${markerId}`);
                         return;
                     }
                     
@@ -917,7 +913,6 @@
             const existingMarkerIds = new Set(markers.keys());
             const newMarkerIds = new Set(cloudMarkers.map(m => m.id));
             
-            // Удаляем метки, которых нет в cloudMarkers
             existingMarkerIds.forEach(markerId => {
                 if (!newMarkerIds.has(markerId)) {
                     removeMarkerFromMap(markerId);
@@ -925,7 +920,6 @@
                 }
             });
             
-            // Добавляем/обновляем метки
             cloudMarkers.forEach(markerData => {
                 if (now - markerData.timestamp > EXPIRATION_TIME) {
                     return;
@@ -945,7 +939,6 @@
         function addMarkerToMap(markerData) {
             if (!ymap) return;
             
-            // Проверяем, нет ли уже метки на этих координатах
             const existingMarker = Array.from(markers.values()).find(marker => 
                 Math.abs(marker.coords[0] - markerData.coords[0]) < 0.0001 && 
                 Math.abs(marker.coords[1] - markerData.coords[1]) < 0.0001
@@ -1033,7 +1026,6 @@
                 return;
             }
             
-            // Проверяем, нет ли уже метки на этих координатах
             const existingMarker = Array.from(markers.values()).find(marker => 
                 Math.abs(marker.coords[0] - coords[0]) < 0.0001 && 
                 Math.abs(marker.coords[1] - coords[1]) < 0.0001
@@ -1075,38 +1067,58 @@
             try {
                 console.log(`🗑️ Удаление метки: ${markerId}`);
                 
-                // Удаляем с карты
                 removeMarkerFromMap(markerId);
-                
-                // Удаляем из локального хранилища
                 markers.delete(markerId);
-                
-                // Добавляем в список удаленных
                 deletedMarkers.add(markerId);
                 
-                // Удаляем из Firebase
                 if (firebaseInitialized) {
                     await firebaseDb.ref('markers/' + markerId).remove();
                 }
                 
-                // Начисляем очки (1 вместо 10)
-                points += POINTS_PER_REMOVE;
+                // Обновляем очки у всех пользователей через Firebase
+                updateUserPoints(POINTS_PER_REMOVE);
+                
                 activity++;
                 
-                // Сохраняем пользовательские данные
                 saveUserData();
-                
-                // Обновляем UI
                 updateUI();
                 checkMarkerLimit();
                 
                 showNotification(`✅ Патруль удален! +${POINTS_PER_REMOVE} очко`, 'info');
                 
-                console.log(`✅ Метка ${markerId} успешно удалена`);
-                
             } catch (error) {
                 console.error('❌ Ошибка удаления метки:', error);
                 showNotification('❌ Ошибка удаления патруля', 'error');
+            }
+        }
+
+        // Функция обновления очков пользователя через Firebase
+        async function updateUserPoints(pointsToAdd) {
+            try {
+                if (!firebaseInitialized) return;
+                
+                const userRef = firebaseDb.ref('users/' + window.userId);
+                
+                // Получаем текущие данные пользователя
+                const snapshot = await userRef.once('value');
+                const userData = snapshot.val() || { points: STARTING_POINTS };
+                
+                // Обновляем очки
+                const newPoints = (userData.points || STARTING_POINTS) + pointsToAdd;
+                
+                // Сохраняем в Firebase
+                await userRef.set({
+                    name: window.userName,
+                    points: newPoints,
+                    lastUpdate: Date.now()
+                });
+                
+                // Обновляем локально
+                points = newPoints;
+                updateUI();
+                
+            } catch (error) {
+                console.error('❌ Ошибка обновления очков:', error);
             }
         }
 
@@ -1184,10 +1196,10 @@
 
         function getCost(type) {
             const costs = {
-                police: 2,    // Было 20
-                accident: 3,  // Было 30
-                help: 2.5,    // Было 25
-                hazard: 1.5   // Было 15
+                police: 2,
+                accident: 3,
+                help: 2.5,
+                hazard: 1.5
             };
             return costs[type] || 2;
         }
@@ -1200,7 +1212,8 @@
             
             userPresenceRef.set({
                 name: window.userName,
-                lastSeen: Date.now()
+                lastSeen: Date.now(),
+                points: points
             });
             
             userPresenceRef.onDisconnect().remove();
@@ -1220,6 +1233,26 @@
                 document.getElementById('gameOnlineIndicator').innerHTML = 
                     `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
             });
+        }
+
+        // Загрузка очков пользователя из Firebase
+        async function loadUserPoints() {
+            try {
+                if (!firebaseInitialized) return;
+                
+                const userRef = firebaseDb.ref('users/' + window.userId);
+                
+                userRef.on('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData && userData.points) {
+                        points = userData.points;
+                        updateUI();
+                    }
+                });
+                
+            } catch (error) {
+                console.error('❌ Ошибка загрузки очков:', error);
+            }
         }
 
         // ============ СТАТУСЫ ============
@@ -1359,6 +1392,7 @@
             console.log('🚔 Запуск многопользовательской игры...');
             
             loadUserData();
+            loadUserPoints(); // Загружаем очки из Firebase
             startAutoDeleteChecker();
             
             if (window.ymaps) {
@@ -1381,12 +1415,17 @@
                 ymap.events.add('click', function(e) {
                     const coords = e.get('coords');
                     
+                    if (isWaitingForComment) return; // Защита от повторных кликов
+                    
                     if (selectedTool === 'clear') {
                         removeNearMarker(coords);
-                    } else if (selectedTool === 'police' || selectedTool === 'help') {
+                    } else if (selectedTool === 'police' || selectedTool === 'accident' || selectedTool === 'help') {
+                        // Для этих типов запрашиваем комментарий
+                        isWaitingForComment = true;
                         pendingCommentData = { coords, type: selectedTool };
                         showCommentModal();
                     } else {
+                        // Для hazard сразу ставим без комментария
                         addMarker(coords, selectedTool, null);
                     }
                 });
@@ -1465,18 +1504,23 @@
         function showCommentModal() {
             const comment = prompt(`💬 Введите комментарий для ${getToolName(pendingCommentData.type)} (до 30 символов, необязательно):`, '');
             
-            if (comment !== null) {
-                if (comment.length > 30) {
-                    showNotification('❌ Максимум 30 символов!', 'error');
-                    return;
-                }
-                
-                if (pendingCommentData) {
-                    addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim() || null);
-                    pendingCommentData = null;
-                }
-            } else if (pendingCommentData) {
-                addMarker(pendingCommentData.coords, pendingCommentData.type, null);
+            isWaitingForComment = false; // Сбрасываем флаг ожидания
+            
+            if (comment === null) {
+                // Пользователь нажал "Отмена" - НЕ добавляем метку
+                showNotification('❌ Установка патруля отменена', 'warning');
+                pendingCommentData = null;
+                return;
+            }
+            
+            if (comment.length > 30) {
+                showNotification('❌ Максимум 30 символов!', 'error');
+                pendingCommentData = null;
+                return;
+            }
+            
+            if (pendingCommentData) {
+                addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim() || null);
                 pendingCommentData = null;
             }
         }
@@ -1494,6 +1538,16 @@
                 };
                 
                 localStorage.setItem(`miami_police_user_${window.userId}`, JSON.stringify(userData));
+                
+                // Также сохраняем в Firebase
+                if (firebaseInitialized) {
+                    firebaseDb.ref('users/' + window.userId).set({
+                        name: window.userName,
+                        points: points,
+                        lastUpdate: Date.now()
+                    });
+                }
+                
             } catch (e) {
                 console.error('Ошибка сохранения пользовательских данных:', e);
             }
@@ -1511,7 +1565,6 @@
                     }
                     updateUI();
                 } else {
-                    // Первый вход - дарим 1000 очков
                     points = STARTING_POINTS;
                     updateUI();
                 }
