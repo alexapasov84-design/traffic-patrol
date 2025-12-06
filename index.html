@@ -3,64 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Traffic Patrol Online</title>
+    <title>🚨 Traffic Patrol - Карта ДТП и Патрулей</title>
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Font Awesome -->
+    <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Основные стили */
-        :root {
-            --primary: #2196f3;
-            --danger: #f44336;
-            --warning: #ff9800;
-            --success: #4caf50;
-            --dark: #1a237e;
-            --light: #e3f2fd;
-        }
-        
+        /* Сброс и базовые стили */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            touch-action: manipulation;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--dark), #311b92);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
             color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-            touch-action: none;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: fixed;
         }
         
+        /* Контейнер приложения */
         .app-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
         }
         
         /* Хедер */
         .app-header {
-            background: rgba(0, 0, 0, 0.95);
-            padding: 15px 20px;
+            background: rgba(13, 27, 42, 0.95);
+            padding: 12px 16px;
+            border-bottom: 3px solid #2196f3;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid var(--primary);
+            backdrop-filter: blur(10px);
             flex-shrink: 0;
             z-index: 100;
         }
         
         .header-left h1 {
-            color: #00bcd4;
-            font-size: 1.5rem;
+            color: #4fc3f7;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -70,23 +67,32 @@
             animation: pulse 2s infinite;
         }
         
-        .online-count {
-            font-size: 0.9rem;
-            color: var(--success);
-            margin-top: 5px;
+        .online-stats {
+            font-size: 0.85rem;
+            color: #81c784;
+            margin-top: 4px;
+            display: flex;
+            gap: 15px;
         }
         
         .user-info {
             text-align: right;
         }
         
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #bb86fc;
+        }
+        
         .user-rank {
-            background: rgba(0, 188, 212, 0.2);
+            background: rgba(33, 150, 243, 0.2);
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.8rem;
-            margin-top: 3px;
-            border: 1px solid #00bcd4;
+            margin-top: 4px;
+            border: 1px solid #2196f3;
+            display: inline-block;
         }
         
         /* Контейнер карты */
@@ -94,20 +100,23 @@
             flex: 1;
             position: relative;
             margin: 10px;
-            border-radius: 15px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            border: 3px solid var(--primary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 3px solid #2196f3;
             background: #0d47a1;
             min-height: 0;
         }
         
+        /* Canvas карты */
         #mapCanvas {
             width: 100%;
             height: 100%;
             display: block;
+            cursor: crosshair;
         }
         
+        /* Контейнер для маркеров */
         #markersContainer {
             position: absolute;
             top: 0;
@@ -115,110 +124,122 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 10;
         }
         
-        /* Маркеры */
+        /* Стили маркеров */
         .marker {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             cursor: move;
             transform: translate(-50%, -50%);
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 10;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            z-index: 20;
             pointer-events: auto;
             touch-action: none;
+            user-drag: none;
+            -webkit-user-drag: none;
         }
         
         .marker:hover {
-            transform: translate(-50%, -50%) scale(1.15);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%) scale(1.12);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            z-index: 30;
         }
         
         .marker.police {
-            background: var(--primary);
-            animation: pulseBlue 1.5s infinite;
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            animation: policePulse 1.5s infinite;
         }
         
         .marker.accident {
-            background: var(--danger);
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
         }
         
         .marker.hazard {
-            background: var(--warning);
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         }
         
-        .marker-dragging {
+        .marker.dragging {
             opacity: 0.9;
-            transform: translate(-50%, -50%) scale(1.2);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            transform: translate(-50%, -50%) scale(1.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             z-index: 1000;
         }
         
-        @keyframes pulseBlue {
+        @keyframes policePulse {
             0%, 100% { 
                 box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
             }
             50% { 
-                box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+                box-shadow: 0 0 0 12px rgba(33, 150, 243, 0);
             }
         }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            50% { opacity: 0.8; }
         }
         
         /* Панель инструментов */
         .toolbar {
             display: flex;
-            gap: 10px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.85);
-            border-top: 2px solid var(--primary);
+            gap: 8px;
+            padding: 12px;
+            background: rgba(13, 27, 42, 0.95);
+            border-top: 2px solid #2196f3;
             flex-shrink: 0;
             overflow-x: auto;
-            justify-content: center;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .toolbar::-webkit-scrollbar {
+            display: none;
         }
         
         .tool-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
+            gap: 6px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.08);
             border: 2px solid transparent;
             border-radius: 12px;
             color: white;
             cursor: pointer;
-            min-width: 80px;
-            transition: all 0.3s;
+            min-width: 75px;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
         }
         
         .tool-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
         }
         
         .tool-btn.active {
-            background: rgba(33, 150, 243, 0.3);
-            border-color: var(--primary);
+            background: rgba(33, 150, 243, 0.25);
+            border-color: #2196f3;
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
         }
         
         .tool-btn i {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
         
         .tool-btn span {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
         
@@ -226,11 +247,11 @@
         .stats {
             display: flex;
             justify-content: space-around;
-            padding: 12px 15px;
-            background: rgba(0, 0, 0, 0.6);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             flex-shrink: 0;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .stat-item {
@@ -241,70 +262,74 @@
         }
         
         .stat-value {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #00bcd4;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4fc3f7;
         }
         
         .stat-label {
-            opacity: 0.8;
-            font-size: 0.8rem;
+            opacity: 0.85;
+            font-size: 0.75rem;
         }
         
         /* Чат */
-        .chat-modal {
+        .chat-overlay {
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            background: rgba(26, 35, 126, 0.98);
-            backdrop-filter: blur(20px);
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            z-index: 2000;
-            border-radius: 20px 20px 0 0;
-            max-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+            padding: 0;
         }
         
-        .chat-modal.show {
-            transform: translateY(0);
+        .chat-modal {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            width: 100%;
+            max-height: 70vh;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+            border-top: 3px solid #2196f3;
         }
         
         .chat-header {
             padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 20px 20px 0 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .chat-header h3 {
-            color: #00bcd4;
+            color: #4fc3f7;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
         .close-chat {
-            background: none;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
         }
         
         .close-chat:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .chat-messages {
@@ -313,7 +338,52 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        
+        .message.system {
+            background: rgba(33, 150, 243, 0.15);
+            border-left: 4px solid #2196f3;
+            align-self: center;
+            max-width: 90%;
+        }
+        
+        .message.user {
+            background: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4caf50;
+            align-self: flex-end;
+        }
+        
+        .message.other {
+            background: rgba(255, 152, 0, 0.15);
+            border-left: 4px solid #ff9800;
+            align-self: flex-start;
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: #bb86fc;
+        }
+        
+        .message-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
         }
         
         .chat-input {
@@ -321,38 +391,46 @@
             display: flex;
             gap: 10px;
             background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .chat-input input {
             flex: 1;
-            padding: 12px 20px;
-            border: 2px solid var(--primary);
+            padding: 12px 18px;
+            border: 2px solid #2196f3;
             border-radius: 25px;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        
+        .chat-input input:focus {
+            background: rgba(255, 255, 255, 0.15);
         }
         
         .chat-input input::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
         
-        .chat-input button {
-            background: var(--primary);
+        .send-btn {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
             border: none;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             color: white;
             cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .chat-input button:hover {
-            background: #1976d2;
+        .send-btn:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
         }
         
         /* Уведомления */
@@ -360,116 +438,155 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--success);
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
             color: white;
-            padding: 15px 25px;
+            padding: 16px 24px;
             border-radius: 12px;
-            z-index: 3000;
+            z-index: 2000;
             animation: slideIn 0.3s ease-out;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             gap: 12px;
-            max-width: 350px;
+            max-width: 320px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .notification.error {
-            background: var(--danger);
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
         }
         
         .notification.warning {
-            background: var(--warning);
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+        
+        .notification.info {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
         }
         
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(-30px) translateX(30px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) translateX(0);
             }
+        }
+        
+        /* Подсказка */
+        .hint-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(13, 27, 42, 0.85);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            border-left: 4px solid #4fc3f7;
+            max-width: 260px;
+            backdrop-filter: blur(10px);
+            z-index: 50;
+        }
+        
+        .hint-box i {
+            color: #4fc3f7;
+            margin-right: 8px;
         }
         
         /* Адаптивность */
         @media (max-width: 768px) {
             .app-header {
-                padding: 12px 15px;
+                padding: 10px 14px;
             }
             
             .header-left h1 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
             }
             
             .map-container {
                 margin: 8px;
                 border-width: 2px;
+                border-radius: 14px;
             }
             
             .toolbar {
                 padding: 10px;
-                justify-content: flex-start;
+                gap: 6px;
             }
             
             .tool-btn {
                 min-width: 70px;
-                padding: 10px;
+                padding: 8px 10px;
             }
             
             .tool-btn i {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
             }
             
             .tool-btn span {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             
             .marker {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3rem;
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
             }
             
             .stats {
-                padding: 10px;
+                padding: 8px 10px;
             }
             
             .stat-value {
                 font-size: 1.2rem;
             }
+            
+            .hint-box {
+                bottom: 15px;
+                left: 15px;
+                font-size: 0.8rem;
+                max-width: 220px;
+            }
         }
         
         @media (max-width: 480px) {
             .toolbar {
-                gap: 8px;
+                gap: 4px;
             }
             
             .tool-btn {
                 min-width: 65px;
-                padding: 8px;
+                padding: 6px 8px;
             }
             
             .marker {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
+                width: 44px;
+                height: 44px;
+                font-size: 1.3rem;
+            }
+            
+            .online-stats {
+                font-size: 0.75rem;
+                gap: 10px;
             }
         }
         
-        /* Подсказка */
-        .hint {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            border-left: 4px solid #00bcd4;
-            max-width: 250px;
+        /* Улучшение для тач-устройств */
+        @media (hover: none) and (pointer: coarse) {
+            .tool-btn:hover {
+                transform: none;
+            }
+            
+            .marker:hover {
+                transform: translate(-50%, -50%);
+            }
+            
+            .marker:active {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
         }
     </style>
 </head>
@@ -479,13 +596,13 @@
         <header class="app-header">
             <div class="header-left">
                 <h1><i class="fas fa-traffic-light"></i> Traffic Patrol</h1>
-                <p class="online-count">
-                    <i class="fas fa-users"></i> Онлайн: <span id="onlineCount">1</span> | 
-                    <i class="fas fa-map-marker-alt"></i> Меток: <span id="markerCount">0</span>
-                </p>
+                <div class="online-stats">
+                    <span><i class="fas fa-users"></i> Онлайн: <span id="onlineCount">1</span></span>
+                    <span><i class="fas fa-map-marker-alt"></i> Меток: <span id="markerCount">0</span></span>
+                </div>
             </div>
             <div class="user-info">
-                <span id="userName">Игрок</span>
+                <div class="user-name" id="userName">Игрок</div>
                 <div class="user-rank" id="userRank">Новичок 🚦</div>
             </div>
         </header>
@@ -494,34 +611,35 @@
         <div class="map-container">
             <canvas id="mapCanvas"></canvas>
             <div id="markersContainer"></div>
-            <div class="hint" id="hint">
-                <i class="fas fa-lightbulb"></i> Кликните для добавления метки
+            <div class="hint-box" id="hintBox">
+                <i class="fas fa-lightbulb"></i>
+                <span id="hintText">Выберите инструмент и кликните на карту</span>
             </div>
         </div>
 
         <!-- Панель инструментов -->
         <div class="toolbar">
-            <button class="tool-btn active" onclick="selectTool('police')">
+            <button class="tool-btn active" onclick="selectTool('police')" id="toolPolice">
                 <i class="fas fa-car"></i>
                 <span>Патруль</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('accident')">
+            <button class="tool-btn" onclick="selectTool('accident')" id="toolAccident">
                 <i class="fas fa-car-crash"></i>
                 <span>ДТП</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('hazard')">
+            <button class="tool-btn" onclick="selectTool('hazard')" id="toolHazard">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Опасность</span>
             </button>
             
-            <button class="tool-btn" onclick="selectTool('clear')">
+            <button class="tool-btn" onclick="selectTool('clear')" id="toolClear">
                 <i class="fas fa-trash-alt"></i>
                 <span>Удалить</span>
             </button>
             
-            <button class="tool-btn" onclick="showChat()">
+            <button class="tool-btn" onclick="showChat()" id="toolChat">
                 <i class="fas fa-comments"></i>
                 <span>Чат</span>
             </button>
@@ -530,697 +648,892 @@
         <!-- Статистика -->
         <div class="stats">
             <div class="stat-item">
-                <span class="stat-value" id="userPoints">100</span>
+                <span class="stat-value" id="statPoints">100</span>
                 <span class="stat-label">Очки</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value" id="userActivity">0</span>
+                <span class="stat-value" id="statActivity">0</span>
                 <span class="stat-label">Активность</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value" id="rankPoints">100%</span>
+                <span class="stat-value" id="statProgress">100%</span>
                 <span class="stat-label">Прогресс</span>
             </div>
         </div>
 
-        <!-- Чат -->
-        <div class="chat-modal" id="chatModal">
-            <div class="chat-header">
-                <h3><i class="fas fa-comments"></i> Чат патруля</h3>
-                <button class="close-chat" onclick="hideChat()">×</button>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div style="background: rgba(0,188,212,0.2); padding: 12px; border-radius: 10px; border-left: 4px solid #00bcd4;">
-                    <i class="fas fa-info-circle"></i> Добро пожаловать в Traffic Patrol!<br>
-                    <small>Перетаскивайте метки на новые места</small>
+        <!-- Чат (скрыт по умолчанию) -->
+        <div class="chat-overlay" id="chatOverlay">
+            <div class="chat-modal">
+                <div class="chat-header">
+                    <h3><i class="fas fa-comments"></i> Чат патруля</h3>
+                    <button class="close-chat" onclick="hideChat()">×</button>
                 </div>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="200">
-                <button onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">
+                        <div class="message-sender"><i class="fas fa-info-circle"></i> Система</div>
+                        <div class="message-text">Добро пожаловать в Traffic Patrol!</div>
+                        <div class="message-text">Добавляйте метки, перемещайте их и следите за дорогой!</div>
+                        <div class="message-time">Только что</div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Напишите сообщение..." maxlength="200">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== GAME STATE ====================
-        const gameState = {
-            markers: [],
-            selectedTool: 'police',
-            userPoints: 100,
-            userActivity: 0,
-            markersAdded: 0,
-            markersRemoved: 0,
-            isDragging: false,
-            draggingMarker: null,
-            dragStartX: 0,
-            dragStartY: 0,
-            canvas: null,
-            ctx: null,
-            userName: 'Игрок'
-        };
+        // ============================================
+        // ТРАФИК ПАТРОЛЬ - ПОЛНАЯ ИГРА В ОДНОМ ФАЙЛЕ
+        // ============================================
         
-        // ==================== INITIALIZATION ====================
-        function initGame() {
-            console.log('🎮 Инициализация игры...');
+        // Глобальное состояние игры
+        const Game = {
+            // Настройки
+            config: {
+                centerLat: 55.459619,
+                centerLon: 38.438920,
+                initialZoom: 15,
+                markerRadius: 25,
+                minPoints: 0,
+                maxPoints: 1000
+            },
             
-            // Получаем canvas
-            gameState.canvas = document.getElementById('mapCanvas');
-            gameState.ctx = gameState.canvas.getContext('2d');
+            // Состояние игры
+            state: {
+                markers: [],
+                selectedTool: 'police',
+                userPoints: 100,
+                userActivity: 0,
+                totalMarkersAdded: 0,
+                totalMarkersRemoved: 0,
+                isDragging: false,
+                draggingMarker: null,
+                dragOffsetX: 0,
+                dragOffsetY: 0,
+                userName: 'Игрок',
+                chatMessages: [],
+                lastMarkerId: 0
+            },
             
-            // Устанавливаем размеры canvas
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            // DOM элементы
+            elements: {
+                canvas: null,
+                ctx: null,
+                markersContainer: null
+            },
             
-            // Инициализация Telegram
-            initTelegram();
-            
-            // Загружаем сохраненные данные
-            loadGameData();
-            
-            // Рисуем начальную карту
-            drawMap();
-            
-            // Настраиваем обработчики событий
-            setupEventListeners();
-            
-            // Обновляем UI
-            updateUI();
-            
-            console.log('✅ Игра готова!');
-            showNotification('Добро пожаловать в Traffic Patrol! 🚓', 'success');
-        }
-        
-        function initTelegram() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                const tg = window.Telegram.WebApp;
+            // Инициализация
+            init() {
+                console.log('🚦 Инициализация Traffic Patrol...');
                 
-                tg.expand();
-                tg.ready();
+                // Получаем DOM элементы
+                this.elements.canvas = document.getElementById('mapCanvas');
+                this.elements.ctx = this.elements.canvas.getContext('2d');
+                this.elements.markersContainer = document.getElementById('markersContainer');
                 
-                if (tg.initDataUnsafe.user) {
-                    const user = tg.initDataUnsafe.user;
-                    gameState.userName = user.first_name || 'Игрок';
-                    document.getElementById('userName').textContent = gameState.userName;
-                }
+                // Настраиваем размеры canvas
+                this.setupCanvas();
                 
-                // Настройка кнопки назад
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => {
-                    saveGameData();
-                    tg.close();
-                });
+                // Инициализируем Telegram
+                this.initTelegram();
                 
-                console.log('🤖 Telegram Web App подключен');
-            }
-        }
-        
-        function resizeCanvas() {
-            const container = gameState.canvas.parentElement;
-            gameState.canvas.width = container.clientWidth;
-            gameState.canvas.height = container.clientHeight;
-            drawMap();
-            renderMarkers();
-        }
-        
-        // ==================== DRAWING ====================
-        function drawMap() {
-            const ctx = gameState.ctx;
-            const width = gameState.canvas.width;
-            const height = gameState.canvas.height;
-            
-            // Очищаем canvas
-            ctx.clearRect(0, 0, width, height);
-            
-            // Фон карты
-            ctx.fillStyle = '#0d47a1';
-            ctx.fillRect(0, 0, width, height);
-            
-            // Рисуем дороги
-            drawRoads();
-            
-            // Рисуем здания/объекты
-            drawBuildings();
-        }
-        
-        function drawRoads() {
-            const ctx = gameState.ctx;
-            const width = gameState.canvas.width;
-            const height = gameState.canvas.height;
-            
-            // Горизонтальные дороги
-            const hRoads = 5;
-            const hSpacing = height / (hRoads + 1);
-            
-            ctx.strokeStyle = '#424242';
-            ctx.lineWidth = 25;
-            ctx.lineCap = 'round';
-            
-            for (let i = 1; i <= hRoads; i++) {
-                const y = i * hSpacing;
-                ctx.beginPath();
-                ctx.moveTo(-50, y);
-                ctx.lineTo(width + 50, y);
-                ctx.stroke();
+                // Загружаем сохраненные данные
+                this.loadGameData();
                 
-                // Разметка
-                ctx.strokeStyle = '#ffeb3b';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([30, 20]);
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
+                // Рисуем карту
+                this.drawMap();
                 
-                ctx.strokeStyle = '#424242';
-                ctx.lineWidth = 25;
-                ctx.setLineDash([]);
-            }
-            
-            // Вертикальные дороги
-            const vRoads = 5;
-            const vSpacing = width / (vRoads + 1);
-            
-            for (let i = 1; i <= vRoads; i++) {
-                const x = i * vSpacing;
-                ctx.beginPath();
-                ctx.moveTo(x, -50);
-                ctx.lineTo(x, height + 50);
-                ctx.stroke();
+                // Настраиваем обработчики событий
+                this.setupEventListeners();
                 
-                // Разметка
-                ctx.strokeStyle = '#ffeb3b';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([30, 20]);
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
+                // Обновляем UI
+                this.updateUI();
                 
-                ctx.strokeStyle = '#424242';
-                ctx.lineWidth = 25;
-                ctx.setLineDash([]);
-            }
-        }
-        
-        function drawBuildings() {
-            const ctx = gameState.ctx;
-            const width = gameState.canvas.width;
-            const height = gameState.canvas.height;
-            
-            // Здания как квадраты
-            ctx.fillStyle = 'rgba(96, 125, 139, 0.8)';
-            const buildingSize = 40;
-            
-            // Координаты зданий
-            const buildings = [
-                { x: width * 0.2, y: height * 0.2 },
-                { x: width * 0.8, y: height * 0.2 },
-                { x: width * 0.3, y: height * 0.7 },
-                { x: width * 0.7, y: height * 0.7 },
-                { x: width * 0.5, y: height * 0.5 }
-            ];
-            
-            buildings.forEach(building => {
-                ctx.fillRect(
-                    building.x - buildingSize/2,
-                    building.y - buildingSize/2,
-                    buildingSize,
-                    buildingSize
-                );
+                // Загружаем историю чата
+                this.loadChatHistory();
                 
-                // Окна
-                ctx.fillStyle = '#ffcc80';
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        ctx.fillRect(
-                            building.x - buildingSize/2 + 5 + i * 12,
-                            building.y - buildingSize/2 + 5 + j * 12,
-                            8, 8
-                        );
+                console.log('✅ Игра готова!');
+                this.showNotification('Добро пожаловать в Traffic Patrol! 🚓', 'success');
+            },
+            
+            // Настройка Telegram Web App
+            initTelegram() {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const tg = window.Telegram.WebApp;
+                    
+                    // Настройка приложения
+                    tg.expand();
+                    tg.enableClosingConfirmation();
+                    tg.ready();
+                    
+                    // Получаем данные пользователя
+                    if (tg.initDataUnsafe.user) {
+                        const user = tg.initDataUnsafe.user;
+                        this.state.userName = user.first_name || 'Игрок';
+                        document.getElementById('userName').textContent = this.state.userName;
                     }
+                    
+                    // Настройка кнопки назад
+                    tg.BackButton.show();
+                    tg.BackButton.onClick(() => {
+                        this.saveGameData();
+                        tg.close();
+                    });
+                    
+                    console.log('🤖 Telegram Web App подключен');
                 }
-                ctx.fillStyle = 'rgba(96, 125, 139, 0.8)';
-            });
-        }
-        
-        // ==================== MARKERS ====================
-        function renderMarkers() {
-            const container = document.getElementById('markersContainer');
-            container.innerHTML = '';
+            },
             
-            gameState.markers.forEach(marker => {
-                const markerDiv = document.createElement('div');
-                markerDiv.className = `marker ${marker.type}`;
-                markerDiv.id = marker.id;
-                markerDiv.style.left = `${marker.x}px`;
-                markerDiv.style.top = `${marker.y}px`;
-                markerDiv.title = `${marker.user}: ${getToolName(marker.type)}`;
+            // Настройка canvas
+            setupCanvas() {
+                const resize = () => {
+                    const container = this.elements.canvas.parentElement;
+                    this.elements.canvas.width = container.clientWidth;
+                    this.elements.canvas.height = container.clientHeight;
+                    this.drawMap();
+                    this.renderMarkers();
+                };
                 
-                // Иконка
-                let icon = '';
-                switch(marker.type) {
-                    case 'police': icon = '🚓'; break;
-                    case 'accident': icon = '💥'; break;
-                    case 'hazard': icon = '⚠️'; break;
+                resize();
+                window.addEventListener('resize', resize);
+            },
+            
+            // Рисование карты (симуляция Яндекс.Карт)
+            drawMap() {
+                const ctx = this.elements.ctx;
+                const width = this.elements.canvas.width;
+                const height = this.elements.canvas.height;
+                
+                // Очистка canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                // Фон - синий как у карты
+                ctx.fillStyle = '#0d47a1';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Рисуем дороги
+                this.drawRoads();
+                
+                // Рисуем здания/ориентиры
+                this.drawLandmarks();
+                
+                // Рисуем сетку (для наглядности)
+                this.drawGrid();
+            },
+            
+            // Рисование дорог
+            drawRoads() {
+                const ctx = this.elements.ctx;
+                const width = this.elements.canvas.width;
+                const height = this.elements.canvas.height;
+                
+                // Основные дороги
+                ctx.strokeStyle = '#37474f';
+                ctx.lineWidth = 40;
+                ctx.lineCap = 'round';
+                
+                // Горизонтальные дороги (3 штуки)
+                const hRoads = 3;
+                const hSpacing = height / (hRoads + 1);
+                
+                for (let i = 1; i <= hRoads; i++) {
+                    const y = i * hSpacing;
+                    
+                    // Дорога
+                    ctx.beginPath();
+                    ctx.moveTo(-50, y);
+                    ctx.lineTo(width + 50, y);
+                    ctx.stroke();
+                    
+                    // Разметка (прерывистая линия)
+                    ctx.strokeStyle = '#ffd740';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([25, 15]);
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = '#37474f';
+                    ctx.lineWidth = 40;
+                    ctx.setLineDash([]);
                 }
-                markerDiv.innerHTML = icon;
                 
-                // Обработчики для перетаскивания
-                markerDiv.addEventListener('mousedown', (e) => startDrag(e, marker.id));
-                markerDiv.addEventListener('touchstart', (e) => startDragTouch(e, marker.id), { passive: false });
+                // Вертикальные дороги (3 штуки)
+                const vRoads = 3;
+                const vSpacing = width / (vRoads + 1);
                 
-                container.appendChild(markerDiv);
-            });
-        }
-        
-        // ==================== EVENT HANDLERS ====================
-        function setupEventListeners() {
-            const canvas = gameState.canvas;
+                for (let i = 1; i <= vRoads; i++) {
+                    const x = i * vSpacing;
+                    
+                    // Дорога
+                    ctx.beginPath();
+                    ctx.moveTo(x, -50);
+                    ctx.lineTo(x, height + 50);
+                    ctx.stroke();
+                    
+                    // Разметка
+                    ctx.strokeStyle = '#ffd740';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([25, 15]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = '#37474f';
+                    ctx.lineWidth = 40;
+                    ctx.setLineDash([]);
+                }
+            },
             
-            // Клик по карте для добавления/удаления меток
-            canvas.addEventListener('click', handleCanvasClick);
-            canvas.addEventListener('touchend', handleCanvasTouch, { passive: false });
-            
-            // Перетаскивание меток
-            document.addEventListener('mousemove', handleDrag);
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchmove', handleDragTouch, { passive: false });
-            document.addEventListener('touchend', stopDrag);
-            
-            // Чат
-            const chatInput = document.getElementById('chatInput');
-            if (chatInput) {
-                chatInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') sendMessage();
+            // Рисование ориентиров (зданий, парков и т.д.)
+            drawLandmarks() {
+                const ctx = this.elements.ctx;
+                const width = this.elements.canvas.width;
+                const height = this.elements.canvas.height;
+                
+                // Здания (квадраты)
+                ctx.fillStyle = '#546e7a';
+                const buildings = [
+                    { x: width * 0.2, y: height * 0.2, size: 50 },
+                    { x: width * 0.8, y: height * 0.2, size: 60 },
+                    { x: width * 0.3, y: height * 0.7, size: 45 },
+                    { x: width * 0.7, y: height * 0.7, size: 55 },
+                    { x: width * 0.5, y: height * 0.5, size: 70 }
+                ];
+                
+                buildings.forEach(building => {
+                    // Здание
+                    ctx.fillRect(
+                        building.x - building.size/2,
+                        building.y - building.size/2,
+                        building.size,
+                        building.size
+                    );
+                    
+                    // Окна
+                    ctx.fillStyle = '#ffb74d';
+                    const windowSize = 8;
+                    const windowSpacing = 15;
+                    
+                    for (let i = 0; i < 3; i++) {
+                        for (let j = 0; j < 3; j++) {
+                            ctx.fillRect(
+                                building.x - building.size/2 + windowSpacing * (i + 0.5),
+                                building.y - building.size/2 + windowSpacing * (j + 0.5),
+                                windowSize,
+                                windowSize
+                            );
+                        }
+                    }
+                    
+                    ctx.fillStyle = '#546e7a';
                 });
-            }
-        }
-        
-        function handleCanvasClick(e) {
-            const rect = gameState.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+                
+                // Парки (зеленые круги)
+                ctx.fillStyle = '#388e3c';
+                const parks = [
+                    { x: width * 0.1, y: height * 0.9, radius: 30 },
+                    { x: width * 0.9, y: height * 0.1, radius: 25 }
+                ];
+                
+                parks.forEach(park => {
+                    ctx.beginPath();
+                    ctx.arc(park.x, park.y, park.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Деревья в парке
+                    ctx.fillStyle = '#558b2f';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i / 5) * Math.PI * 2;
+                        const treeX = park.x + Math.cos(angle) * (park.radius * 0.6);
+                        const treeY = park.y + Math.sin(angle) * (park.radius * 0.6);
+                        
+                        ctx.beginPath();
+                        ctx.arc(treeX, treeY, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.fillStyle = '#388e3c';
+                });
+            },
             
-            processMapClick(x, y);
-        }
-        
-        function handleCanvasTouch(e) {
-            e.preventDefault();
-            const rect = gameState.canvas.getBoundingClientRect();
-            const touch = e.changedTouches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            processMapClick(x, y);
-        }
-        
-        function processMapClick(x, y) {
-            // Проверяем, не кликнули ли по маркеру (если перетаскиваем)
-            if (gameState.isDragging) {
-                gameState.isDragging = false;
-                if (gameState.draggingMarker) {
-                    document.getElementById(gameState.draggingMarker.id)?.classList.remove('marker-dragging');
-                    gameState.draggingMarker = null;
+            // Рисование сетки (для наглядности)
+            drawGrid() {
+                const ctx = this.elements.ctx;
+                const width = this.elements.canvas.width;
+                const height = this.elements.canvas.height;
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.lineWidth = 1;
+                
+                // Вертикальные линии
+                for (let x = 0; x <= width; x += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
                 }
-                return;
-            }
+                
+                // Горизонтальные линии
+                for (let y = 0; y <= height; y += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            },
             
-            // Проверяем, не попали ли в существующий маркер
-            for (let marker of gameState.markers) {
-                const distance = Math.sqrt(
-                    Math.pow(marker.x - x, 2) + Math.pow(marker.y - y, 2)
-                );
-                if (distance < 25) { // Радиус маркера
-                    // Если выбран режим удаления
-                    if (gameState.selectedTool === 'clear') {
-                        removeMarker(marker.id);
+            // Рендеринг маркеров
+            renderMarkers() {
+                const container = this.elements.markersContainer;
+                container.innerHTML = '';
+                
+                this.state.markers.forEach(marker => {
+                    const markerDiv = document.createElement('div');
+                    markerDiv.className = `marker ${marker.type}`;
+                    markerDiv.id = marker.id;
+                    markerDiv.style.left = `${marker.x}px`;
+                    markerDiv.style.top = `${marker.y}px`;
+                    markerDiv.setAttribute('data-marker-id', marker.id);
+                    markerDiv.title = `${marker.user}: ${this.getToolName(marker.type)}`;
+                    
+                    // Иконка маркера
+                    let icon = '';
+                    switch(marker.type) {
+                        case 'police': icon = '🚓'; break;
+                        case 'accident': icon = '💥'; break;
+                        case 'hazard': icon = '⚠️'; break;
+                    }
+                    markerDiv.innerHTML = icon;
+                    
+                    // Обработчики для перетаскивания
+                    markerDiv.addEventListener('mousedown', (e) => this.startDrag(e, marker.id));
+                    markerDiv.addEventListener('touchstart', (e) => this.startDragTouch(e, marker.id), { passive: false });
+                    
+                    container.appendChild(markerDiv);
+                });
+            },
+            
+            // Настройка обработчиков событий
+            setupEventListeners() {
+                const canvas = this.elements.canvas;
+                
+                // Клик по карте
+                canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                
+                // Тач события для мобильных
+                canvas.addEventListener('touchend', (e) => this.handleCanvasTouch(e), { passive: false });
+                
+                // События перетаскивания
+                document.addEventListener('mousemove', (e) => this.handleDrag(e));
+                document.addEventListener('mouseup', () => this.stopDrag());
+                document.addEventListener('touchmove', (e) => this.handleDragTouch(e), { passive: false });
+                document.addEventListener('touchend', () => this.stopDrag());
+                
+                // Чат
+                const chatInput = document.getElementById('chatInput');
+                if (chatInput) {
+                    chatInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.sendMessage();
+                    });
+                }
+                
+                // Обработка клика по маркерам для удаления
+                document.addEventListener('click', (e) => {
+                    const markerElement = e.target.closest('.marker');
+                    if (markerElement && this.state.selectedTool === 'clear') {
+                        const markerId = markerElement.getAttribute('data-marker-id');
+                        this.removeMarker(markerId);
+                    }
+                });
+            },
+            
+            // Обработка клика по canvas
+            handleCanvasClick(e) {
+                const rect = this.elements.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.processMapClick(x, y);
+            },
+            
+            // Обработка тача по canvas
+            handleCanvasTouch(e) {
+                e.preventDefault();
+                const rect = this.elements.canvas.getBoundingClientRect();
+                const touch = e.changedTouches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                this.processMapClick(x, y);
+            },
+            
+            // Обработка клика по карте
+            processMapClick(x, y) {
+                // Если мы перетаскиваем маркер - игнорируем клик
+                if (this.state.isDragging) {
+                    this.state.isDragging = false;
+                    if (this.state.draggingMarker) {
+                        document.getElementById(this.state.draggingMarker.id)?.classList.remove('dragging');
+                        this.state.draggingMarker = null;
                     }
                     return;
                 }
-            }
-            
-            // Если не попали в маркер и не перетаскиваем - добавляем новый
-            if (gameState.selectedTool !== 'clear') {
-                addMarker(x, y, gameState.selectedTool);
-            } else {
-                showNotification('Кликните по метке для удаления', 'warning');
-            }
-        }
-        
-        // ==================== MARKER MANAGEMENT ====================
-        function addMarker(x, y, type) {
-            // Проверяем очки
-            const cost = getMarkerCost(type);
-            if (gameState.userPoints < cost) {
-                showNotification(`Недостаточно очков! Нужно ${cost}`, 'error');
-                return;
-            }
-            
-            // Создаем маркер
-            const marker = {
-                id: 'marker_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                x: x,
-                y: y,
-                type: type,
-                user: gameState.userName,
-                timestamp: Date.now()
-            };
-            
-            // Добавляем в массив
-            gameState.markers.push(marker);
-            gameState.userPoints -= cost;
-            gameState.userActivity++;
-            gameState.markersAdded++;
-            
-            // Обновляем интерфейс
-            renderMarkers();
-            updateUI();
-            saveGameData();
-            
-            // Уведомление
-            showNotification(`${getToolName(type)} добавлен! -${cost} очков`);
-        }
-        
-        function removeMarker(markerId) {
-            const index = gameState.markers.findIndex(m => m.id === markerId);
-            if (index === -1) return;
-            
-            // Удаляем
-            gameState.markers.splice(index, 1);
-            
-            // Начисляем очки
-            gameState.userPoints += 5;
-            gameState.userActivity++;
-            gameState.markersRemoved++;
-            
-            // Обновляем
-            renderMarkers();
-            updateUI();
-            saveGameData();
-            
-            showNotification('Метка удалена! +5 очков');
-        }
-        
-        // ==================== DRAG & DROP ====================
-        function startDrag(e, markerId) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const marker = gameState.markers.find(m => m.id === markerId);
-            if (!marker) return;
-            
-            gameState.isDragging = true;
-            gameState.draggingMarker = marker;
-            
-            const rect = gameState.canvas.getBoundingClientRect();
-            if (e.type === 'mousedown') {
-                gameState.dragStartX = e.clientX - rect.left - marker.x;
-                gameState.dragStartY = e.clientY - rect.top - marker.y;
-            }
-            
-            const markerDiv = document.getElementById(markerId);
-            if (markerDiv) {
-                markerDiv.classList.add('marker-dragging');
-            }
-        }
-        
-        function startDragTouch(e, markerId) {
-            e.preventDefault();
-            startDrag(e.touches[0], markerId);
-        }
-        
-        function handleDrag(e) {
-            if (!gameState.isDragging || !gameState.draggingMarker) return;
-            
-            const rect = gameState.canvas.getBoundingClientRect();
-            const newX = e.clientX - rect.left - gameState.dragStartX;
-            const newY = e.clientY - rect.top - gameState.dragStartY;
-            
-            // Ограничиваем перемещение в пределах карты
-            gameState.draggingMarker.x = Math.max(25, Math.min(newX, gameState.canvas.width - 25));
-            gameState.draggingMarker.y = Math.max(25, Math.min(newY, gameState.canvas.height - 25));
-            
-            renderMarkers();
-        }
-        
-        function handleDragTouch(e) {
-            e.preventDefault();
-            if (e.touches.length > 0) {
-                handleDrag(e.touches[0]);
-            }
-        }
-        
-        function stopDrag() {
-            if (gameState.isDragging && gameState.draggingMarker) {
-                // Сохраняем новое положение
-                saveGameData();
                 
-                // Обновляем очки за перемещение
-                gameState.userPoints += 2;
-                updateUI();
+                // Если выбран режим удаления - проверяем, попали ли в маркер
+                if (this.state.selectedTool === 'clear') {
+                    // Проверяем, есть ли маркер под курсором
+                    const clickedMarker = this.getMarkerAtPosition(x, y);
+                    if (clickedMarker) {
+                        this.removeMarker(clickedMarker.id);
+                    } else {
+                        this.showNotification('Кликните по метке для удаления', 'warning');
+                    }
+                } else {
+                    // Добавляем новый маркер
+                    this.addMarker(x, y, this.state.selectedTool);
+                }
+            },
+            
+            // Начало перетаскивания
+            startDrag(e, markerId) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                const markerDiv = document.getElementById(gameState.draggingMarker.id);
-                if (markerDiv) {
-                    markerDiv.classList.remove('marker-dragging');
-                    setTimeout(() => {
-                        showNotification('Метка перемещена! +2 очка');
-                    }, 100);
+                const marker = this.state.markers.find(m => m.id === markerId);
+                if (!marker) return;
+                
+                this.state.isDragging = true;
+                this.state.draggingMarker = marker;
+                
+                const rect = this.elements.canvas.getBoundingClientRect();
+                this.state.dragOffsetX = e.clientX - rect.left - marker.x;
+                this.state.dragOffsetY = e.clientY - rect.top - marker.y;
+                
+                document.getElementById(markerId).classList.add('dragging');
+            },
+            
+            startDragTouch(e, markerId) {
+                e.preventDefault();
+                if (e.touches[0]) {
+                    this.startDrag(e.touches[0], markerId);
                 }
-            }
+            },
             
-            gameState.isDragging = false;
-            gameState.draggingMarker = null;
-        }
-        
-        // ==================== UI FUNCTIONS ====================
-        function selectTool(tool) {
-            gameState.selectedTool = tool;
+            // Перетаскивание маркера
+            handleDrag(e) {
+                if (!this.state.isDragging || !this.state.draggingMarker) return;
+                
+                const rect = this.elements.canvas.getBoundingClientRect();
+                const newX = e.clientX - rect.left - this.state.dragOffsetX;
+                const newY = e.clientY - rect.top - this.state.dragOffsetY;
+                
+                // Ограничиваем перемещение в пределах карты
+                this.state.draggingMarker.x = Math.max(25, Math.min(newX, this.elements.canvas.width - 25));
+                this.state.draggingMarker.y = Math.max(25, Math.min(newY, this.elements.canvas.height - 25));
+                
+                this.renderMarkers();
+            },
             
-            // Обновляем активные кнопки
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.includes(getToolName(tool))) {
-                    btn.classList.add('active');
+            handleDragTouch(e) {
+                e.preventDefault();
+                if (e.touches[0]) {
+                    this.handleDrag(e.touches[0]);
                 }
-            });
+            },
             
-            // Обновляем подсказку
-            const hint = document.getElementById('hint');
-            if (tool === 'clear') {
-                hint.innerHTML = '<i class="fas fa-trash-alt"></i> Кликните по метке для удаления';
-            } else {
-                hint.innerHTML = '<i class="fas fa-lightbulb"></i> Кликните на карте для добавления';
-            }
+            // Окончание перетаскивания
+            stopDrag() {
+                if (this.state.isDragging && this.state.draggingMarker) {
+                    // Начисляем очки за перемещение
+                    this.state.userPoints += 2;
+                    this.state.userActivity++;
+                    
+                    // Сохраняем игру
+                    this.saveGameData();
+                    this.updateUI();
+                    
+                    const markerDiv = document.getElementById(this.state.draggingMarker.id);
+                    if (markerDiv) {
+                        markerDiv.classList.remove('dragging');
+                        setTimeout(() => {
+                            this.showNotification('Метка перемещена! +2 очка', 'info');
+                        }, 100);
+                    }
+                }
+                
+                this.state.isDragging = false;
+                this.state.draggingMarker = null;
+            },
             
-            showNotification(`Выбран: ${getToolName(tool)}`);
-        }
-        
-        function updateUI() {
-            document.getElementById('markerCount').textContent = gameState.markers.length;
-            document.getElementById('userPoints').textContent = gameState.userPoints;
-            document.getElementById('userActivity').textContent = gameState.userActivity;
+            // Добавление маркера
+            addMarker(x, y, type) {
+                // Проверяем стоимость
+                const cost = this.getMarkerCost(type);
+                if (this.state.userPoints < cost) {
+                    this.showNotification(`Недостаточно очков! Нужно ${cost}`, 'error');
+                    return;
+                }
+                
+                // Генерируем ID
+                const markerId = `marker_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Создаем маркер
+                const marker = {
+                    id: markerId,
+                    x: x,
+                    y: y,
+                    type: type,
+                    user: this.state.userName,
+                    timestamp: Date.now(),
+                    moved: false
+                };
+                
+                // Добавляем в массив
+                this.state.markers.push(marker);
+                
+                // Обновляем статистику
+                this.state.userPoints -= cost;
+                this.state.userActivity++;
+                this.state.totalMarkersAdded++;
+                
+                // Обновляем интерфейс
+                this.renderMarkers();
+                this.updateUI();
+                this.saveGameData();
+                
+                // Показываем уведомление
+                this.showNotification(`${this.getToolName(type)} добавлен! -${cost} очков`, 'success');
+                
+                // Добавляем сообщение в чат
+                this.addChatMessage('system', `${this.state.userName} добавил ${this.getToolName(type)} на карту`);
+            },
             
-            // Прогресс
-            const progress = Math.min(Math.max(gameState.userPoints / 100, 0), 1) * 100;
-            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
+            // Удаление маркера
+            removeMarker(markerId) {
+                const index = this.state.markers.findIndex(m => m.id === markerId);
+                if (index === -1) return;
+                
+                const marker = this.state.markers[index];
+                
+                // Удаляем маркер
+                this.state.markers.splice(index, 1);
+                
+                // Начисляем очки
+                this.state.userPoints += 5;
+                this.state.userActivity++;
+                this.state.totalMarkersRemoved++;
+                
+                // Обновляем интерфейс
+                this.renderMarkers();
+                this.updateUI();
+                this.saveGameData();
+                
+                // Показываем уведомление
+                this.showNotification('Метка удалена! +5 очков', 'success');
+                
+                // Добавляем сообщение в чат
+                this.addChatMessage('system', `${this.state.userName} удалил ${this.getToolName(marker.type)} с карты`);
+            },
             
-            // Ранг
-            const rank = calculateRank();
-            document.getElementById('userRank').textContent = rank;
-        }
-        
-        function calculateRank() {
-            const points = gameState.userPoints;
-            if (points >= 1000) return 'Комиссар 👮‍♂️';
-            if (points >= 500) return 'Сержант 👮';
-            if (points >= 200) return 'Офицер 🚔';
-            if (points >= 100) return 'Патрульный 🚓';
-            return 'Новичок 🚦';
-        }
-        
-        // ==================== CHAT ====================
-        function showChat() {
-            document.getElementById('chatModal').classList.add('show');
-            setTimeout(() => {
-                document.getElementById('chatInput').focus();
-            }, 300);
-        }
-        
-        function hideChat() {
-            document.getElementById('chatModal').classList.remove('show');
-        }
-        
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
+            // Поиск маркера по координатам
+            getMarkerAtPosition(x, y, threshold = 30) {
+                for (let marker of this.state.markers) {
+                    const distance = Math.sqrt(
+                        Math.pow(marker.x - x, 2) + Math.pow(marker.y - y, 2)
+                    );
+                    if (distance < threshold) {
+                        return marker;
+                    }
+                }
+                return null;
+            },
             
-            if (message) {
+            // Выбор инструмента
+            selectTool(tool) {
+                this.state.selectedTool = tool;
+                
+                // Обновляем активные кнопки
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const toolButtons = {
+                    police: 'toolPolice',
+                    accident: 'toolAccident',
+                    hazard: 'toolHazard',
+                    clear: 'toolClear'
+                };
+                
+                const activeButton = document.getElementById(toolButtons[tool]);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+                
+                // Обновляем подсказку
+                const hintText = document.getElementById('hintText');
+                if (tool === 'clear') {
+                    hintText.textContent = 'Кликните по метке для удаления';
+                } else {
+                    hintText.textContent = 'Кликните на карте для добавления метки';
+                }
+                
+                this.showNotification(`Выбран: ${this.getToolName(tool)}`, 'info');
+            },
+            
+            // Обновление UI
+            updateUI() {
+                // Обновляем счетчики
+                document.getElementById('markerCount').textContent = this.state.markers.length;
+                document.getElementById('statPoints').textContent = this.state.userPoints;
+                document.getElementById('statActivity').textContent = this.state.userActivity;
+                
+                // Обновляем прогресс
+                const progress = Math.min(Math.max(this.state.userPoints / 100, 0), 1) * 100;
+                document.getElementById('statProgress').textContent = Math.round(progress) + '%';
+                
+                // Обновляем ранг
+                const rank = this.calculateRank();
+                document.getElementById('userRank').textContent = rank;
+            },
+            
+            // Расчет ранга
+            calculateRank() {
+                const points = this.state.userPoints;
+                if (points >= 1000) return 'Комиссар 👮‍♂️';
+                if (points >= 500) return 'Сержант 👮';
+                if (points >= 200) return 'Офицер 🚔';
+                if (points >= 100) return 'Патрульный 🚓';
+                return 'Новичок 🚦';
+            },
+            
+            // Получение названия инструмента
+            getToolName(tool) {
+                const names = {
+                    police: 'Патруль 🚓',
+                    accident: 'ДТП 💥',
+                    hazard: 'Опасность ⚠️',
+                    clear: 'Удаление 🗑️'
+                };
+                return names[tool] || tool;
+            },
+            
+            // Получение стоимости маркера
+            getMarkerCost(type) {
+                const costs = {
+                    police: 10,
+                    accident: 15,
+                    hazard: 8
+                };
+                return costs[type] || 10;
+            },
+            
+            // Работа с чатом
+            showChat() {
+                document.getElementById('chatOverlay').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('chatInput').focus();
+                }, 300);
+            },
+            
+            hideChat() {
+                document.getElementById('chatOverlay').style.display = 'none';
+            },
+            
+            sendMessage() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addChatMessage('user', message);
+                    input.value = '';
+                    this.saveChatHistory();
+                }
+            },
+            
+            addChatMessage(sender, text) {
                 const messagesDiv = document.getElementById('chatMessages');
                 
                 const messageDiv = document.createElement('div');
-                messageDiv.style.cssText = `
-                    background: rgba(255,255,255,0.1);
-                    padding: 12px;
-                    border-radius: 10px;
-                    margin-bottom: 10px;
-                `;
-                messageDiv.innerHTML = `
-                    <strong>${gameState.userName}:</strong> ${message}
-                    <br><small>${new Date().toLocaleTimeString()}</small>
-                `;
+                messageDiv.className = `message ${sender}`;
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                if (sender === 'system') {
+                    messageDiv.innerHTML = `
+                        <div class="message-sender"><i class="fas fa-info-circle"></i> Система</div>
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="message-sender">${this.state.userName}</div>
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                    `;
+                }
                 
                 messagesDiv.appendChild(messageDiv);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 
-                input.value = '';
-                saveChatMessage(message);
-            }
-        }
-        
-        // ==================== DATA MANAGEMENT ====================
-        function saveGameData() {
-            try {
-                const data = {
-                    markers: gameState.markers,
-                    userPoints: gameState.userPoints,
-                    userActivity: gameState.userActivity,
-                    markersAdded: gameState.markersAdded,
-                    markersRemoved: gameState.markersRemoved,
-                    userName: gameState.userName
-                };
-                localStorage.setItem('traffic_patrol_data', JSON.stringify(data));
-            } catch (e) {
-                console.error('Ошибка сохранения:', e);
-            }
-        }
-        
-        function loadGameData() {
-            try {
-                const saved = localStorage.getItem('traffic_patrol_data');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    
-                    gameState.markers = data.markers || [];
-                    gameState.userPoints = data.userPoints || 100;
-                    gameState.userActivity = data.userActivity || 0;
-                    gameState.markersAdded = data.markersAdded || 0;
-                    gameState.markersRemoved = data.markersRemoved || 0;
-                    gameState.userName = data.userName || 'Игрок';
-                    
-                    document.getElementById('userName').textContent = gameState.userName;
-                }
-            } catch (e) {
-                console.error('Ошибка загрузки:', e);
-            }
-        }
-        
-        function saveChatMessage(message) {
-            try {
-                const chatHistory = JSON.parse(localStorage.getItem('traffic_chat') || '[]');
-                chatHistory.push({
-                    user: gameState.userName,
-                    message: message,
-                    timestamp: Date.now()
+                // Сохраняем в историю
+                this.state.chatMessages.push({
+                    sender: sender,
+                    text: text,
+                    time: Date.now(),
+                    user: sender === 'user' ? this.state.userName : 'Система'
                 });
                 
-                if (chatHistory.length > 50) {
-                    chatHistory.shift();
+                // Ограничиваем историю 100 сообщениями
+                if (this.state.chatMessages.length > 100) {
+                    this.state.chatMessages.shift();
                 }
+            },
+            
+            // Сохранение и загрузка данных
+            saveGameData() {
+                try {
+                    const gameData = {
+                        markers: this.state.markers,
+                        userPoints: this.state.userPoints,
+                        userActivity: this.state.userActivity,
+                        totalMarkersAdded: this.state.totalMarkersAdded,
+                        totalMarkersRemoved: this.state.totalMarkersRemoved,
+                        userName: this.state.userName,
+                        lastSave: Date.now()
+                    };
+                    
+                    localStorage.setItem('traffic_patrol_game_data', JSON.stringify(gameData));
+                } catch (error) {
+                    console.error('Ошибка сохранения игры:', error);
+                }
+            },
+            
+            loadGameData() {
+                try {
+                    const savedData = localStorage.getItem('traffic_patrol_game_data');
+                    if (savedData) {
+                        const data = JSON.parse(savedData);
+                        
+                        this.state.markers = data.markers || [];
+                        this.state.userPoints = data.userPoints || 100;
+                        this.state.userActivity = data.userActivity || 0;
+                        this.state.totalMarkersAdded = data.totalMarkersAdded || 0;
+                        this.state.totalMarkersRemoved = data.totalMarkersRemoved || 0;
+                        this.state.userName = data.userName || 'Игрок';
+                        
+                        document.getElementById('userName').textContent = this.state.userName;
+                        
+                        console.log('✅ Игра загружена из сохранения');
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки игры:', error);
+                }
+            },
+            
+            saveChatHistory() {
+                try {
+                    localStorage.setItem('traffic_patrol_chat_history', JSON.stringify(this.state.chatMessages));
+                } catch (error) {
+                    console.error('Ошибка сохранения чата:', error);
+                }
+            },
+            
+            loadChatHistory() {
+                try {
+                    const savedChat = localStorage.getItem('traffic_patrol_chat_history');
+                    if (savedChat) {
+                        this.state.chatMessages = JSON.parse(savedChat);
+                        
+                        // Восстанавливаем сообщения в чате
+                        const messagesDiv = document.getElementById('chatMessages');
+                        messagesDiv.innerHTML = '';
+                        
+                        this.state.chatMessages.forEach(msg => {
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = `message ${msg.sender}`;
+                            
+                            const time = new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            
+                            if (msg.sender === 'system') {
+                                messageDiv.innerHTML = `
+                                    <div class="message-sender"><i class="fas fa-info-circle"></i> ${msg.user}</div>
+                                    <div class="message-text">${msg.text}</div>
+                                    <div class="message-time">${time}</div>
+                                `;
+                            } else {
+                                messageDiv.innerHTML = `
+                                    <div class="message-sender">${msg.user}</div>
+                                    <div class="message-text">${msg.text}</div>
+                                    <div class="message-time">${time}</div>
+                                `;
+                            }
+                            
+                            messagesDiv.appendChild(messageDiv);
+                        });
+                        
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки чата:', error);
+                }
+            },
+            
+            // Показать уведомление
+            showNotification(message, type = 'success') {
+                // Удаляем старые уведомления
+                const oldNotifications = document.querySelectorAll('.notification');
+                oldNotifications.forEach(n => n.remove());
                 
-                localStorage.setItem('traffic_chat', JSON.stringify(chatHistory));
-            } catch (e) {
-                console.error('Ошибка сохранения чата:', e);
+                // Создаем новое уведомление
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Автоматическое скрытие через 3 секунды
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-30px) translateX(30px)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
             }
-        }
+        };
         
-        function loadChatMessages() {
-            try {
-                const chatHistory = JSON.parse(localStorage.getItem('traffic_chat') || '[]');
-                const messagesDiv = document.getElementById('chatMessages');
-                
-                chatHistory.forEach(msg => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.style.cssText = `
-                        background: rgba(255,255,255,0.1);
-                        padding: 12px;
-                        border-radius: 10px;
-                        margin-bottom: 10px;
-                    `;
-                    messageDiv.innerHTML = `
-                        <strong>${msg.user}:</strong> ${msg.message}
-                        <br><small>${new Date(msg.timestamp).toLocaleTimeString()}</small>
-                    `;
-                    messagesDiv.appendChild(messageDiv);
-                });
-                
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } catch (e) {
-                console.error('Ошибка загрузки чата:', e);
-            }
-        }
+        // ============================================
+        // ИНИЦИАЛИЗАЦИЯ ИГРЫ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
+        // ============================================
         
-        // ==================== UTILITIES ====================
-        function getToolName(tool) {
-            const names = {
-                police: 'Патруль',
-                accident: 'ДТП',
-                hazard: 'Опасность',
-                clear: 'Удаление'
-            };
-            return names[tool] || tool;
-        }
-        
-        function getMarkerCost(type) {
-            const costs = {
-                police: 10,
-                accident: 15,
-                hazard: 8
-            };
-            return costs[type] || 10;
-        }
-        
-        function showNotification(message, type = 'success') {
-            // Удаляем старые уведомления
-            const oldNotifications = document.querySelectorAll('.notification');
-            oldNotifications.forEach(n => n.remove());
-            
-            // Создаем новое
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Автоудаление
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateY(-30px)';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-        
-        // ==================== START GAME ====================
         document.addEventListener('DOMContentLoaded', () => {
-            initGame();
-            loadChatMessages();
+            // Инициализируем игру
+            Game.init();
             
-            // Автоматическая подсказка
+            // Показываем стартовую подсказку
             setTimeout(() => {
-                showNotification('🚓 Добро пожаловать! Перетаскивайте метки на новые места');
+                Game.showNotification('🚓 Перетаскивайте метки на новые места!', 'info');
+                Game.addChatMessage('system', 'Игра загружена. Добавляйте метки на карту!');
             }, 1000);
+            
+            // Глобальные функции для кнопок
+            window.selectTool = (tool) => Game.selectTool(tool);
+            window.showChat = () => Game.showChat();
+            window.hideChat = () => Game.hideChat();
+            window.sendMessage = () => Game.sendMessage();
         });
-        
-        // Экспорт функций для кнопок
-        window.selectTool = selectTool;
-        window.showChat = showChat;
-        window.hideChat = hideChat;
-        window.sendMessage = sendMessage;
     </script>
 </body>
 </html>
