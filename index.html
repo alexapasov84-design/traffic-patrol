@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Полиция Майями👮‍♂️🚔👮‍♂️</title>
     
-    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase для синхронизации (версия 8.x - совместима) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -488,25 +486,19 @@
     </style>
 </head>
 <body>
-    <!-- Заставка с картинкой на весь экран -->
     <div id="splashScreen" class="splash-screen">
-        <!-- Картинка на весь экран -->
         <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
              class="splash-image" 
              alt="Полиция Майями"
              onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='#0a1931';">
         
-        <!-- Затемнение поверх картинки -->
         <div class="image-overlay"></div>
         
-        <!-- Контент поверх картинки -->
         <div class="splash-content">
-            <!-- Таймер автозапуска -->
             <div class="auto-start-timer" id="autoStartTimer">
                 Автозапуск через: <span id="countdown">20</span> сек
             </div>
             
-            <!-- Заголовок сверху -->
             <div class="splash-header">
                 <h1 class="splash-title">👮‍♂️ Полиция Майями 🚔</h1>
                 <p class="splash-subtitle" id="userWelcome">Загрузка системы патрулирования...</p>
@@ -515,7 +507,6 @@
                 </div>
             </div>
             
-            <!-- Центральный блок с информацией -->
             <div class="splash-center">
                 <div class="game-info">
                     <h3>🌍 МУЛЬТИПЛЕЕРНАЯ ИГРА</h3>
@@ -529,7 +520,6 @@
                 </div>
             </div>
             
-            <!-- Кнопки внизу -->
             <div class="splash-buttons">
                 <button class="start-btn" onclick="startGame()">
                     <i class="fas fa-play-circle"></i>
@@ -541,7 +531,6 @@
                     Пропустить заставку
                 </button>
                 
-                <!-- Бейдж Telegram в самом низу -->
                 <div class="tg-badge-bottom">
                     <i class="fab fa-telegram"></i> Мультиплеер • Telegram Mini App
                 </div>
@@ -549,7 +538,6 @@
         </div>
     </div>
     
-    <!-- Основной игровой интерфейс -->
     <div class="app" id="mainApp">
         <div class="header">
             <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
@@ -622,7 +610,6 @@
         </div>
     </div>
 
-    <!-- Отладочная панель -->
     <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; display: none; max-width: 300px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <strong>🔧 Отладка Firebase</strong>
@@ -651,20 +638,19 @@
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
-        const MAX_MARKERS = 40; // Максимум меток
+        const MAX_MARKERS = 40;
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
-        // Игровые переменные
         let ymap = null;
-        let markers = []; // Локальный кэш меток
+        let markers = [];
+        let deletedMarkers = new Set(); // Храним ID удаленных меток
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
         let pendingCommentData = null;
         
-        // Мультиплеер
         let onlinePlayers = 1;
         let lastSyncTime = 0;
         let syncInterval = null;
@@ -677,8 +663,6 @@
             console.log('Initializing Telegram Web App...');
             
             tg.expand();
-            tg.setHeaderColor('#0d1b2a');
-            tg.setBackgroundColor('#0a1931');
             
             telegramUser = tg.initDataUnsafe?.user;
             
@@ -693,13 +677,6 @@
                 window.userId = 'guest_' + Math.random().toString(36).substr(2, 9);
                 window.userName = 'Гость';
             }
-            
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                tg.showConfirm('Закрыть игру?', (confirmed) => {
-                    if (confirmed) tg.close();
-                });
-            });
             
             startAutoStartTimer();
             initFirebase();
@@ -772,9 +749,19 @@
                     
                     if (data) {
                         const markersArray = Object.values(data);
-                        console.log(`✅ Загружено ${markersArray.length} меток из Firebase`);
                         
-                        updateLocalMarkers(markersArray);
+                        // Фильтруем удаленные метки
+                        const filteredMarkers = markersArray.filter(marker => {
+                            if (deletedMarkers.has(marker.id)) {
+                                console.log(`Пропускаем удаленную метку: ${marker.id}`);
+                                return false;
+                            }
+                            return true;
+                        });
+                        
+                        console.log(`✅ Загружено ${filteredMarkers.length} меток из Firebase (после фильтрации)`);
+                        
+                        updateLocalMarkers(filteredMarkers);
                     } else {
                         console.log('ℹ️ В Firebase пока нет меток');
                     }
@@ -793,6 +780,11 @@
                 
                 const markersObj = {};
                 markers.forEach(marker => {
+                    if (deletedMarkers.has(marker.id)) {
+                        console.log(`Не синхронизируем удаленную метку: ${marker.id}`);
+                        return;
+                    }
+                    
                     markersObj[marker.id] = {
                         id: marker.id || '',
                         type: marker.type || '',
@@ -800,7 +792,8 @@
                         comment: marker.comment || null,
                         timestamp: marker.timestamp || Date.now(),
                         author: marker.author || window.userName || '',
-                        authorId: marker.authorId || window.userId || ''
+                        authorId: marker.authorId || window.userId || '',
+                        status: 'active' // Добавляем статус метки
                     };
                 });
                 
@@ -814,6 +807,26 @@
             } catch (error) {
                 console.error('❌ Ошибка синхронизации:', error);
                 updateSyncStatus('Ошибка синхронизации', '#f44336');
+            }
+        }
+
+        // Удаление метки из Firebase
+        async function deleteMarkerFromFirebase(markerId) {
+            try {
+                if (!firebaseInitialized) return;
+                
+                console.log(`🗑️ Удаление метки ${markerId} из Firebase...`);
+                
+                // Добавляем в список удаленных
+                deletedMarkers.add(markerId);
+                
+                // Удаляем из Firebase
+                await firebaseDb.ref('markers/' + markerId).remove();
+                
+                console.log(`✅ Метка ${markerId} удалена из Firebase`);
+                
+            } catch (error) {
+                console.error('❌ Ошибка удаления метки из Firebase:', error);
             }
         }
 
@@ -835,21 +848,29 @@
             
             const now = Date.now();
             
+            // Удаляем только те метки, которых нет в cloudMarkers
+            const cloudMarkerIds = new Set(cloudMarkers.map(m => m.id));
+            
             markers.forEach(marker => {
-                if (marker.placemark) {
+                if (!cloudMarkerIds.has(marker.id) && marker.placemark) {
                     ymap.geoObjects.remove(marker.placemark);
                 }
             });
             
-            markers = [];
+            // Обновляем массив меток
+            markers = markers.filter(marker => cloudMarkerIds.has(marker.id));
             
+            // Добавляем новые метки
             cloudMarkers.forEach(markerData => {
                 if (now - markerData.timestamp > EXPIRATION_TIME) {
                     return;
                 }
                 
-                createMarkerOnMap(markerData);
-                markers.push(markerData);
+                const existingMarker = markers.find(m => m.id === markerData.id);
+                if (!existingMarker) {
+                    createMarkerOnMap(markerData);
+                    markers.push(markerData);
+                }
             });
             
             updateUI();
@@ -908,19 +929,7 @@
             }, {
                 preset: preset,
                 iconColor: iconColor,
-                draggable: true
-            });
-            
-            placemark.events.add('dragend', function() {
-                const marker = markers.find(m => m.id === markerData.id);
-                if (marker) {
-                    marker.coords = placemark.geometry.getCoordinates();
-                    points += 2;
-                    activity++;
-                    syncMarkersToFirebase();
-                    updateUI();
-                    showNotification('🚗 Метка перемещена! +2 очка', 'info');
-                }
+                draggable: false // Отключаем перетаскивание чтобы не было конфликтов
             });
             
             ymap.geoObjects.add(placemark);
@@ -963,26 +972,39 @@
             activity++;
             
             saveUserData();
-            syncMarkersToFirebase();
+            syncMarkersToFirebase(); // Сразу синхронизируем
             updateUI();
             checkMarkerLimit();
             
             showNotification(`✅ ${getToolName(type)} добавлен! Виден всем игрокам`, 'info');
         }
 
+        // Удаление метки с синхронизацией
         function deleteMarker(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (marker) {
+                // Удаляем с карты
                 if (marker.placemark) {
                     ymap.geoObjects.remove(marker.placemark);
                 }
                 
+                // Удаляем из локального массива
                 markers = markers.filter(m => m.id !== markerId);
+                
+                // Добавляем в список удаленных
+                deletedMarkers.add(markerId);
+                
+                // Удаляем из Firebase
+                deleteMarkerFromFirebase(markerId);
+                
+                // Начисляем очки
                 points += 10;
                 activity++;
                 
-                syncMarkersToFirebase();
+                // Сохраняем пользовательские данные
                 saveUserData();
+                
+                // Обновляем UI
                 updateUI();
                 checkMarkerLimit();
                 
@@ -992,13 +1014,17 @@
 
         function clearAllMarkers() {
             if (confirm('Очистить ВСЕ метки? Это действие нельзя отменить.')) {
+                // Добавляем все метки в список удаленных
                 markers.forEach(marker => {
+                    deletedMarkers.add(marker.id);
                     if (marker.placemark) {
                         ymap.geoObjects.remove(marker.placemark);
                     }
                 });
+                
                 markers = [];
                 
+                // Очищаем Firebase
                 if (firebaseInitialized) {
                     firebaseDb.ref('markers').remove();
                 }
@@ -1175,8 +1201,8 @@
             debugInfo.innerHTML = `
                 <div>Firebase: ${firebaseInitialized ? '✅' : '❌'}</div>
                 <div>Меток: ${markers.length}</div>
+                <div>Удалено: ${deletedMarkers.size}</div>
                 <div>Онлайн: ${onlinePlayers}</div>
-                <div>Очки: ${points}</div>
                 <div>Синхр.: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'никогда'}</div>
             `;
         }
@@ -1242,13 +1268,16 @@
 
         function deleteExpiredMarkers(expiredMarkers) {
             expiredMarkers.forEach(marker => {
+                deletedMarkers.add(marker.id);
                 if (marker.placemark && ymap) {
                     ymap.geoObjects.remove(marker.placemark);
+                }
+                if (firebaseInitialized) {
+                    firebaseDb.ref('markers/' + marker.id).remove();
                 }
             });
             
             markers = markers.filter(m => !expiredMarkers.includes(m));
-            syncMarkersToFirebase();
             updateUI();
         }
 
@@ -1372,13 +1401,6 @@
             }
         }
 
-        function updateMarkerCoords(markerId, newCoords) {
-            const marker = markers.find(m => m.id === markerId);
-            if (marker) {
-                marker.coords = newCoords;
-            }
-        }
-
         // ============ УВЕДОМЛЕНИЯ ============
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
@@ -1412,7 +1434,6 @@
             `;
         }
 
-        // ============ МОДАЛЬНОЕ ОКНО ============
         function showCommentModal() {
             const comment = prompt(`💬 Введите комментарий для ${getToolName(pendingCommentData.type)} (до 30 символов, необязательно):`, '');
             
@@ -1440,7 +1461,8 @@
                     activity: activity,
                     userId: window.userId,
                     userName: window.userName,
-                    lastPlayed: Date.now()
+                    lastPlayed: Date.now(),
+                    deletedMarkers: Array.from(deletedMarkers) // Сохраняем удаленные метки
                 };
                 
                 localStorage.setItem(`miami_police_user_${window.userId}`, JSON.stringify(userData));
@@ -1456,6 +1478,9 @@
                     const data = JSON.parse(saved);
                     points = data.points || 100;
                     activity = data.activity || 0;
+                    if (data.deletedMarkers) {
+                        deletedMarkers = new Set(data.deletedMarkers);
+                    }
                     updateUI();
                 }
             } catch (e) {
@@ -1482,6 +1507,7 @@
             if (autoDeleteInterval) clearInterval(autoDeleteInterval);
             if (autoStartInterval) clearInterval(autoStartInterval);
             if (syncInterval) clearInterval(syncInterval);
+            saveUserData(); // Сохраняем перед закрытием
         });
 
         // Глобальные функции
