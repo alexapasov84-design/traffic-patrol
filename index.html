@@ -14,7 +14,6 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
-        /* [ВСЁ СТИЛИ ОСТАВЛЯЕМ БЕЗ ИЗМЕНЕНИЙ] */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -623,15 +622,16 @@
         </div>
     </div>
 
-    <!-- Отладочная панель (для разработки) -->
+    <!-- Отладочная панель -->
     <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; display: none; max-width: 300px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <strong>🔧 Отладка Firebase</strong>
             <button onclick="document.getElementById('debugPanel').style.display='none'" style="background: none; border: none; color: white; cursor: pointer;">×</button>
         </div>
         <div id="debugInfo">Загрузка...</div>
-        <button onclick="forceSync()" style="margin-top: 5px; padding: 3px 8px; background: #2196f3; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔄 Принудительная синхронизация</button>
-        <button onclick="clearAllMarkers()" style="margin-top: 5px; padding: 3px 8px; background: #f44336; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🗑️ Очистить все метки</button>
+        <button onclick="forceSync()" style="margin-top: 5px; padding: 3px 8px; background: #2196f3; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔄 Синхронизация</button>
+        <button onclick="forceRefresh()" style="margin-top: 5px; padding: 3px 8px; background: #4CAF50; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🔄 Обновить метки</button>
+        <button onclick="clearAllMarkers()" style="margin-top: 5px; padding: 3px 8px; background: #f44336; border: none; border-radius: 3px; color: white; cursor: pointer; width: 100%;">🗑️ Очистить все</button>
     </div>
     <button onclick="toggleDebug()" style="position: fixed; bottom: 10px; right: 10px; background: #2196f3; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; z-index: 9998; font-size: 18px;">🔧</button>
 
@@ -710,21 +710,18 @@
             try {
                 console.log('🔄 Инициализация Firebase...');
                 
-                // Проверяем, загрузилась ли библиотека Firebase
                 if (typeof firebase === 'undefined') {
                     console.error('❌ Библиотека Firebase не загрузилась');
                     updateConnectionStatus('error');
                     return;
                 }
                 
-                // Инициализируем Firebase
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDb = firebase.database();
                 firebaseInitialized = true;
                 
                 console.log('✅ Firebase инициализирован');
                 
-                // Проверяем подключение
                 firebaseDb.ref('.info/connected').on('value', (snapshot) => {
                     if (snapshot.val() === true) {
                         console.log('✅ Подключено к Firebase');
@@ -737,7 +734,6 @@
                     }
                 });
                 
-                // Начинаем синхронизацию
                 startSync();
                 
             } catch (error) {
@@ -751,17 +747,14 @@
         function startSync() {
             console.log('🔄 Запуск синхронизации...');
             
-            // Загружаем существующие метки
             loadMarkersFromFirebase();
             
-            // Синхронизируем каждые 5 секунд
             syncInterval = setInterval(() => {
                 if (markers.length > 0) {
                     syncMarkersToFirebase();
                 }
             }, 5000);
             
-            // Обновляем онлайн игроков
             updatePlayerPresence();
             updateOnlinePlayers();
         }
@@ -774,20 +767,16 @@
                 
                 const markersRef = firebaseDb.ref('markers');
                 
-                // Слушаем изменения в реальном времени
                 markersRef.on('value', (snapshot) => {
                     const data = snapshot.val();
                     
                     if (data) {
-                        // Преобразуем объект в массив
                         const markersArray = Object.values(data);
                         console.log(`✅ Загружено ${markersArray.length} меток из Firebase`);
                         
-                        // Обновляем локальные метки
                         updateLocalMarkers(markersArray);
-                        
-                        // Обновляем счетчик онлайн игроков
-                        updateOnlinePlayersCount();
+                    } else {
+                        console.log('ℹ️ В Firebase пока нет меток');
                     }
                 });
                 
@@ -802,27 +791,24 @@
                 
                 console.log('🔄 Синхронизация меток в Firebase...');
                 
-                // Преобразуем массив в объект для Firebase
                 const markersObj = {};
                 markers.forEach(marker => {
                     markersObj[marker.id] = {
-                        id: marker.id,
-                        type: marker.type,
-                        coords: marker.coords,
-                        comment: marker.comment,
-                        timestamp: marker.timestamp,
-                        author: marker.author || window.userName,
-                        authorId: marker.authorId || window.userId
+                        id: marker.id || '',
+                        type: marker.type || '',
+                        coords: marker.coords || [0, 0],
+                        comment: marker.comment || null,
+                        timestamp: marker.timestamp || Date.now(),
+                        author: marker.author || window.userName || '',
+                        authorId: marker.authorId || window.userId || ''
                     };
                 });
                 
-                // Сохраняем в Firebase
                 await firebaseDb.ref('markers').set(markersObj);
                 
                 lastSyncTime = Date.now();
                 console.log(`✅ Синхронизировано ${markers.length} меток`);
                 
-                // Обновляем статус
                 updateSyncStatus('Синхронизировано', '#4CAF50');
                 
             } catch (error) {
@@ -831,39 +817,44 @@
             }
         }
 
+        function forceSync() {
+            console.log('🔄 Принудительная синхронизация...');
+            syncMarkersToFirebase();
+            showNotification('🔄 Принудительная синхронизация', 'info');
+        }
+
+        function forceRefresh() {
+            console.log('🔄 Принудительное обновление меток...');
+            loadMarkersFromFirebase();
+            showNotification('🔄 Метки обновлены', 'info');
+        }
+
         // ============ ФУНКЦИИ ИГРЫ ============
         function updateLocalMarkers(cloudMarkers) {
             if (!ymap) return;
             
             const now = Date.now();
             
-            // Удаляем устаревшие метки
             markers.forEach(marker => {
                 if (marker.placemark) {
                     ymap.geoObjects.remove(marker.placemark);
                 }
             });
             
-            // Обновляем массив
             markers = [];
             
-            // Добавляем свежие метки
             cloudMarkers.forEach(markerData => {
                 if (now - markerData.timestamp > EXPIRATION_TIME) {
-                    return; // Пропускаем устаревшие
+                    return;
                 }
                 
-                // Создаем метку на карте
                 createMarkerOnMap(markerData);
                 markers.push(markerData);
             });
             
-            // Обновляем UI
             updateUI();
             updateExpiringCount();
             checkMarkerLimit();
-            
-            // Обновляем отладочную информацию
             updateDebugInfo();
         }
 
@@ -921,7 +912,6 @@
             });
             
             placemark.events.add('dragend', function() {
-                // Обновляем координаты метки
                 const marker = markers.find(m => m.id === markerData.id);
                 if (marker) {
                     marker.coords = placemark.geometry.getCoordinates();
@@ -935,7 +925,6 @@
             
             ymap.geoObjects.add(placemark);
             
-            // Сохраняем ссылку на метку
             const marker = markers.find(m => m.id === markerData.id);
             if (marker) {
                 marker.placemark = placemark;
@@ -967,21 +956,14 @@
                 authorId: window.userId
             };
             
-            // Создаем метку на карте
             createMarkerOnMap(markerData);
             markers.push(markerData);
             
-            // Обновляем очки
             points -= cost;
             activity++;
             
-            // Сохраняем данные пользователя
             saveUserData();
-            
-            // Синхронизируем с Firebase
             syncMarkersToFirebase();
-            
-            // Обновляем UI
             updateUI();
             checkMarkerLimit();
             
@@ -991,27 +973,38 @@
         function deleteMarker(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (marker) {
-                // Удаляем с карты
                 if (marker.placemark) {
                     ymap.geoObjects.remove(marker.placemark);
                 }
                 
-                // Удаляем из массива
                 markers = markers.filter(m => m.id !== markerId);
-                
-                // Начисляем очки
                 points += 10;
                 activity++;
                 
-                // Синхронизируем изменения
                 syncMarkersToFirebase();
                 saveUserData();
-                
-                // Обновляем UI
                 updateUI();
                 checkMarkerLimit();
                 
                 showNotification('✅ Метка удалена! +10 очков', 'info');
+            }
+        }
+
+        function clearAllMarkers() {
+            if (confirm('Очистить ВСЕ метки? Это действие нельзя отменить.')) {
+                markers.forEach(marker => {
+                    if (marker.placemark) {
+                        ymap.geoObjects.remove(marker.placemark);
+                    }
+                });
+                markers = [];
+                
+                if (firebaseInitialized) {
+                    firebaseDb.ref('markers').remove();
+                }
+                
+                updateUI();
+                showNotification('🗑️ Все метки очищены', 'info');
             }
         }
 
@@ -1026,13 +1019,19 @@
         }
 
         function updateUI() {
-            document.getElementById('markerCount').textContent = markers.length;
-            document.getElementById('points').textContent = points;
-            document.getElementById('activity').textContent = activity;
-            document.getElementById('userRank').textContent = getRank();
+            const markerCountEl = document.getElementById('markerCount');
+            const pointsEl = document.getElementById('points');
+            const activityEl = document.getElementById('activity');
+            const userRankEl = document.getElementById('userRank');
+            const rankPointsEl = document.getElementById('rankPoints');
+            
+            if (markerCountEl) markerCountEl.textContent = markers.length;
+            if (pointsEl) pointsEl.textContent = points;
+            if (activityEl) activityEl.textContent = activity;
+            if (userRankEl) userRankEl.textContent = getRank();
             
             const progress = Math.min(points / 1000, 1) * 100;
-            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
+            if (rankPointsEl) rankPointsEl.textContent = Math.round(progress) + '%';
             
             updateToolButtons();
             updateDebugInfo();
@@ -1105,13 +1104,11 @@
             
             const userPresenceRef = firebaseDb.ref('online/' + window.userId);
             
-            // Устанавливаем присутствие
             userPresenceRef.set({
                 name: window.userName,
                 lastSeen: Date.now()
             });
             
-            // Удаляем при выходе
             userPresenceRef.onDisconnect().remove();
         }
 
@@ -1124,16 +1121,14 @@
                 const users = snapshot.val() || {};
                 onlinePlayers = Object.keys(users).length || 1;
                 
-                // Обновляем счетчики
-                document.getElementById('onlineCount').textContent = onlinePlayers;
-                document.getElementById('onlinePlayers').textContent = onlinePlayers;
-                document.getElementById('gameOnlineIndicator').innerHTML = 
-                    `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
+                const onlineCountEl = document.getElementById('onlineCount');
+                const onlinePlayersEl = document.getElementById('onlinePlayers');
+                const gameIndicator = document.getElementById('gameOnlineIndicator');
+                
+                if (onlineCountEl) onlineCountEl.textContent = onlinePlayers;
+                if (onlinePlayersEl) onlinePlayersEl.textContent = onlinePlayers;
+                if (gameIndicator) gameIndicator.innerHTML = `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
             });
-        }
-
-        function updateOnlinePlayersCount() {
-            document.getElementById('onlinePlayers').textContent = onlinePlayers;
         }
 
         // ============ СТАТУСЫ ============
@@ -1182,14 +1177,8 @@
                 <div>Меток: ${markers.length}</div>
                 <div>Онлайн: ${onlinePlayers}</div>
                 <div>Очки: ${points}</div>
-                <div>Последняя синхр.: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'никогда'}</div>
+                <div>Синхр.: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'никогда'}</div>
             `;
-        }
-
-        function forceSync() {
-            console.log('🔄 Принудительная синхронизация...');
-            syncMarkersToFirebase();
-            showNotification('🔄 Принудительная синхронизация', 'info');
         }
 
         async function testFirebaseConnection() {
@@ -1215,25 +1204,7 @@
             }
         }
 
-        function clearAllMarkers() {
-            if (confirm('Очистить ВСЕ метки? Это действие нельзя отменить.')) {
-                markers.forEach(marker => {
-                    if (marker.placemark) {
-                        ymap.geoObjects.remove(marker.placemark);
-                    }
-                });
-                markers = [];
-                
-                if (firebaseInitialized) {
-                    firebaseDb.ref('markers').remove();
-                }
-                
-                updateUI();
-                showNotification('🗑️ Все метки очищены', 'info');
-            }
-        }
-
-        // ============ ОСТАЛЬНЫЕ ФУНКЦИИ ============
+        // ============ ТАЙМЕРЫ ============
         function startAutoStartTimer() {
             const countdownElement = document.getElementById('countdown');
             countdownElement.textContent = countdownSeconds;
@@ -1251,6 +1222,54 @@
             }, 1000);
         }
 
+        function startAutoDeleteChecker() {
+            autoDeleteInterval = setInterval(checkExpiredMarkers, 30000);
+            setTimeout(checkExpiredMarkers, 1000);
+        }
+
+        function checkExpiredMarkers() {
+            const now = Date.now();
+            const expiredMarkers = markers.filter(marker => 
+                now - marker.timestamp > EXPIRATION_TIME
+            );
+            
+            if (expiredMarkers.length > 0) {
+                deleteExpiredMarkers(expiredMarkers);
+            }
+            
+            updateExpiringCount();
+        }
+
+        function deleteExpiredMarkers(expiredMarkers) {
+            expiredMarkers.forEach(marker => {
+                if (marker.placemark && ymap) {
+                    ymap.geoObjects.remove(marker.placemark);
+                }
+            });
+            
+            markers = markers.filter(m => !expiredMarkers.includes(m));
+            syncMarkersToFirebase();
+            updateUI();
+        }
+
+        function updateExpiringCount() {
+            const now = Date.now();
+            const expiringSoon = markers.filter(marker => {
+                const hoursLeft = 24 - ((now - marker.timestamp) / (60 * 60 * 1000));
+                return hoursLeft <= 6 && hoursLeft > 0;
+            }).length;
+            
+            const expiringCountEl = document.getElementById('expiringCount');
+            if (expiringCountEl) {
+                expiringCountEl.textContent = expiringSoon;
+                if (expiringSoon > 0) {
+                    expiringCountEl.style.color = '#ff9800';
+                    expiringCountEl.style.fontWeight = 'bold';
+                }
+            }
+        }
+
+        // ============ ИГРОВЫЕ ФУНКЦИИ ============
         function skipIntro() {
             clearInterval(autoStartInterval);
             const splash = document.getElementById('splashScreen');
@@ -1317,9 +1336,7 @@
                     }
                 });
                 
-                // Загружаем метки из Firebase
                 loadMarkersFromFirebase();
-                
                 updateUI();
                 updateExpiringCount();
                 checkMarkerLimit();
@@ -1332,50 +1349,37 @@
             }
         }
 
-        function startAutoDeleteChecker() {
-            autoDeleteInterval = setInterval(checkExpiredMarkers, 30000);
-            setTimeout(checkExpiredMarkers, 1000);
-        }
-
-        function checkExpiredMarkers() {
-            const now = Date.now();
-            const expiredMarkers = markers.filter(marker => 
-                now - marker.timestamp > EXPIRATION_TIME
-            );
+        function removeNearMarker(coords) {
+            let closestMarker = null;
+            let minDistance = Infinity;
             
-            if (expiredMarkers.length > 0) {
-                deleteExpiredMarkers(expiredMarkers);
-            }
-            
-            updateExpiringCount();
-        }
-
-        function deleteExpiredMarkers(expiredMarkers) {
-            expiredMarkers.forEach(marker => {
-                if (marker.placemark && ymap) {
-                    ymap.geoObjects.remove(marker.placemark);
+            markers.forEach(marker => {
+                const distance = Math.sqrt(
+                    Math.pow(marker.coords[0] - coords[0], 2) + 
+                    Math.pow(marker.coords[1] - coords[1], 2)
+                );
+                
+                if (distance < minDistance && distance < 0.001) {
+                    minDistance = distance;
+                    closestMarker = marker;
                 }
             });
             
-            markers = markers.filter(m => !expiredMarkers.includes(m));
-            syncMarkersToFirebase();
-            updateUI();
-        }
-
-        function updateExpiringCount() {
-            const now = Date.now();
-            const expiringSoon = markers.filter(marker => {
-                const hoursLeft = 24 - ((now - marker.timestamp) / (60 * 60 * 1000));
-                return hoursLeft <= 6 && hoursLeft > 0;
-            }).length;
-            
-            document.getElementById('expiringCount').textContent = expiringSoon;
-            if (expiringSoon > 0) {
-                document.getElementById('expiringCount').style.color = '#ff9800';
-                document.getElementById('expiringCount').style.fontWeight = 'bold';
+            if (closestMarker) {
+                deleteMarker(closestMarker.id);
+            } else {
+                showNotification('❌ Нет меток для удаления рядом', 'warning');
             }
         }
 
+        function updateMarkerCoords(markerId, newCoords) {
+            const marker = markers.find(m => m.id === markerId);
+            if (marker) {
+                marker.coords = newCoords;
+            }
+        }
+
+        // ============ УВЕДОМЛЕНИЯ ============
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -1408,6 +1412,7 @@
             `;
         }
 
+        // ============ МОДАЛЬНОЕ ОКНО ============
         function showCommentModal() {
             const comment = prompt(`💬 Введите комментарий для ${getToolName(pendingCommentData.type)} (до 30 символов, необязательно):`, '');
             
@@ -1427,6 +1432,7 @@
             }
         }
 
+        // ============ СОХРАНЕНИЕ ДАННЫХ ============
         function saveUserData() {
             try {
                 const userData = {
@@ -1485,6 +1491,7 @@
         window.skipIntro = skipIntro;
         window.testFirebaseConnection = testFirebaseConnection;
         window.forceSync = forceSync;
+        window.forceRefresh = forceRefresh;
         window.clearAllMarkers = clearAllMarkers;
     </script>
 </body>
