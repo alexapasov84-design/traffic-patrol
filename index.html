@@ -12,6 +12,7 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
+        /* СТИЛИ ОСТАЮТСЯ ТАКИМИ ЖЕ */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -486,6 +487,7 @@
     </style>
 </head>
 <body>
+    <!-- ЗАСТАВКА -->
     <div id="splashScreen" class="splash-screen">
         <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
              class="splash-image" 
@@ -538,6 +540,7 @@
         </div>
     </div>
     
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
     <div class="app" id="mainApp">
         <div class="header">
             <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
@@ -610,6 +613,7 @@
         </div>
     </div>
 
+    <!-- ОТЛАДОЧНАЯ ПАНЕЛЬ -->
     <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; display: none; max-width: 300px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <strong>🔧 Отладка Firebase</strong>
@@ -638,17 +642,16 @@
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
-        const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
+        const EXPIRATION_TIME = 24 * 60 * 60 * 1000;
         const MAX_MARKERS = 40;
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
         let ymap = null;
-        let markers = new Map(); // Map: markerId -> {data, placemark}
-        let markerPlacemarks = new Map(); // Map: markerId -> ymaps.Placemark
+        let markers = new Map(); // markerId -> markerData
+        let markerPlacemarks = new Map(); // markerId -> ymaps.Placemark
         let deletedMarkers = new Set();
-        let pendingOperations = new Set();
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
@@ -813,7 +816,7 @@
             }
         }
 
-        // ============ ФУНКЦИИ ИГРЫ (ИСПРАВЛЕННЫЕ) ============
+        // ============ ФУНКЦИИ ДЛЯ РАБОТЫ С МЕТКАМИ ============
         function updateLocalMarkers(cloudMarkers) {
             if (!ymap) return;
             
@@ -849,6 +852,17 @@
 
         function addMarkerToMap(markerData) {
             if (!ymap) return;
+            
+            // Проверяем, нет ли уже метки на этих координатах
+            const existingMarker = Array.from(markers.values()).find(marker => 
+                Math.abs(marker.coords[0] - markerData.coords[0]) < 0.0001 && 
+                Math.abs(marker.coords[1] - markerData.coords[1]) < 0.0001
+            );
+            
+            if (existingMarker) {
+                console.log(`⚠️ Метка уже существует по этим координатам: ${markerData.id}`);
+                return;
+            }
             
             let preset, iconColor;
             
@@ -914,6 +928,7 @@
             }
         }
 
+        // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
         function addMarker(coords, type, comment = null) {
             if (markers.size >= MAX_MARKERS) {
                 showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
@@ -937,7 +952,7 @@
                 return;
             }
             
-            const markerId = 'marker_' + Date.now() + '_' + window.userId + '_' + Math.random().toString(36).substr(2, 5);
+            const markerId = 'marker_' + Date.now() + '_' + window.userId;
             const timestamp = Date.now();
             
             const markerData = {
@@ -1005,7 +1020,6 @@
 
         function clearAllMarkers() {
             if (confirm('Очистить ВСЕ метки? Это действие нельзя отменить.')) {
-                // Добавляем все метки в список удаленных
                 markers.forEach((marker, markerId) => {
                     deletedMarkers.add(markerId);
                     removeMarkerFromMap(markerId);
@@ -1013,7 +1027,6 @@
                 
                 markers.clear();
                 
-                // Очищаем Firebase
                 if (firebaseInitialized) {
                     firebaseDb.ref('markers').remove();
                 }
@@ -1023,51 +1036,6 @@
             }
         }
 
-        // Функция для исправления базы данных
-        async function repairDatabase() {
-            try {
-                if (!firebaseInitialized) return;
-                
-                showNotification('🔧 Исправление базы данных...', 'info');
-                
-                const markersRef = firebaseDb.ref('markers');
-                const snapshot = await markersRef.once('value');
-                const data = snapshot.val();
-                
-                if (!data) {
-                    showNotification('✅ База данных уже чиста', 'success');
-                    return;
-                }
-                
-                // Просто сохраняем текущие данные (удаляя дубликаты из Firebase)
-                const markersObj = {};
-                markers.forEach((markerData, markerId) => {
-                    markersObj[markerId] = {
-                        id: markerId,
-                        type: markerData.type || '',
-                        coords: markerData.coords || [0, 0],
-                        comment: markerData.comment || null,
-                        timestamp: markerData.timestamp || Date.now(),
-                        author: markerData.author || window.userName || '',
-                        authorId: markerData.authorId || window.userId || '',
-                        status: 'active'
-                    };
-                });
-                
-                await markersRef.set(markersObj);
-                
-                showNotification(`✅ База данных исправлена. Оставлено ${markers.size} меток`, 'success');
-                
-                // Перезагружаем метки
-                forceRefresh();
-                
-            } catch (error) {
-                console.error('❌ Ошибка исправления базы данных:', error);
-                showNotification('❌ Ошибка исправления БД', 'error');
-            }
-        }
-
-        // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
         function selectTool(tool) {
             selectedTool = tool;
             document.querySelectorAll('.tool-btn').forEach(btn => {
@@ -1078,19 +1046,13 @@
         }
 
         function updateUI() {
-            const markerCountEl = document.getElementById('markerCount');
-            const pointsEl = document.getElementById('points');
-            const activityEl = document.getElementById('activity');
-            const userRankEl = document.getElementById('userRank');
-            const rankPointsEl = document.getElementById('rankPoints');
-            
-            if (markerCountEl) markerCountEl.textContent = markers.size;
-            if (pointsEl) pointsEl.textContent = points;
-            if (activityEl) activityEl.textContent = activity;
-            if (userRankEl) userRankEl.textContent = getRank();
+            document.getElementById('markerCount').textContent = markers.size;
+            document.getElementById('points').textContent = points;
+            document.getElementById('activity').textContent = activity;
+            document.getElementById('userRank').textContent = getRank();
             
             const progress = Math.min(points / 1000, 1) * 100;
-            if (rankPointsEl) rankPointsEl.textContent = Math.round(progress) + '%';
+            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
             
             updateToolButtons();
             updateDebugInfo();
@@ -1180,13 +1142,10 @@
                 const users = snapshot.val() || {};
                 onlinePlayers = Object.keys(users).length || 1;
                 
-                const onlineCountEl = document.getElementById('onlineCount');
-                const onlinePlayersEl = document.getElementById('onlinePlayers');
-                const gameIndicator = document.getElementById('gameOnlineIndicator');
-                
-                if (onlineCountEl) onlineCountEl.textContent = onlinePlayers;
-                if (onlinePlayersEl) onlinePlayersEl.textContent = onlinePlayers;
-                if (gameIndicator) gameIndicator.innerHTML = `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
+                document.getElementById('onlineCount').textContent = onlinePlayers;
+                document.getElementById('onlinePlayers').textContent = onlinePlayers;
+                document.getElementById('gameOnlineIndicator').innerHTML = 
+                    `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
             });
         }
 
@@ -1275,6 +1234,23 @@
             showNotification('🔄 Метки обновлены', 'info');
         }
 
+        async function repairDatabase() {
+            try {
+                if (!firebaseInitialized) return;
+                
+                showNotification('🔧 Исправление базы данных...', 'info');
+                
+                // Просто синхронизируем текущие метки
+                await syncMarkersToFirebase();
+                
+                showNotification('✅ База данных исправлена', 'success');
+                
+            } catch (error) {
+                console.error('❌ Ошибка исправления базы данных:', error);
+                showNotification('❌ Ошибка исправления БД', 'error');
+            }
+        }
+
         // ============ ТАЙМЕРЫ ============
         function startAutoStartTimer() {
             const countdownElement = document.getElementById('countdown');
@@ -1339,13 +1315,10 @@
                 }
             });
             
-            const expiringCountEl = document.getElementById('expiringCount');
-            if (expiringCountEl) {
-                expiringCountEl.textContent = expiringSoon;
-                if (expiringSoon > 0) {
-                    expiringCountEl.style.color = '#ff9800';
-                    expiringCountEl.style.fontWeight = 'bold';
-                }
+            document.getElementById('expiringCount').textContent = expiringSoon;
+            if (expiringSoon > 0) {
+                document.getElementById('expiringCount').style.color = '#ff9800';
+                document.getElementById('expiringCount').style.fontWeight = 'bold';
             }
         }
 
