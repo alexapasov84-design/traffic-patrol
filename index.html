@@ -549,6 +549,105 @@
             transform: scale(1.1);
         }
         
+        /* Модальное окно комментария */
+        .comment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .comment-modal-content {
+            background: linear-gradient(135deg, #0d1b2a, #1b3a4b);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            border: 3px solid #2196f3;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .comment-header h2 {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comment-textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            color: white;
+            padding: 15px;
+            font-size: 1rem;
+            resize: none;
+            margin-bottom: 20px;
+        }
+        
+        .comment-textarea::placeholder {
+            color: #aaa;
+        }
+        
+        .comment-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .comment-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .comment-btn.add {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .comment-btn.add:hover {
+            background: #1976d2;
+        }
+        
+        .comment-btn.skip {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .comment-btn.skip:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .comment-info {
+            color: #aaa;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
         /* Модальное окно подписки */
         .subscription-modal {
             position: fixed;
@@ -972,6 +1071,36 @@
         </div>
     </div>
 
+    <!-- Модальное окно комментария -->
+    <div id="commentModal" class="comment-modal">
+        <div class="comment-modal-content">
+            <div class="comment-header">
+                <h2><i class="fas fa-comment"></i> Комментарий</h2>
+                <button class="modal-close" onclick="closeCommentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea 
+                    id="commentText" 
+                    class="comment-textarea" 
+                    placeholder="Введите комментарий (не обязательно)..."
+                    maxlength="200"></textarea>
+                <div class="comment-buttons">
+                    <button class="comment-btn skip" onclick="addMarkerWithoutComment()">
+                        Без комментария
+                    </button>
+                    <button class="comment-btn add" onclick="addMarkerWithComment()">
+                        Добавить с комментарием
+                    </button>
+                </div>
+                <div class="comment-info">
+                    Комментарий будет виден всем игрокам на карте
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Уведомление о пробном периоде -->
     <div id="trialNotification" class="trial-notification">
         <i class="fas fa-clock"></i> 
@@ -1016,7 +1145,7 @@
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
-        let pendingCommentData = null;
+        let pendingMarkerData = null;
         
         // Firebase
         let firebaseApp = null;
@@ -1497,13 +1626,27 @@
             document.getElementById(modalId).style.display = 'none';
         }
         
+        function openCommentModal() {
+            document.getElementById('commentText').value = '';
+            document.getElementById('commentModal').style.display = 'flex';
+        }
+        
+        function closeCommentModal() {
+            document.getElementById('commentModal').style.display = 'none';
+            pendingMarkerData = null;
+        }
+        
         // Закрытие по клику вне окна
         document.addEventListener('click', function(event) {
-            const modals = ['rulesModal', 'playersModal', 'controlsModal'];
+            const modals = ['rulesModal', 'playersModal', 'controlsModal', 'commentModal'];
             modals.forEach(modalId => {
                 const modal = document.getElementById(modalId);
                 if (event.target === modal) {
-                    closeModal(modalId);
+                    if (modalId === 'commentModal') {
+                        closeCommentModal();
+                    } else {
+                        closeModal(modalId);
+                    }
                 }
             });
         });
@@ -1603,8 +1746,9 @@
                         if (selectedTool === 'clear') {
                             removeNearMarker(coords);
                         } else {
-                            // Для всех типов меток комментарий не обязателен
-                            addMarker(coords, selectedTool, null);
+                            // Открываем модальное окно для комментария (не обязательно)
+                            pendingMarkerData = { coords, type: selectedTool };
+                            openCommentModal();
                         }
                     });
                 }
@@ -1777,6 +1921,21 @@
             }
         }
         
+        function addMarkerWithComment() {
+            if (pendingMarkerData) {
+                const comment = document.getElementById('commentText').value.trim();
+                addMarker(pendingMarkerData.coords, pendingMarkerData.type, comment || null);
+                closeCommentModal();
+            }
+        }
+        
+        function addMarkerWithoutComment() {
+            if (pendingMarkerData) {
+                addMarker(pendingMarkerData.coords, pendingMarkerData.type, null);
+                closeCommentModal();
+            }
+        }
+        
         // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
         function selectTool(tool) {
             selectedTool = tool;
@@ -1892,6 +2051,10 @@
         window.purchaseSubscription = purchaseSubscription;
         window.showSubscriptionModal = showSubscriptionModal;
         window.sendMessageToPlayer = sendMessageToPlayer;
+        window.openCommentModal = openCommentModal;
+        window.closeCommentModal = closeCommentModal;
+        window.addMarkerWithComment = addMarkerWithComment;
+        window.addMarkerWithoutComment = addMarkerWithoutComment;
     </script>
 </body>
 </html>
