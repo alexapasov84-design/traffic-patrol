@@ -122,38 +122,36 @@
             animation: fadeIn 1s ease;
         }
         
-        .game-info {
-            background: rgba(0, 0, 0, 0.7);
+        /* Меню кнопки на заставке */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .menu-btn {
+            padding: 18px 25px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid rgba(33, 150, 243, 0.5);
             border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #2196f3;
-            max-width: 90%;
-            backdrop-filter: blur(5px);
-            margin-bottom: 20px;
-        }
-        
-        .game-info h3 {
-            color: #4fc3f7;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
-        }
-        
-        .controls-list {
-            text-align: left;
-            display: inline-block;
-            font-size: 1rem;
-        }
-        
-        .controls-list p {
-            margin: 8px 0;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
         
-        .controls-list i {
-            color: #4fc3f7;
-            width: 24px;
+        .menu-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
+            border-color: #2196f3;
+            transform: translateY(-2px);
         }
         
         /* Кнопки внизу */
@@ -377,6 +375,231 @@
             color: #4fc3f7;
         }
         
+        /* Модальное окно */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #0d1b2a, #1b3a4b);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 3px solid #2196f3;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .modal-header h2 {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-close {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: #ff4444;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            color: #e0e0e0;
+        }
+        
+        .rules-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .rules-section h3 {
+            color: #81c784;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rules-section p {
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+        
+        /* Модальное окно подписки */
+        .subscription-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .subscription-modal .modal-content {
+            max-width: 400px;
+            animation: scaleIn 0.3s ease;
+        }
+        
+        .features-list {
+            margin: 20px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 8px;
+        }
+        
+        .feature i {
+            color: #4CAF50;
+        }
+        
+        .pricing {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .price-btn {
+            flex: 1;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .price-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .price-btn.recommended {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #FFC107;
+        }
+        
+        .price-btn.recommended:hover {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .period {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Уведомление о пробном периоде */
+        .trial-notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #FF9800, #F57C00);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+            animation: slideDown 0.5s ease;
+        }
+        
+        .trial-notification button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            border-radius: 15px;
+            color: white;
+            padding: 5px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .trial-notification button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Анимация сирены */
+        .fa-siren::before {
+            content: "\f024";
+            animation: siren 1s infinite alternate;
+        }
+        
+        @keyframes siren {
+            0% { color: #2196f3; }
+            50% { color: #f44336; }
+            100% { color: #2196f3; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
         /* Анимации */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -403,9 +626,8 @@
         @media (max-height: 700px) {
             .splash-title { font-size: 2rem; }
             .splash-subtitle { font-size: 1rem; }
-            .game-info { padding: 15px; margin-bottom: 15px; }
-            .game-info h3 { font-size: 1.2rem; margin-bottom: 10px; }
-            .controls-list { font-size: 0.9rem; }
+            .menu-buttons { gap: 10px; }
+            .menu-btn { padding: 14px 20px; font-size: 1rem; }
             .start-btn { padding: 16px 30px; font-size: 1.1rem; }
             .skip-intro-btn { padding: 12px 20px; font-size: 0.95rem; }
             .tools { grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -415,7 +637,6 @@
         @media (max-height: 600px) {
             .splash-header { margin-top: 10px; }
             .splash-title { font-size: 1.8rem; }
-            .game-info { display: none; }
             .splash-center { justify-content: flex-start; padding-top: 20px; }
             .tools { grid-template-columns: repeat(5, 1fr); }
             .tg-badge-bottom { margin-bottom: 5px; }
@@ -423,14 +644,15 @@
         
         @media (max-width: 768px) {
             .splash-title { font-size: 2rem; }
-            .game-info h3 { font-size: 1.2rem; }
             .tools { grid-template-columns: repeat(5, 1fr); }
+            .pricing { flex-direction: column; }
         }
         
         @media (max-width: 480px) {
             .tools { grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .tool-btn span { font-size: 0.65rem; }
             .header-stats { gap: 10px; font-size: 0.8rem; }
+            .modal-content { padding: 15px; }
         }
     </style>
 </head>
@@ -459,17 +681,18 @@
                 <p class="splash-subtitle" id="userWelcome">Мультиплеерная игра</p>
             </div>
             
-            <!-- Центральный блок с информацией -->
+            <!-- Центральный блок с кнопками меню -->
             <div class="splash-center">
-                <div class="game-info">
-                    <h3>🌍 ОБЩИЕ МЕТКИ ДЛЯ ВСЕХ</h3>
-                    <div class="controls-list">
-                        <p><i class="fas fa-users"></i> <strong>Мультиплеер</strong> - все игроки видят одни метки</p>
-                        <p><i class="fas fa-sync"></i> <strong>Синхронизация</strong> - каждые 10 секунд</p>
-                        <p><i class="fas fa-database"></i> <strong>Firebase Cloud</strong> - надежное хранение</p>
-                        <p><i class="fas fa-shield-alt"></i> <strong>Защита</strong> - максимум 40 меток на карту</p>
-                        <p><i class="fas fa-trophy"></i> <strong>Рейтинг</strong> - повышайте свой ранг</p>
-                    </div>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="openRulesModal()">
+                        <i class="fas fa-book"></i> Правила игры
+                    </button>
+                    <button class="menu-btn" onclick="openMultiplayerInfo()">
+                        <i class="fas fa-users"></i> Мультиплеер
+                    </button>
+                    <button class="menu-btn" onclick="openControlsInfo()">
+                        <i class="fas fa-gamepad"></i> Управление
+                    </button>
                 </div>
             </div>
             
@@ -498,7 +721,7 @@
         <div class="header">
             <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
             <div class="header-stats">
-                <span>Меток: <span id="markerCount">0</span>/40</span>
+                <span>Меток: <span id="markerCount">0</span>/<span id="maxMarkers">40</span></span>
                 <span>Очки: <span id="points">100</span></span>
                 <span>Онлайн: <span id="onlineCount">1</span></span>
             </div>
@@ -521,7 +744,7 @@
         
         <div class="tools">
             <button class="tool-btn active" onclick="selectTool('police')">
-                <i class="fas fa-police-car"></i>
+                <i class="fas fa-siren" style="font-size: 1.2em;"></i>
                 <span>Патруль</span>
             </button>
             <button class="tool-btn" onclick="selectTool('accident')">
@@ -558,9 +781,49 @@
         </div>
     </div>
 
+    <!-- Модальное окно правил -->
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> Правила игры</h2>
+                <button class="modal-close" onclick="closeRulesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="rules-section">
+                    <h3><i class="fas fa-users"></i> Мультиплеер</h3>
+                    <p>Все игроки видят одни и те же метки в реальном времени через Firebase Cloud.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-sync"></i> Синхронизация</h3>
+                    <p>Данные обновляются каждые 10 секунд автоматически.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-database"></i> Ограничения</h3>
+                    <p>Максимум <span id="rulesMaxMarkers">40</span> меток на всю игру. Старые метки удаляются через 24 часа.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-trophy"></i> Рейтинг</h3>
+                    <p>Зарабатывайте очки за добавление меток. Чем активнее - тем выше ранг!</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-shield-alt"></i> Подписка</h3>
+                    <p>Бесплатный период: 30 дней. Затем требуется подписка для продолжения игры.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление о пробном периоде -->
+    <div id="trialNotification" class="trial-notification" style="display: none;">
+        <i class="fas fa-clock"></i> 
+        <span id="trialDays">30</span> дней пробного периода
+        <button onclick="showSubscriptionModal()">⭐ Премиум</button>
+    </div>
+
     <script>
         // ============ КОНФИГУРАЦИЯ FIREBASE ============
-        // ВАША КОНФИГУРАЦИЯ ИЗ FIREBASE CONSOLE
         const firebaseConfig = {
             apiKey: "AIzaSyD0zwcRZs7mI0RzPq3O18WOIWjhUO6yKZQ",
             authDomain: "miami-police-game.firebaseapp.com",
@@ -571,18 +834,28 @@
             appId: "1:4861394604:web:f2acb3a189f99396a66909"
         };
         
+        // ============ СИСТЕМА МОНЕТИЗАЦИИ ============
+        const TRIAL_PERIOD_DAYS = 30;
+        const PREMIUM_FEATURES = {
+            maxMarkers: 100,
+            customIcons: true,
+            prioritySync: true,
+            noAds: true,
+            analytics: true
+        };
+        
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
-        const MAX_MARKERS = 40; // Максимум меток на всю игру
+        let MAX_MARKERS = 40; // Будет изменяться в зависимости от подписки
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
         // Игровые переменные
         let ymap = null;
-        let markers = []; // Локальный кэш меток
+        let markers = [];
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
@@ -622,30 +895,188 @@
                 });
             });
             
-            // Запускаем таймер автозапуска
             startAutoStartTimer();
-            
-            // Инициализируем Firebase
             initFirebase();
+        }
+        
+        // ============ ПРОВЕРКА ПОДПИСКИ ============
+        function checkSubscription() {
+            const installDate = getInstallDate();
+            const currentDate = new Date();
+            const daysPassed = Math.floor((currentDate - installDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysPassed <= TRIAL_PERIOD_DAYS) {
+                return { 
+                    status: 'trial', 
+                    daysLeft: TRIAL_PERIOD_DAYS - daysPassed,
+                    features: PREMIUM_FEATURES 
+                };
+            } else {
+                const subscription = checkActiveSubscription();
+                return {
+                    status: subscription ? 'premium' : 'expired',
+                    daysLeft: 0,
+                    features: subscription ? PREMIUM_FEATURES : null
+                };
+            }
+        }
+        
+        function getInstallDate() {
+            let installDate = localStorage.getItem('app_install_date');
+            if (!installDate) {
+                installDate = new Date().toISOString();
+                localStorage.setItem('app_install_date', installDate);
+                console.log('Дата установки сохранена:', installDate);
+            }
+            return new Date(installDate);
+        }
+        
+        function checkActiveSubscription() {
+            return localStorage.getItem('premium_subscription') === 'active';
+        }
+        
+        function updatePremiumFeatures() {
+            const subscription = checkSubscription();
+            
+            if (subscription.status === 'trial') {
+                MAX_MARKERS = 40;
+                document.getElementById('trialDays').textContent = subscription.daysLeft;
+                document.getElementById('trialNotification').style.display = 'flex';
+                document.getElementById('rulesMaxMarkers').textContent = '40';
+                showNotification(`Пробный период: ${subscription.daysLeft} дней осталось`, 'info');
+                
+                // Скрываем уведомление через 5 секунд
+                setTimeout(() => {
+                    document.getElementById('trialNotification').style.display = 'none';
+                }, 5000);
+            } else if (subscription.status === 'premium') {
+                MAX_MARKERS = 100;
+                document.getElementById('markerLimit').innerHTML = '⭐ Премиум: 100 меток';
+                document.getElementById('maxMarkers').textContent = '100';
+                document.getElementById('rulesMaxMarkers').textContent = '100';
+                document.getElementById('trialNotification').style.display = 'none';
+                showNotification('⭐ Премиум функции активны', 'success');
+            } else if (subscription.status === 'expired') {
+                MAX_MARKERS = 40;
+                document.getElementById('rulesMaxMarkers').textContent = '40';
+                setTimeout(() => {
+                    showSubscriptionModal();
+                }, 2000);
+            }
+            
+            document.getElementById('maxMarkers').textContent = MAX_MARKERS;
+        }
+        
+        function purchaseSubscription(plan) {
+            tg.showPopup({
+                title: 'Премиум подписка',
+                message: 'Доступ ко всем функциям:\n• 100 меток вместо 40\n• Приоритетная синхронизация\n• Без рекламы\n• Расширенная статистика',
+                buttons: [
+                    { id: 'monthly', type: 'default', text: '99₽/месяц' },
+                    { id: 'yearly', type: 'default', text: '990₽/год' },
+                    { id: 'cancel', type: 'cancel' }
+                ]
+            }, function(buttonId) {
+                if (buttonId === 'monthly' || buttonId === 'yearly') {
+                    initiateTelegramPayment(buttonId);
+                }
+            });
+        }
+        
+        function initiateTelegramPayment(plan) {
+            // Демо-режим для тестирования
+            localStorage.setItem('premium_subscription', 'active');
+            showNotification('✅ Подписка активирована! (демо-режим)', 'success');
+            updatePremiumFeatures();
+            
+            // В реальном приложении используйте:
+            /*
+            const paymentData = {
+                title: 'Премиум подписка',
+                description: plan === 'monthly' ? 'Месячная подписка' : 'Годовая подписка',
+                payload: JSON.stringify({
+                    userId: window.userId,
+                    plan: plan,
+                    timestamp: Date.now()
+                }),
+                prices: plan === 'monthly' ? 
+                    [{ label: 'Месячная подписка', amount: 9900 }] :
+                    [{ label: 'Годовая подписка', amount: 99000 }],
+                provider_token: 'YOUR_PROVIDER_TOKEN'
+            };
+            
+            tg.openInvoice(paymentData, function(status) {
+                if (status === 'paid') {
+                    localStorage.setItem('premium_subscription', 'active');
+                    showNotification('✅ Подписка активирована!', 'success');
+                    updatePremiumFeatures();
+                }
+            });
+            */
+        }
+        
+        function showSubscriptionModal() {
+            const modal = document.createElement('div');
+            modal.className = 'subscription-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-crown"></i> Пробный период закончился</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>Для продолжения игры требуется подписка.</p>
+                        <div class="features-list">
+                            <div class="feature">
+                                <i class="fas fa-check"></i> 100 меток вместо 40
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Приоритетная синхронизация
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Без рекламы
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Расширенная статистика
+                            </div>
+                        </div>
+                        <div class="pricing">
+                            <button class="price-btn" onclick="purchaseSubscription('monthly')">
+                                <div class="price">99₽</div>
+                                <div class="period">в месяц</div>
+                            </button>
+                            <button class="price-btn recommended" onclick="purchaseSubscription('yearly')">
+                                <div class="price">990₽</div>
+                                <div class="period">в год (экономия 20%)</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Закрытие по клику вне окна
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
         }
         
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
-                // Инициализируем Firebase с вашей конфигурацией
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDatabase = firebase.database();
                 
                 console.log('✅ Firebase успешно инициализирован!');
                 
-                // Обновляем статус
                 const syncStatus = document.getElementById('syncStatus');
                 if (syncStatus) {
                     syncStatus.textContent = 'Подключено к Firebase ✓';
                     syncStatus.style.color = '#4CAF50';
                 }
                 
-                // Начинаем синхронизацию
                 startFirebaseSync();
                 
             } catch (error) {
@@ -657,27 +1088,18 @@
                     syncStatus.style.color = '#FF9800';
                 }
                 
-                // Используем локальное хранилище
                 useLocalStorage();
             }
         }
         
         // ============ СИНХРОНИЗАЦИЯ С FIREBASE ============
         function startFirebaseSync() {
-            // Загружаем метки из Firebase
             loadMarkersFromFirebase();
-            
-            // Слушаем изменения в реальном времени
             listenToFirebaseChanges();
-            
-            // Синхронизируем каждые 10 секунд
             syncInterval = setInterval(syncToFirebase, 10000);
-            
-            // Обновляем онлайн статус
             updateOnlineStatus();
         }
         
-        // Загрузка меток из Firebase
         function loadMarkersFromFirebase() {
             try {
                 const markersRef = firebaseDatabase.ref('markers');
@@ -694,7 +1116,6 @@
             }
         }
         
-        // Слушаем изменения в реальном времени
         function listenToFirebaseChanges() {
             try {
                 const markersRef = firebaseDatabase.ref('markers');
@@ -702,7 +1123,6 @@
                 markersRef.on('value', (snapshot) => {
                     const firebaseMarkers = snapshot.val() || [];
                     
-                    // Проверяем, изменились ли метки
                     if (JSON.stringify(firebaseMarkers) !== JSON.stringify(markers.map(m => ({...m, placemark: undefined})))) {
                         console.log('Обновление меток из Firebase...');
                         updateMarkersFromCloud(firebaseMarkers);
@@ -714,37 +1134,28 @@
             }
         }
         
-        // Обновление меток из облака
         function updateMarkersFromCloud(cloudMarkers) {
             if (!ymap) return;
             
             const now = Date.now();
             
-            // Удаляем старые метки с карты
             markers.forEach(marker => {
                 if (marker.placemark) {
                     ymap.geoObjects.remove(marker.placemark);
                 }
             });
             
-            // Очищаем локальный массив
             markers = [];
             
-            // Добавляем метки из облака
             cloudMarkers.forEach(markerData => {
-                // Проверяем срок годности
                 if (now - markerData.timestamp > EXPIRATION_TIME) {
                     return;
                 }
                 
-                // Добавляем метку на карту
                 addMarkerToMap(markerData);
-                
-                // Сохраняем в локальный массив
                 markers.push(markerData);
             });
             
-            // Обновляем UI
             updateUI();
             updateExpiringCount();
             checkMarkerLimit();
@@ -752,10 +1163,8 @@
             console.log(`Обновлено ${markers.length} меток`);
         }
         
-        // Синхронизация с Firebase
         function syncToFirebase() {
             try {
-                // Подготавливаем данные для Firebase
                 const markersData = markers.map(marker => ({
                     id: marker.id,
                     type: marker.type,
@@ -766,7 +1175,6 @@
                     authorId: marker.authorId || window.userId
                 }));
                 
-                // Отправляем в Firebase
                 firebaseDatabase.ref('markers').set(markersData)
                     .then(() => {
                         console.log('✅ Синхронизировано с Firebase');
@@ -780,27 +1188,22 @@
             }
         }
         
-        // Обновление онлайн статуса
         function updateOnlineStatus() {
             try {
-                // Обновляем свой статус
                 const userStatusRef = firebaseDatabase.ref('online/' + window.userId);
                 userStatusRef.set({
                     name: window.userName,
                     lastSeen: Date.now()
                 });
                 
-                // Удаляем при выходе
                 userStatusRef.onDisconnect().remove();
                 
-                // Слушаем других игроков
                 const onlineRef = firebaseDatabase.ref('online');
                 onlineRef.on('value', (snapshot) => {
                     const users = snapshot.val() || {};
                     const userCount = Object.keys(users).length;
                     onlinePlayers = userCount || 1;
                     
-                    // Обновляем счетчики
                     document.getElementById('onlineCount').textContent = onlinePlayers;
                     document.getElementById('playersOnline').textContent = onlinePlayers;
                     document.getElementById('onlineIndicator').innerHTML = 
@@ -812,7 +1215,7 @@
             }
         }
         
-        // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ (резерв) ============
+        // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
         function useLocalStorage() {
             console.log('Используем локальное хранилище...');
             
@@ -867,6 +1270,31 @@
             }, 1000);
         }
         
+        // ============ МОДАЛЬНЫЕ ОКНА ============
+        function openRulesModal() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        
+        function closeRulesModal() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+        
+        function openMultiplayerInfo() {
+            openRulesModal();
+        }
+        
+        function openControlsInfo() {
+            openRulesModal();
+        }
+        
+        // Закрытие по клику вне окна
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('rulesModal');
+            if (event.target === modal) {
+                closeRulesModal();
+            }
+        });
+        
         // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
         function skipIntro() {
             clearInterval(autoStartInterval);
@@ -901,13 +1329,10 @@
         function initGame() {
             console.log('🚔 Запуск игры...');
             
-            // Загружаем данные пользователя
+            updatePremiumFeatures();
             loadUserData();
-            
-            // Запускаем автоудаление
             startAutoDeleteChecker();
             
-            // Инициализируем карту
             if (window.ymaps) {
                 ymaps.ready(initMap);
             } else {
@@ -915,37 +1340,69 @@
             }
         }
         
-        // ============ КАРТА И МЕТКИ ============
+        // ============ КАРТА И ГЕОЛОКАЦИЯ ============
         function initMap() {
             try {
-                ymap = new ymaps.Map('yandex-map', {
-                    center: [55.459619, 38.438920],
-                    zoom: 15,
-                    controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
-                });
+                let center = [55.459619, 38.438920];
+                let zoom = 15;
                 
-                document.getElementById('loading').style.display = 'none';
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            center = [position.coords.latitude, position.coords.longitude];
+                            zoom = 17;
+                            createMap(center, zoom);
+                        },
+                        function(error) {
+                            console.warn('Геолокация недоступна:', error);
+                            createMap(center, zoom);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    createMap(center, zoom);
+                }
                 
-                // Клик по карте
-                ymap.events.add('click', function(e) {
-                    const coords = e.get('coords');
+                function createMap(centerCoords, zoomLevel) {
+                    ymap = new ymaps.Map('yandex-map', {
+                        center: centerCoords,
+                        zoom: zoomLevel,
+                        controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
+                    });
                     
-                    if (selectedTool === 'clear') {
-                        removeNearMarker(coords);
-                    } else if (selectedTool === 'police' || selectedTool === 'help') {
-                        pendingCommentData = { coords, type: selectedTool };
-                        showCommentModal();
-                    } else {
-                        addMarker(coords, selectedTool, null);
-                    }
-                });
+                    const geolocationControl = new ymaps.control.GeolocationControl({
+                        options: {
+                            noPlacemark: true,
+                            position: { right: 10, top: 80 }
+                        }
+                    });
+                    ymap.controls.add(geolocationControl);
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    ymap.events.add('click', function(e) {
+                        const coords = e.get('coords');
+                        
+                        if (selectedTool === 'clear') {
+                            removeNearMarker(coords);
+                        } else if (selectedTool === 'police' || selectedTool === 'help') {
+                            pendingCommentData = { coords, type: selectedTool };
+                            showCommentModal();
+                        } else {
+                            addMarker(coords, selectedTool, null);
+                        }
+                    });
+                }
                 
-                // Уже загружены метки из Firebase/локального хранилища
                 updateUI();
                 updateExpiringCount();
                 checkMarkerLimit();
                 
-                showNotification('✅ Игра запущена! Метки синхронизированы со всеми игроками', 'info');
+                showNotification('✅ Игра запущена! Используйте геолокацию для навигации', 'info');
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
@@ -953,8 +1410,270 @@
             }
         }
         
-        // Добавление новой метки
+        // ============ МЕТКИ ============
         function addMarker(coords, type, comment = null) {
-            // Проверка лимита
             if (markers.length >= MAX_MARKERS) {
-                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`,
+                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
+                return;
+            }
+            
+            const markerId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            const markerData = {
+                id: markerId,
+                type: type,
+                coords: coords,
+                comment: comment,
+                timestamp: Date.now(),
+                author: window.userName,
+                authorId: window.userId
+            };
+            
+            addMarkerToMap(markerData);
+            markers.push(markerData);
+            
+            points += 10;
+            activity += 1;
+            
+            updateUI();
+            checkMarkerLimit();
+            saveToLocalStorage();
+            syncToFirebase();
+            
+            const typeNames = {
+                'police': 'Патруль',
+                'accident': 'ДТП',
+                'help': 'Помощь',
+                'hazard': 'Пробка'
+            };
+            
+            showNotification(`✅ Добавлена метка: ${typeNames[type]}`, 'success');
+        }
+        
+        function addMarkerToMap(markerData) {
+            if (!ymap) return;
+            
+            const iconColor = {
+                'police': '#2196F3',
+                'accident': '#F44336',
+                'help': '#4CAF50',
+                'hazard': '#FF9800'
+            }[markerData.type] || '#2196F3';
+            
+            const iconContent = {
+                'police': '<i class="fas fa-siren" style="color: white;"></i>',
+                'accident': '<i class="fas fa-car-crash" style="color: white;"></i>',
+                'help': '<i class="fas fa-flag" style="color: white;"></i>',
+                'hazard': '<i class="fas fa-traffic-light" style="color: white;"></i>'
+            }[markerData.type] || '<i class="fas fa-map-marker" style="color: white;"></i>';
+            
+            const placemark = new ymaps.Placemark(
+                markerData.coords,
+                {
+                    balloonContent: `
+                        <div style="padding: 10px;">
+                            <h3 style="margin: 0 0 10px 0; color: ${iconColor}">
+                                ${markerData.type === 'police' ? '👮‍♂️ Патруль' : 
+                                  markerData.type === 'accident' ? '🚗 ДТП' :
+                                  markerData.type === 'help' ? '🆘 Помощь' : '🚦 Пробка'}
+                            </h3>
+                            ${markerData.comment ? `<p><strong>Комментарий:</strong> ${markerData.comment}</p>` : ''}
+                            <p><strong>Автор:</strong> ${markerData.author}</p>
+                            <p><strong>Время:</strong> ${new Date(markerData.timestamp).toLocaleString()}</p>
+                        </div>
+                    `,
+                    iconCaption: markerData.comment || ''
+                },
+                {
+                    preset: 'islands#icon',
+                    iconColor: iconColor,
+                    iconLayout: 'default#imageWithContent',
+                    iconImageHref: '',
+                    iconImageSize: [40, 40],
+                    iconImageOffset: [-20, -40],
+                    iconContentOffset: [0, 0],
+                    iconContentLayout: ymaps.templateLayoutFactory.createClass(
+                        `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${iconContent}</div>`
+                    )
+                }
+            );
+            
+            markerData.placemark = placemark;
+            ymap.geoObjects.add(placemark);
+        }
+        
+        function removeNearMarker(coords) {
+            if (!markers.length) {
+                showNotification('Нет меток для удаления', 'info');
+                return;
+            }
+            
+            let closestMarker = null;
+            let minDistance = Infinity;
+            
+            markers.forEach(marker => {
+                const distance = Math.sqrt(
+                    Math.pow(marker.coords[0] - coords[0], 2) + 
+                    Math.pow(marker.coords[1] - coords[1], 2)
+                ) * 111000; // Примерное расстояние в метрах
+                
+                if (distance < 50 && distance < minDistance) { // 50 метров
+                    minDistance = distance;
+                    closestMarker = marker;
+                }
+            });
+            
+            if (closestMarker) {
+                if (closestMarker.placemark) {
+                    ymap.geoObjects.remove(closestMarker.placemark);
+                }
+                
+                markers = markers.filter(m => m.id !== closestMarker.id);
+                
+                points += 5;
+                updateUI();
+                checkMarkerLimit();
+                saveToLocalStorage();
+                syncToFirebase();
+                
+                showNotification('🗑️ Метка удалена', 'success');
+            } else {
+                showNotification('❌ Нет меток рядом', 'error');
+            }
+        }
+        
+        // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+        function selectTool(tool) {
+            selectedTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tool-btn').classList.add('active');
+        }
+        
+        function showCommentModal() {
+            const comment = prompt('Введите комментарий к метке:', '');
+            if (comment !== null && comment.trim() !== '') {
+                addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim());
+            }
+            pendingCommentData = null;
+        }
+        
+        function updateUI() {
+            document.getElementById('markerCount').textContent = markers.length;
+            document.getElementById('points').textContent = points;
+            document.getElementById('activity').textContent = activity;
+            
+            const rank = calculateRank();
+            document.getElementById('userRank').textContent = rank.name;
+            document.getElementById('rankPoints').textContent = rank.progress + '%';
+        }
+        
+        function calculateRank() {
+            if (activity >= 100) return { name: 'Комиссар', progress: 100 };
+            if (activity >= 50) return { name: 'Детектив', progress: Math.min(100, (activity - 50) * 2) };
+            if (activity >= 20) return { name: 'Сержант', progress: Math.min(100, (activity - 20) * 3.33) };
+            if (activity >= 5) return { name: 'Патрульный', progress: Math.min(100, (activity - 5) * 6.67) };
+            return { name: 'Новичок', progress: Math.min(100, activity * 20) };
+        }
+        
+        function checkMarkerLimit() {
+            const limitElement = document.getElementById('markerLimit');
+            if (markers.length >= MAX_MARKERS * 0.9) {
+                limitElement.style.display = 'block';
+            } else {
+                limitElement.style.display = 'none';
+            }
+        }
+        
+        function updateExpiringCount() {
+            const now = Date.now();
+            const expiringSoon = markers.filter(m => now - m.timestamp > EXPIRATION_TIME * 0.9).length;
+            if (expiringSoon > 0) {
+                showNotification(`${expiringSoon} меток скоро будут удалены`, 'warning');
+            }
+        }
+        
+        function startAutoDeleteChecker() {
+            if (autoDeleteInterval) clearInterval(autoDeleteInterval);
+            
+            autoDeleteInterval = setInterval(() => {
+                const now = Date.now();
+                const initialCount = markers.length;
+                
+                markers = markers.filter(marker => {
+                    if (now - marker.timestamp > EXPIRATION_TIME) {
+                        if (marker.placemark && ymap) {
+                            ymap.geoObjects.remove(marker.placemark);
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+                
+                if (markers.length < initialCount) {
+                    updateUI();
+                    checkMarkerLimit();
+                    syncToFirebase();
+                    console.log(`Автоудаление: удалено ${initialCount - markers.length} старых меток`);
+                }
+            }, 60000); // Проверка каждую минуту
+        }
+        
+        function loadUserData() {
+            try {
+                const savedData = localStorage.getItem('user_data_' + window.userId);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    points = data.points || points;
+                    activity = data.activity || activity;
+                    updateUI();
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки данных:', e);
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // Простое уведомление через alert для демо
+            if (type === 'error') {
+                alert('❌ ' + message);
+            } else if (type === 'success') {
+                console.log('✅ ' + message);
+            } else {
+                console.log('ℹ️ ' + message);
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
+                <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки</p>
+                <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${message}</p>
+            `;
+        }
+        
+        // ============ ЗАПУСК ПРИЛОЖЕНИЯ ============
+        document.addEventListener('DOMContentLoaded', function() {
+            initTelegram();
+            
+            setTimeout(() => {
+                const subscription = checkSubscription();
+                if (subscription.status === 'expired') {
+                    setTimeout(showSubscriptionModal, 2000);
+                }
+            }, 1000);
+        });
+        
+        // Экспорт функций для глобального доступа
+        window.startGame = startGame;
+        window.skipIntro = skipIntro;
+        window.selectTool = selectTool;
+        window.openRulesModal = openRulesModal;
+        window.closeRulesModal = closeRulesModal;
+        window.openMultiplayerInfo = openMultiplayerInfo;
+        window.openControlsInfo = openControlsInfo;
+        window.purchaseSubscription = purchaseSubscription;
+        window.showSubscriptionModal = showSubscriptionModal;
+    </script>
+</body>
+</html>
