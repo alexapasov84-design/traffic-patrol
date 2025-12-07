@@ -7,9 +7,11 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase 8 (РАБОЧАЯ ВЕРСИЯ) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <!-- FIREBASE 8 - КОРРЕКТНЫЕ ССЫЛКИ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
@@ -1088,17 +1090,6 @@
             return titles[type] || '📍 Метка';
         }
         
-        // ============ ПРОВЕРКА FIREBASE ============
-        function checkFirebase() {
-            if (typeof firebase === 'undefined') {
-                console.error('Firebase не загружен!');
-                document.getElementById('syncStatus').textContent = 'Ошибка загрузки Firebase';
-                document.getElementById('syncStatus').style.color = '#f44336';
-                return false;
-            }
-            return true;
-        }
-        
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
@@ -1119,28 +1110,21 @@
             }
             
             startAutoStartTimer();
-            
-            // Проверяем Firebase перед инициализацией
-            if (checkFirebase()) {
-                initFirebase();
-            } else {
-                // Ждем и пробуем снова
-                setTimeout(() => {
-                    if (checkFirebase()) {
-                        initFirebase();
-                    } else {
-                        document.getElementById('syncStatus').textContent = 'Firebase не загрузился, используем локальное хранилище';
-                        document.getElementById('syncStatus').style.color = '#FF9800';
-                        useLocalStorage();
-                    }
-                }, 2000);
-            }
+            initFirebase();
         }
         
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
-                console.log('Проверяем Firebase:', typeof firebase, typeof firebase.initializeApp);
+                console.log('Firebase доступен:', typeof firebase !== 'undefined');
+                
+                if (typeof firebase === 'undefined') {
+                    console.error('Firebase не загрузился!');
+                    document.getElementById('syncStatus').textContent = 'Firebase не загрузился';
+                    document.getElementById('syncStatus').style.color = '#f44336';
+                    useLocalStorage();
+                    return;
+                }
                 
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDatabase = firebase.database();
@@ -1255,6 +1239,11 @@
         
         function syncToFirebase() {
             try {
+                if (!firebaseDatabase) {
+                    console.error('Firebase Database не инициализирован!');
+                    return;
+                }
+                
                 const markersData = markers.map(marker => ({
                     id: marker.id,
                     type: marker.type,
@@ -1283,6 +1272,11 @@
         
         function updateOnlineStatus() {
             try {
+                if (!firebaseDatabase) {
+                    console.error('Firebase Database не инициализирован для онлайн статуса');
+                    return;
+                }
+                
                 const userStatusRef = firebaseDatabase.ref('online/' + window.userId);
                 
                 const updateMyStatus = () => {
