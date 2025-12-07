@@ -35,7 +35,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoi UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
         
         body {
@@ -375,7 +375,7 @@
             color: #4fc3f7;
         }
         
-        /* Модальное окно */
+        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -464,6 +464,106 @@
         .rules-section p {
             line-height: 1.5;
             font-size: 1rem;
+        }
+        
+        /* Список игроков */
+        .players-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .player-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .player-item.offline {
+            border-left-color: #757575;
+            opacity: 0.7;
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .player-status {
+            font-size: 0.8rem;
+            color: #81c784;
+        }
+        
+        .player-status.offline {
+            color: #757575;
+        }
+        
+        .player-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 5px 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Кнопка удаления на метках */
+        .marker-delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .marker-delete-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
         }
         
         /* Модальное окно подписки */
@@ -555,7 +655,7 @@
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 10px;
             z-index: 10000;
@@ -580,14 +680,14 @@
         
         /* Анимация сирены */
         .fa-siren::before {
-            content: "\f024";
+            content: "🚨";
             animation: siren 1s infinite alternate;
         }
         
         @keyframes siren {
-            0% { color: #2196f3; }
-            50% { color: #f44336; }
-            100% { color: #2196f3; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
         
         @keyframes scaleIn {
@@ -653,6 +753,8 @@
             .tool-btn span { font-size: 0.65rem; }
             .header-stats { gap: 10px; font-size: 0.8rem; }
             .modal-content { padding: 15px; }
+            .player-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .player-actions { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -687,10 +789,10 @@
                     <button class="menu-btn" onclick="openRulesModal()">
                         <i class="fas fa-book"></i> Правила игры
                     </button>
-                    <button class="menu-btn" onclick="openMultiplayerInfo()">
-                        <i class="fas fa-users"></i> Мультиплеер
+                    <button class="menu-btn" onclick="openPlayersModal()">
+                        <i class="fas fa-users"></i> Игроки онлайн
                     </button>
-                    <button class="menu-btn" onclick="openControlsInfo()">
+                    <button class="menu-btn" onclick="openControlsModal()">
                         <i class="fas fa-gamepad"></i> Управление
                     </button>
                 </div>
@@ -786,7 +888,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-book"></i> Правила игры</h2>
-                <button class="modal-close" onclick="closeRulesModal()">
+                <button class="modal-close" onclick="closeModal('rulesModal')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -815,8 +917,59 @@
         </div>
     </div>
 
+    <!-- Модальное окно игроков -->
+    <div id="playersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-users"></i> Игроки онлайн</h2>
+                <button class="modal-close" onclick="closeModal('playersModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="players-list" id="playersList">
+                    <!-- Список игроков будет загружен здесь -->
+                    <p style="text-align: center; color: #aaa;">Загрузка списка игроков...</p>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <p><i class="fas fa-info-circle"></i> Всего онлайн: <span id="modalOnlineCount">0</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно управления -->
+    <div id="controlsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-gamepad"></i> Управление</h2>
+                <button class="modal-close" onclick="closeModal('controlsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="rules-section">
+                    <h3><i class="fas fa-mouse-pointer"></i> Добавление меток</h3>
+                    <p>Выберите тип метки и кликните на карту в нужном месте.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-trash-alt"></i> Удаление меток</h3>
+                    <p>Нажмите кнопку "Удалить", затем кликните рядом с меткой, которую хотите удалить.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-map-marked-alt"></i> Геолокация</h3>
+                    <p>Используйте кнопку геолокации на карте для перемещения к своему местоположению.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-sync-alt"></i> Синхронизация</h3>
+                    <p>Метки автоматически синхронизируются со всеми игроками каждые 10 секунд.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Уведомление о пробном периоде -->
-    <div id="trialNotification" class="trial-notification" style="display: none;">
+    <div id="trialNotification" class="trial-notification">
         <i class="fas fa-clock"></i> 
         <span id="trialDays">30</span> дней пробного периода
         <button onclick="showSubscriptionModal()">⭐ Премиум</button>
@@ -848,7 +1001,7 @@
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
         const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
-        let MAX_MARKERS = 40; // Будет изменяться в зависимости от подписки
+        let MAX_MARKERS = 40;
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
@@ -865,7 +1018,7 @@
         let firebaseApp = null;
         let firebaseDatabase = null;
         let syncInterval = null;
-        let onlinePlayers = 1;
+        let onlinePlayers = {};
         
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
@@ -943,9 +1096,7 @@
                 document.getElementById('trialDays').textContent = subscription.daysLeft;
                 document.getElementById('trialNotification').style.display = 'flex';
                 document.getElementById('rulesMaxMarkers').textContent = '40';
-                showNotification(`Пробный период: ${subscription.daysLeft} дней осталось`, 'info');
                 
-                // Скрываем уведомление через 5 секунд
                 setTimeout(() => {
                     document.getElementById('trialNotification').style.display = 'none';
                 }, 5000);
@@ -955,7 +1106,6 @@
                 document.getElementById('maxMarkers').textContent = '100';
                 document.getElementById('rulesMaxMarkers').textContent = '100';
                 document.getElementById('trialNotification').style.display = 'none';
-                showNotification('⭐ Премиум функции активны', 'success');
             } else if (subscription.status === 'expired') {
                 MAX_MARKERS = 40;
                 document.getElementById('rulesMaxMarkers').textContent = '40';
@@ -986,33 +1136,9 @@
         function initiateTelegramPayment(plan) {
             // Демо-режим для тестирования
             localStorage.setItem('premium_subscription', 'active');
-            showNotification('✅ Подписка активирована! (демо-режим)', 'success');
             updatePremiumFeatures();
             
-            // В реальном приложении используйте:
-            /*
-            const paymentData = {
-                title: 'Премиум подписка',
-                description: plan === 'monthly' ? 'Месячная подписка' : 'Годовая подписка',
-                payload: JSON.stringify({
-                    userId: window.userId,
-                    plan: plan,
-                    timestamp: Date.now()
-                }),
-                prices: plan === 'monthly' ? 
-                    [{ label: 'Месячная подписка', amount: 9900 }] :
-                    [{ label: 'Годовая подписка', amount: 99000 }],
-                provider_token: 'YOUR_PROVIDER_TOKEN'
-            };
-            
-            tg.openInvoice(paymentData, function(status) {
-                if (status === 'paid') {
-                    localStorage.setItem('premium_subscription', 'active');
-                    showNotification('✅ Подписка активирована!', 'success');
-                    updatePremiumFeatures();
-                }
-            });
-            */
+            // В реальном приложении используйте Telegram Payments API
         }
         
         function showSubscriptionModal() {
@@ -1055,7 +1181,6 @@
             
             document.body.appendChild(modal);
             
-            // Закрытие по клику вне окна
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     document.body.removeChild(modal);
@@ -1201,17 +1326,78 @@
                 const onlineRef = firebaseDatabase.ref('online');
                 onlineRef.on('value', (snapshot) => {
                     const users = snapshot.val() || {};
-                    const userCount = Object.keys(users).length;
-                    onlinePlayers = userCount || 1;
+                    onlinePlayers = users;
                     
-                    document.getElementById('onlineCount').textContent = onlinePlayers;
-                    document.getElementById('playersOnline').textContent = onlinePlayers;
+                    const userCount = Object.keys(users).length;
+                    const onlineCount = Object.keys(users).filter(id => {
+                        const user = users[id];
+                        return Date.now() - user.lastSeen < 30000; // 30 секунд
+                    }).length;
+                    
+                    document.getElementById('onlineCount').textContent = onlineCount;
+                    document.getElementById('playersOnline').textContent = onlineCount;
+                    document.getElementById('modalOnlineCount').textContent = onlineCount;
                     document.getElementById('onlineIndicator').innerHTML = 
-                        `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
+                        `<i class="fas fa-wifi"></i> ${onlineCount}`;
+                        
+                    updatePlayersList(users);
                 });
                 
             } catch (error) {
                 console.error('Ошибка онлайн статуса:', error);
+            }
+        }
+        
+        function updatePlayersList(users) {
+            const playersList = document.getElementById('playersList');
+            if (!playersList) return;
+            
+            const now = Date.now();
+            const onlinePlayersArray = Object.entries(users)
+                .filter(([id, user]) => now - user.lastSeen < 30000)
+                .sort((a, b) => b[1].lastSeen - a[1].lastSeen);
+            
+            playersList.innerHTML = '';
+            
+            if (onlinePlayersArray.length === 0) {
+                playersList.innerHTML = '<p style="text-align: center; color: #aaa;">Нет игроков онлайн</p>';
+                return;
+            }
+            
+            onlinePlayersArray.forEach(([id, user]) => {
+                const isOnline = now - user.lastSeen < 30000;
+                const playerName = user.name || 'Гость';
+                const playerItem = document.createElement('div');
+                playerItem.className = `player-item ${isOnline ? '' : 'offline'}`;
+                
+                const initials = playerName.split(' ').map(n => n[0]).join('').toUpperCase() || 'Г';
+                
+                playerItem.innerHTML = `
+                    <div class="player-info">
+                        <div class="player-avatar">${initials}</div>
+                        <div>
+                            <div class="player-name">${playerName}</div>
+                            <div class="player-status ${isOnline ? '' : 'offline'}">
+                                ${isOnline ? '🟢 Онлайн' : '⚫ Не в сети'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-actions">
+                        <button class="action-btn" onclick="sendMessageToPlayer('${id}', '${playerName}')">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                    </div>
+                `;
+                
+                playersList.appendChild(playerItem);
+            });
+        }
+        
+        function sendMessageToPlayer(playerId, playerName) {
+            const message = prompt(`Отправить сообщение ${playerName}:`, '');
+            if (message && message.trim()) {
+                alert(`Сообщение "${message}" отправлено ${playerName}`);
+                // Здесь можно добавить отправку через Firebase
             }
         }
         
@@ -1275,24 +1461,27 @@
             document.getElementById('rulesModal').style.display = 'flex';
         }
         
-        function closeRulesModal() {
-            document.getElementById('rulesModal').style.display = 'none';
+        function openPlayersModal() {
+            document.getElementById('playersModal').style.display = 'flex';
         }
         
-        function openMultiplayerInfo() {
-            openRulesModal();
+        function openControlsModal() {
+            document.getElementById('controlsModal').style.display = 'flex';
         }
         
-        function openControlsInfo() {
-            openRulesModal();
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
         
         // Закрытие по клику вне окна
         document.addEventListener('click', function(event) {
-            const modal = document.getElementById('rulesModal');
-            if (event.target === modal) {
-                closeRulesModal();
-            }
+            const modals = ['rulesModal', 'playersModal', 'controlsModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
         });
         
         // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
@@ -1389,10 +1578,11 @@
                         
                         if (selectedTool === 'clear') {
                             removeNearMarker(coords);
-                        } else if (selectedTool === 'police' || selectedTool === 'help') {
+                        } else if (selectedTool === 'help') {
                             pendingCommentData = { coords, type: selectedTool };
                             showCommentModal();
                         } else {
+                            // Для патруля и других меток - без комментария
                             addMarker(coords, selectedTool, null);
                         }
                     });
@@ -1401,8 +1591,6 @@
                 updateUI();
                 updateExpiringCount();
                 checkMarkerLimit();
-                
-                showNotification('✅ Игра запущена! Используйте геолокацию для навигации', 'info');
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
@@ -1413,7 +1601,7 @@
         // ============ МЕТКИ ============
         function addMarker(coords, type, comment = null) {
             if (markers.length >= MAX_MARKERS) {
-                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
+                alert(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`);
                 return;
             }
             
@@ -1440,13 +1628,13 @@
             syncToFirebase();
             
             const typeNames = {
-                'police': 'Патруль',
-                'accident': 'ДТП',
-                'help': 'Помощь',
-                'hazard': 'Пробка'
+                'police': 'Патруль 🚨',
+                'accident': 'ДТП 🚗',
+                'help': 'Помощь 🆘',
+                'hazard': 'Пробка 🚦'
             };
             
-            showNotification(`✅ Добавлена метка: ${typeNames[type]}`, 'success');
+            console.log(`✅ Добавлена метка: ${typeNames[type]}`);
         }
         
         function addMarkerToMap(markerData) {
@@ -1460,25 +1648,29 @@
             }[markerData.type] || '#2196F3';
             
             const iconContent = {
-                'police': '<i class="fas fa-siren" style="color: white;"></i>',
-                'accident': '<i class="fas fa-car-crash" style="color: white;"></i>',
-                'help': '<i class="fas fa-flag" style="color: white;"></i>',
-                'hazard': '<i class="fas fa-traffic-light" style="color: white;"></i>'
-            }[markerData.type] || '<i class="fas fa-map-marker" style="color: white;"></i>';
+                'police': '🚨',
+                'accident': '🚗',
+                'help': '🆘',
+                'hazard': '🚦'
+            }[markerData.type] || '📍';
             
             const placemark = new ymaps.Placemark(
                 markerData.coords,
                 {
                     balloonContent: `
-                        <div style="padding: 10px;">
+                        <div style="padding: 10px; max-width: 250px;">
                             <h3 style="margin: 0 0 10px 0; color: ${iconColor}">
-                                ${markerData.type === 'police' ? '👮‍♂️ Патруль' : 
+                                ${markerData.type === 'police' ? '🚨 Патруль' : 
                                   markerData.type === 'accident' ? '🚗 ДТП' :
                                   markerData.type === 'help' ? '🆘 Помощь' : '🚦 Пробка'}
                             </h3>
                             ${markerData.comment ? `<p><strong>Комментарий:</strong> ${markerData.comment}</p>` : ''}
                             <p><strong>Автор:</strong> ${markerData.author}</p>
                             <p><strong>Время:</strong> ${new Date(markerData.timestamp).toLocaleString()}</p>
+                            <button onclick="deleteMarkerFromBalloon('${markerData.id}')" 
+                                    style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                                Удалить метку
+                            </button>
                         </div>
                     `,
                     iconCaption: markerData.comment || ''
@@ -1488,22 +1680,57 @@
                     iconColor: iconColor,
                     iconLayout: 'default#imageWithContent',
                     iconImageHref: '',
-                    iconImageSize: [40, 40],
-                    iconImageOffset: [-20, -40],
+                    iconImageSize: [50, 50],
+                    iconImageOffset: [-25, -50],
                     iconContentOffset: [0, 0],
                     iconContentLayout: ymaps.templateLayoutFactory.createClass(
-                        `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${iconContent}</div>`
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative;">
+                            ${iconContent}
+                            <button class="marker-delete-btn" onclick="deleteMarker('${markerData.id}')" 
+                                    style="position: absolute; top: -5px; right: -5px; background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                ×
+                            </button>
+                        </div>`
                     )
                 }
             );
+            
+            // Открываем балун при клике
+            placemark.events.add('click', function() {
+                placemark.balloon.open();
+            });
             
             markerData.placemark = placemark;
             ymap.geoObjects.add(placemark);
         }
         
+        function deleteMarker(markerId) {
+            const markerIndex = markers.findIndex(m => m.id === markerId);
+            if (markerIndex !== -1) {
+                const marker = markers[markerIndex];
+                if (marker.placemark) {
+                    ymap.geoObjects.remove(marker.placemark);
+                }
+                
+                markers.splice(markerIndex, 1);
+                
+                points += 5;
+                updateUI();
+                checkMarkerLimit();
+                saveToLocalStorage();
+                syncToFirebase();
+                
+                alert('🗑️ Метка удалена');
+            }
+        }
+        
+        function deleteMarkerFromBalloon(markerId) {
+            deleteMarker(markerId);
+        }
+        
         function removeNearMarker(coords) {
             if (!markers.length) {
-                showNotification('Нет меток для удаления', 'info');
+                alert('Нет меток для удаления');
                 return;
             }
             
@@ -1523,21 +1750,9 @@
             });
             
             if (closestMarker) {
-                if (closestMarker.placemark) {
-                    ymap.geoObjects.remove(closestMarker.placemark);
-                }
-                
-                markers = markers.filter(m => m.id !== closestMarker.id);
-                
-                points += 5;
-                updateUI();
-                checkMarkerLimit();
-                saveToLocalStorage();
-                syncToFirebase();
-                
-                showNotification('🗑️ Метка удалена', 'success');
+                deleteMarker(closestMarker.id);
             } else {
-                showNotification('❌ Нет меток рядом', 'error');
+                alert('❌ Нет меток рядом');
             }
         }
         
@@ -1549,8 +1764,8 @@
         }
         
         function showCommentModal() {
-            const comment = prompt('Введите комментарий к метке:', '');
-            if (comment !== null && comment.trim() !== '') {
+            const comment = prompt('Введите комментарий к метке (не обязательно):', '');
+            if (comment !== null) {
                 addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim());
             }
             pendingCommentData = null;
@@ -1587,7 +1802,7 @@
             const now = Date.now();
             const expiringSoon = markers.filter(m => now - m.timestamp > EXPIRATION_TIME * 0.9).length;
             if (expiringSoon > 0) {
-                showNotification(`${expiringSoon} меток скоро будут удалены`, 'warning');
+                console.log(`${expiringSoon} меток скоро будут удалены`);
             }
         }
         
@@ -1631,19 +1846,6 @@
             }
         }
         
-        function showNotification(message, type = 'info') {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-            
-            // Простое уведомление через alert для демо
-            if (type === 'error') {
-                alert('❌ ' + message);
-            } else if (type === 'success') {
-                console.log('✅ ' + message);
-            } else {
-                console.log('ℹ️ ' + message);
-            }
-        }
-        
         function showError(message) {
             document.getElementById('loading').innerHTML = `
                 <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
@@ -1669,11 +1871,14 @@
         window.skipIntro = skipIntro;
         window.selectTool = selectTool;
         window.openRulesModal = openRulesModal;
-        window.closeRulesModal = closeRulesModal;
-        window.openMultiplayerInfo = openMultiplayerInfo;
-        window.openControlsInfo = openControlsInfo;
+        window.openPlayersModal = openPlayersModal;
+        window.openControlsModal = openControlsModal;
+        window.closeModal = closeModal;
+        window.deleteMarker = deleteMarker;
+        window.deleteMarkerFromBalloon = deleteMarkerFromBalloon;
         window.purchaseSubscription = purchaseSubscription;
         window.showSubscriptionModal = showSubscriptionModal;
+        window.sendMessageToPlayer = sendMessageToPlayer;
     </script>
 </body>
 </html>
