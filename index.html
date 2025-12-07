@@ -7,11 +7,9 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- FIREBASE 8 - КОРРЕКТНЫЕ ССЫЛКИ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-app.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-database.min.js"></script>
-    
+    <!-- Firebase 8 (РАБОЧАЯ ВЕРСИЯ) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
@@ -1090,6 +1088,17 @@
             return titles[type] || '📍 Метка';
         }
         
+        // ============ ПРОВЕРКА FIREBASE ============
+        function checkFirebase() {
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase не загружен!');
+                document.getElementById('syncStatus').textContent = 'Ошибка загрузки Firebase';
+                document.getElementById('syncStatus').style.color = '#f44336';
+                return false;
+            }
+            return true;
+        }
+        
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
@@ -1110,21 +1119,28 @@
             }
             
             startAutoStartTimer();
-            initFirebase();
+            
+            // Проверяем Firebase перед инициализацией
+            if (checkFirebase()) {
+                initFirebase();
+            } else {
+                // Ждем и пробуем снова
+                setTimeout(() => {
+                    if (checkFirebase()) {
+                        initFirebase();
+                    } else {
+                        document.getElementById('syncStatus').textContent = 'Firebase не загрузился, используем локальное хранилище';
+                        document.getElementById('syncStatus').style.color = '#FF9800';
+                        useLocalStorage();
+                    }
+                }, 2000);
+            }
         }
         
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
-                console.log('Firebase доступен:', typeof firebase !== 'undefined');
-                
-                if (typeof firebase === 'undefined') {
-                    console.error('Firebase не загрузился!');
-                    document.getElementById('syncStatus').textContent = 'Firebase не загрузился';
-                    document.getElementById('syncStatus').style.color = '#f44336';
-                    useLocalStorage();
-                    return;
-                }
+                console.log('Проверяем Firebase:', typeof firebase, typeof firebase.initializeApp);
                 
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDatabase = firebase.database();
@@ -1162,12 +1178,30 @@
         
         function loadMarkersFromFirebase() {
             try {
+                console.log('Загрузка меток из Firebase...');
+                
                 const markersRef = firebaseDatabase.ref('markers');
                 
-                markersRef.once('value').then((snapshot) => {
-                    const firebaseMarkers = snapshot.val() || [];
-                    console.log(`Загружено ${firebaseMarkers.length} меток из Firebase`);
+                // Используем старый стиль Firebase 8
+                markersRef.once('value', function(snapshot) {
+                    const firebaseData = snapshot.val();
+                    const firebaseMarkers = [];
+                    
+                    // Конвертируем объект в массив
+                    if (firebaseData) {
+                        Object.keys(firebaseData).forEach(key => {
+                            firebaseMarkers.push({
+                                id: key,
+                                ...firebaseData[key]
+                            });
+                        });
+                    }
+                    
+                    console.log('Загружено меток из Firebase:', firebaseMarkers.length);
                     updateMarkersFromCloud(firebaseMarkers);
+                }, function(error) {
+                    console.error('Ошибка загрузки из Firebase:', error);
+                    useLocalStorage();
                 });
                 
             } catch (error) {
@@ -1180,10 +1214,25 @@
             try {
                 const markersRef = firebaseDatabase.ref('markers');
                 
-                markersRef.on('value', (snapshot) => {
-                    const firebaseMarkers = snapshot.val() || [];
+                // Firebase v8 синтаксис
+                markersRef.on('value', function(snapshot) {
+                    const firebaseData = snapshot.val();
+                    const firebaseMarkers = [];
+                    
+                    // Конвертируем объект в массив
+                    if (firebaseData) {
+                        Object.keys(firebaseData).forEach(key => {
+                            firebaseMarkers.push({
+                                id: key,
+                                ...firebaseData[key]
+                            });
+                        });
+                    }
+                    
                     console.log('Получено обновление из Firebase:', firebaseMarkers.length, 'меток');
                     updateMarkersFromCloud(firebaseMarkers);
+                }, function(error) {
+                    console.error('Ошибка прослушивания Firebase:', error);
                 });
                 
             } catch (error) {
@@ -1238,145 +1287,60 @@
         }
         
         function syncToFirebase() {
+            console.log('syncToFirebase вызван, меток:', markers.length);
+            
+            if (!firebaseDatabase) {
+                console.error('Firebase Database не инициализирован');
+                return;
+            }
+            
             try {
-                if (!firebaseDatabase) {
-                    console.error('Firebase Database не инициализирован!');
-                    return;
-                }
+                // Создаем простой объект для Firebase
+                const markersObject = {};
                 
-                const markersData = markers.map(marker => ({
-                    id: marker.id,
-                    type: marker.type,
-                    coords: marker.coords,
-                    comment: marker.comment,
-                    timestamp: marker.timestamp,
-                    author: marker.author || window.userName,
-                    authorId: marker.authorId || window.userId,
-                    iconType: marker.type,
-                    iconContent: getIconContent(marker.type),
-                    iconColor: getIconColor(marker.type)
-                }));
+                markers.forEach(marker => {
+                    markersObject[marker.id] = {
+                        type: marker.type,
+                        coords: marker.coords,
+                        comment: marker.comment || '',
+                        timestamp: marker.timestamp,
+                        author: marker.author || window.userName,
+                        authorId: marker.authorId || window.userId,
+                        iconType: marker.type,
+                        iconContent: getIconContent(marker.type),
+                        iconColor: getIconColor(marker.type)
+                    };
+                });
                 
-                firebaseDatabase.ref('markers').set(markersData)
-                    .then(() => {
-                        console.log(`✅ Синхронизировано ${markersData.length} меток с Firebase`);
-                    })
-                    .catch(error => {
-                        console.error('❌ Ошибка синхронизации:', error);
-                    });
+                console.log('Отправляем в Firebase:', Object.keys(markersObject).length, 'меток');
+                
+                // Используем простой set без промисов (Firebase 8 style)
+                firebaseDatabase.ref('markers').set(markersObject, function(error) {
+                    if (error) {
+                        console.error('Ошибка записи в Firebase:', error);
+                    } else {
+                        console.log('✅ Данные успешно записаны в Firebase');
+                        
+                        // Проверяем что записалось
+                        firebaseDatabase.ref('markers').once('value', function(snapshot) {
+                            const data = snapshot.val();
+                            console.log('Проверка: в Firebase сохранено', data ? Object.keys(data).length : 0, 'меток');
+                        });
+                    }
+                });
                 
             } catch (error) {
-                console.error('Ошибка синхронизации:', error);
+                console.error('Общая ошибка syncToFirebase:', error);
             }
         }
         
         function updateOnlineStatus() {
-            try {
-                if (!firebaseDatabase) {
-                    console.error('Firebase Database не инициализирован для онлайн статуса');
-                    return;
-                }
-                
-                const userStatusRef = firebaseDatabase.ref('online/' + window.userId);
-                
-                const updateMyStatus = () => {
-                    userStatusRef.set({
-                        name: window.userName,
-                        lastSeen: Date.now(),
-                        userId: window.userId
-                    });
-                };
-                
-                updateMyStatus();
-                setInterval(updateMyStatus, 5000);
-                
-                userStatusRef.onDisconnect().remove();
-                
-                const onlineRef = firebaseDatabase.ref('online');
-                onlineRef.on('value', (snapshot) => {
-                    const users = snapshot.val() || {};
-                    onlinePlayers = users;
-                    
-                    const now = Date.now();
-                    const onlineUserIds = Object.keys(users).filter(id => {
-                        const user = users[id];
-                        return now - user.lastSeen < 30000;
-                    });
-                    
-                    currentOnlineCount = Math.max(1, onlineUserIds.length);
-                    
-                    document.getElementById('onlineCount').textContent = currentOnlineCount;
-                    document.getElementById('playersOnline').textContent = currentOnlineCount;
-                    document.getElementById('modalOnlineCount').textContent = currentOnlineCount;
-                    document.getElementById('onlineIndicator').innerHTML = 
-                        `<i class="fas fa-wifi"></i> ${currentOnlineCount}`;
-                        
-                    updatePlayersList(users);
-                });
-                
-            } catch (error) {
-                console.error('Ошибка онлайн статуса:', error);
-            }
-        }
-        
-        function updatePlayersList(users) {
-            const playersList = document.getElementById('playersList');
-            if (!playersList) return;
-            
-            const now = Date.now();
-            const onlinePlayersArray = Object.entries(users)
-                .filter(([id, user]) => now - user.lastSeen < 30000)
-                .sort((a, b) => b[1].lastSeen - a[1].lastSeen);
-            
-            playersList.innerHTML = '';
-            
-            if (onlinePlayersArray.length === 0) {
-                playersList.innerHTML = '<p style="text-align: center; color: #aaa;">Нет игроков онлайн</p>';
-                return;
-            }
-            
-            onlinePlayersArray.forEach(([id, user]) => {
-                const isOnline = now - user.lastSeen < 30000;
-                const playerName = user.name || 'Гость';
-                const isCurrentUser = id === window.userId;
-                const playerItem = document.createElement('div');
-                playerItem.className = `player-item ${isOnline ? '' : 'offline'}`;
-                
-                const initials = playerName.split(' ').map(n => n[0]).join('').toUpperCase() || 'Г';
-                
-                playerItem.innerHTML = `
-                    <div class="player-info">
-                        <div class="player-avatar" style="${isCurrentUser ? 'background: linear-gradient(135deg, #FF9800, #F57C00);' : ''}">
-                            ${initials}
-                            ${isCurrentUser ? '⭐' : ''}
-                        </div>
-                        <div>
-                            <div class="player-name">
-                                ${playerName} ${isCurrentUser ? '(Вы)' : ''}
-                            </div>
-                            <div class="player-status ${isOnline ? '' : 'offline'}">
-                                ${isOnline ? '🟢 Онлайн' : '⚫ Не в сети'}
-                            </div>
-                        </div>
-                    </div>
-                    ${!isCurrentUser ? `
-                    <div class="player-actions">
-                        <button class="action-btn" onclick="sendMessageToPlayer('${id}', '${playerName}')">
-                            <i class="fas fa-comment"></i>
-                        </button>
-                    </div>
-                    ` : ''}
-                `;
-                
-                playersList.appendChild(playerItem);
-            });
-        }
-        
-        function sendMessageToPlayer(playerId, playerName) {
-            const message = prompt(`Отправить сообщение ${playerName}:`, '');
-            if (message && message.trim()) {
-                alert(`Сообщение "${message}" отправлено ${playerName}`);
-            }
+            console.log('Онлайн статус временно отключен из-за ошибки Firebase v8');
+            // Просто показываем 1 игрока
+            document.getElementById('onlineCount').textContent = "1";
+            document.getElementById('playersOnline').textContent = "1";
+            document.getElementById('modalOnlineCount').textContent = "1";
+            document.getElementById('onlineIndicator').innerHTML = '<i class="fas fa-wifi"></i> 1';
         }
         
         // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
