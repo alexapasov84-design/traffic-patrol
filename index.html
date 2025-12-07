@@ -7,9 +7,9 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase -->
-   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+    <!-- Firebase 8 (РАБОЧАЯ ВЕРСИЯ) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
@@ -1033,16 +1033,6 @@
             appId: "1:4861394604:web:f2acb3a189f99396a66909"
         };
         
-        // ============ СИСТЕМА МОНЕТИЗАЦИИ ============
-        const TRIAL_PERIOD_DAYS = 30;
-        const PREMIUM_FEATURES = {
-            maxMarkers: 100,
-            customIcons: true,
-            prioritySync: true,
-            noAds: true,
-            analytics: true
-        };
-        
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
@@ -1098,13 +1088,22 @@
             return titles[type] || '📍 Метка';
         }
         
+        // ============ ПРОВЕРКА FIREBASE ============
+        function checkFirebase() {
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase не загружен!');
+                document.getElementById('syncStatus').textContent = 'Ошибка загрузки Firebase';
+                document.getElementById('syncStatus').style.color = '#f44336';
+                return false;
+            }
+            return true;
+        }
+        
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
             
             tg.expand();
-            tg.setHeaderColor('#0d1b2a');
-            tg.setBackgroundColor('#0a1931');
             
             telegramUser = tg.initDataUnsafe?.user;
             
@@ -1119,177 +1118,34 @@
                 window.userName = 'Гость';
             }
             
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                tg.showConfirm('Закрыть игру?', (confirmed) => {
-                    if (confirmed) tg.close();
-                });
-            });
-            
             startAutoStartTimer();
-            initFirebase();
-        }
-        
-        // ============ ПРОВЕРКА ПОДПИСКИ ============
-        function checkSubscription() {
-            const installDate = getInstallDate();
-            const currentDate = new Date();
-            const daysPassed = Math.floor((currentDate - installDate) / (1000 * 60 * 60 * 24));
             
-            if (daysPassed <= TRIAL_PERIOD_DAYS) {
-                return { 
-                    status: 'trial', 
-                    daysLeft: TRIAL_PERIOD_DAYS - daysPassed,
-                    features: PREMIUM_FEATURES 
-                };
+            // Проверяем Firebase перед инициализацией
+            if (checkFirebase()) {
+                initFirebase();
             } else {
-                const subscription = checkActiveSubscription();
-                return {
-                    status: subscription ? 'premium' : 'expired',
-                    daysLeft: 0,
-                    features: subscription ? PREMIUM_FEATURES : null
-                };
-            }
-        }
-        
-        function getInstallDate() {
-            let installDate = localStorage.getItem('app_install_date');
-            if (!installDate) {
-                installDate = new Date().toISOString();
-                localStorage.setItem('app_install_date', installDate);
-                console.log('Дата установки сохранена:', installDate);
-            }
-            return new Date(installDate);
-        }
-        
-        function checkActiveSubscription() {
-            return localStorage.getItem('premium_subscription') === 'active';
-        }
-        
-        function updatePremiumFeatures() {
-            const subscription = checkSubscription();
-            
-            if (subscription.status === 'trial') {
-                MAX_MARKERS = 40;
-                document.getElementById('trialDays').textContent = subscription.daysLeft;
-                document.getElementById('trialNotification').style.display = 'flex';
-                document.getElementById('rulesMaxMarkers').textContent = '40';
-                
+                // Ждем и пробуем снова
                 setTimeout(() => {
-                    document.getElementById('trialNotification').style.display = 'none';
-                }, 5000);
-            } else if (subscription.status === 'premium') {
-                MAX_MARKERS = 100;
-                document.getElementById('markerLimit').innerHTML = '⭐ Премиум: 100 меток';
-                document.getElementById('maxMarkers').textContent = '100';
-                document.getElementById('rulesMaxMarkers').textContent = '100';
-                document.getElementById('trialNotification').style.display = 'none';
-            } else if (subscription.status === 'expired') {
-                MAX_MARKERS = 40;
-                document.getElementById('rulesMaxMarkers').textContent = '40';
-                setTimeout(() => {
-                    showSubscriptionModal();
+                    if (checkFirebase()) {
+                        initFirebase();
+                    } else {
+                        document.getElementById('syncStatus').textContent = 'Firebase не загрузился, используем локальное хранилище';
+                        document.getElementById('syncStatus').style.color = '#FF9800';
+                        useLocalStorage();
+                    }
                 }, 2000);
             }
-            
-            document.getElementById('maxMarkers').textContent = MAX_MARKERS;
-        }
-        
-        function purchaseSubscription(plan) {
-            tg.showPopup({
-                title: 'Премиум подписка',
-                message: 'Доступ ко всем функциям:\n• 100 меток вместо 40\n• Приоритетная синхронизация\n• Без рекламы\n• Расширенная статистика',
-                buttons: [
-                    { id: 'monthly', type: 'default', text: '99₽/месяц' },
-                    { id: 'yearly', type: 'default', text: '990₽/год' },
-                    { id: 'cancel', type: 'cancel' }
-                ]
-            }, function(buttonId) {
-                if (buttonId === 'monthly' || buttonId === 'yearly') {
-                    initiateTelegramPayment(buttonId);
-                }
-            });
-        }
-        
-        function initiateTelegramPayment(plan) {
-            localStorage.setItem('premium_subscription', 'active');
-            updatePremiumFeatures();
-            alert('✅ Премиум активирован! Теперь у вас 100 меток!');
-        }
-        
-        function showSubscriptionModal() {
-            const modal = document.createElement('div');
-            modal.className = 'subscription-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2><i class="fas fa-crown"></i> Пробный период закончился</h2>
-                        <button class="modal-close" onclick="document.body.removeChild(this.parentElement.parentElement)">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Для продолжения игры требуется подписка.</p>
-                        <div class="features-list">
-                            <div class="feature">
-                                <i class="fas fa-check"></i> 100 меток вместо 40
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Приоритетная синхронизация
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Без рекламы
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Расширанная статистика
-                            </div>
-                        </div>
-                        <div class="pricing">
-                            <button class="price-btn" onclick="purchaseSubscription('monthly')">
-                                <div class="price">99₽</div>
-                                <div class="period">в месяц</div>
-                            </button>
-                            <button class="price-btn recommended" onclick="purchaseSubscription('yearly')">
-                                <div class="price">990₽</div>
-                                <div class="period">в год (экономия 20%)</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            });
         }
         
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
+                console.log('Проверяем Firebase:', typeof firebase, typeof firebase.initializeApp);
+                
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDatabase = firebase.database();
                 
                 console.log('✅ Firebase успешно инициализирован!');
-                
-                // Проверка подключения
-                const connectedRef = firebaseDatabase.ref(".info/connected");
-                connectedRef.on("value", (snap) => {
-                    if (snap.val() === true) {
-                        console.log("🔥 Подключено к Firebase в реальном времени");
-                        document.getElementById('onlineIndicator').innerHTML = 
-                            '<i class="fas fa-wifi"></i> Онлайн';
-                        document.getElementById('onlineIndicator').style.color = '#4CAF50';
-                    } else {
-                        console.log("❌ Отключено от Firebase");
-                        document.getElementById('onlineIndicator').innerHTML = 
-                            '<i class="fas fa-wifi-slash"></i> Офлайн';
-                        document.getElementById('onlineIndicator').style.color = '#F44336';
-                    }
-                });
                 
                 const syncStatus = document.getElementById('syncStatus');
                 if (syncStatus) {
@@ -1601,17 +1457,6 @@
             document.getElementById(modalId).style.display = 'none';
         }
         
-        // Закрытие по клику вне окна
-        document.addEventListener('click', function(event) {
-            const modals = ['rulesModal', 'playersModal', 'controlsModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    closeModal(modalId);
-                }
-            });
-        });
-        
         // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
         function skipIntro() {
             clearInterval(autoStartInterval);
@@ -1646,7 +1491,6 @@
         function initGame() {
             console.log('🚔 Запуск игры...');
             
-            updatePremiumFeatures();
             loadUserData();
             startAutoDeleteChecker();
             
@@ -1941,14 +1785,6 @@
             }
         }
         
-        function updateExpiringCount() {
-            const now = Date.now();
-            const expiringSoon = markers.filter(m => now - m.timestamp > EXPIRATION_TIME * 0.9).length;
-            if (expiringSoon > 0) {
-                console.log(`${expiringSoon} меток скоро будут удалены`);
-            }
-        }
-        
         function startAutoDeleteChecker() {
             if (autoDeleteInterval) clearInterval(autoDeleteInterval);
             
@@ -1999,14 +1835,8 @@
         
         // ============ ЗАПУСК ПРИЛОЖЕНИЯ ============
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM загружен, инициализируем Telegram...');
             initTelegram();
-            
-            setTimeout(() => {
-                const subscription = checkSubscription();
-                if (subscription.status === 'expired') {
-                    setTimeout(showSubscriptionModal, 2000);
-                }
-            }, 1000);
         });
         
         // Экспорт функций для глобального доступа
@@ -2019,8 +1849,6 @@
         window.closeModal = closeModal;
         window.deleteMarker = deleteMarker;
         window.deleteMarkerFromBalloon = deleteMarkerFromBalloon;
-        window.purchaseSubscription = purchaseSubscription;
-        window.showSubscriptionModal = showSubscriptionModal;
         window.sendMessageToPlayer = sendMessageToPlayer;
     </script>
 </body>
