@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Полиция Майями👮‍♂️🚔👮‍♂️</title>
     
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
+        /* Telegram оптимизация */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -36,11 +39,11 @@
         }
         
         body {
-            background: linear-gradient(135deg, #0a1931 0%, #162447 50%, #1f4068 100%);
+            background: var(--tg-theme-bg-color, #0a1931);
             color: var(--tg-theme-text-color, white);
-            perspective: 1000px;
         }
         
+        /* Заставка с картинкой на весь экран */
         .splash-screen {
             position: fixed;
             top: 0;
@@ -51,9 +54,9 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: linear-gradient(135deg, #0a1931 0%, #162447 100%);
         }
         
+        /* Картинка на весь экран */
         .splash-image {
             position: absolute;
             top: 0;
@@ -62,10 +65,9 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
-            opacity: 0.7;
-            filter: blur(2px);
         }
         
+        /* Затемнение поверх картинки */
         .image-overlay {
             position: absolute;
             top: 0;
@@ -74,10 +76,10 @@
             height: 100%;
             background: linear-gradient(
                 to bottom,
-                rgba(10, 25, 49, 0.95) 0%,
-                rgba(10, 25, 49, 0.8) 30%,
-                rgba(10, 25, 49, 0.6) 50%,
-                rgba(10, 25, 49, 0.9) 100%
+                rgba(10, 25, 49, 0.9) 0%,
+                rgba(10, 25, 49, 0.7) 30%,
+                rgba(10, 25, 49, 0.5) 50%,
+                rgba(10, 25, 49, 0.8) 100%
             );
             z-index: 2;
         }
@@ -102,37 +104,15 @@
             font-size: 2.5rem;
             color: #4fc3f7;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(79, 195, 247, 0.8), 0 0 40px rgba(79, 195, 247, 0.4);
-            font-weight: 700;
-            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
         }
         
         .splash-subtitle {
             color: #81c784;
             font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
         }
         
-        .online-status {
-            background: rgba(76, 175, 80, 0.3);
-            border: 2px solid rgba(76, 175, 80, 0.6);
-            color: #81c784;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            display: inline-block;
-            animation: pulse 2s infinite;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-        }
-        
-        .online-count {
-            color: #4fc3f7;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
+        /* Контент в центре */
         .splash-center {
             flex: 1;
             display: flex;
@@ -142,54 +122,39 @@
             animation: fadeIn 1s ease;
         }
         
-        .game-info {
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 20px;
-            padding: 25px;
-            border: 3px solid #2196f3;
-            max-width: 90%;
-            backdrop-filter: blur(15px);
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
-            transform-style: preserve-3d;
-            transform: translateZ(10px);
+        /* Меню кнопки на заставке */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 1s ease;
         }
         
-        .game-info h3 {
-            color: #4fc3f7;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
-            text-shadow: 0 0 15px rgba(79, 195, 247, 0.6);
-        }
-        
-        .controls-list {
-            text-align: left;
-            display: inline-block;
-            font-size: 1rem;
-        }
-        
-        .controls-list p {
-            margin: 10px 0;
+        .menu-btn {
+            padding: 18px 25px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid rgba(33, 150, 243, 0.5);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-radius: 10px;
+            justify-content: center;
+            gap: 12px;
             transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
         
-        .controls-list p:hover {
-            background: rgba(79, 195, 247, 0.1);
-            transform: translateX(5px);
+        .menu-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
+            border-color: #2196f3;
+            transform: translateY(-2px);
         }
         
-        .controls-list i {
-            color: #4fc3f7;
-            width: 24px;
-            font-size: 1.1rem;
-            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
-        }
-        
+        /* Кнопки внизу */
         .splash-buttons {
             position: relative;
             z-index: 3;
@@ -204,7 +169,7 @@
         
         .start-btn {
             padding: 18px 35px;
-            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            background: linear-gradient(90deg, #2196f3, #1976d2);
             border: none;
             border-radius: 30px;
             color: white;
@@ -215,26 +180,21 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.7), 0 0 40px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6);
             transition: all 0.3s;
-            transform-style: preserve-3d;
         }
         
         .start-btn:hover {
-            transform: scale(1.05) translateZ(10px);
-            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.9), 0 0 60px rgba(33, 150, 243, 0.5);
-        }
-        
-        .start-btn i {
-            animation: spinSlow 3s linear infinite;
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(33, 150, 243, 0.8);
         }
         
         .skip-intro-btn {
             padding: 14px 25px;
             background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 25px;
-            color: rgba(255, 255, 255, 0.95);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1rem;
             cursor: pointer;
             display: flex;
@@ -242,46 +202,44 @@
             justify-content: center;
             gap: 10px;
             transition: all 0.3s;
-            backdrop-filter: blur(10px);
         }
         
         .skip-intro-btn:hover {
             background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.7);
-            transform: translateZ(5px);
+            border-color: rgba(255, 255, 255, 0.5);
         }
         
+        /* Бейдж Telegram в самом низу */
         .tg-badge-bottom {
             margin-top: 5px;
-            padding: 10px 20px;
-            background: rgba(33, 150, 243, 0.3);
-            border-radius: 25px;
+            padding: 8px 16px;
+            background: rgba(33, 150, 243, 0.2);
+            border-radius: 20px;
             font-size: 0.9rem;
             color: #4fc3f7;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             margin-bottom: 10px;
-            border: 2px solid rgba(79, 195, 247, 0.4);
-            backdrop-filter: blur(10px);
         }
         
+        /* Таймер автозапуска */
         .auto-start-timer {
             position: absolute;
             top: 20px;
             right: 20px;
             background: rgba(0, 0, 0, 0.7);
             color: #81c784;
-            padding: 12px 22px;
-            border-radius: 30px;
+            padding: 10px 18px;
+            border-radius: 25px;
             font-size: 0.95rem;
             z-index: 4;
-            border: 2px solid rgba(129, 199, 132, 0.6);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(129, 199, 132, 0.4);
+            backdrop-filter: blur(5px);
             animation: fadeIn 1s ease;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
         
+        /* Основной интерфейс */
         .app { 
             display: flex; 
             flex-direction: column; 
@@ -295,64 +253,40 @@
         }
         
         .header { 
-            padding: 20px 25px;
+            padding: 15px 20px;
             text-align: center;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(22, 36, 71, 0.95) 100%);
-            backdrop-filter: blur(15px);
-            border-bottom: 4px solid #2196f3;
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid #2196f3;
             position: relative;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-            z-index: 100;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
         }
         
         .header h1 { 
             color: #4fc3f7; 
-            margin: 0 0 15px 0;
+            margin: 0 0 8px 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            font-size: 1.6rem;
-            text-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
-            font-weight: 700;
+            gap: 12px;
+            font-size: 1.5rem;
         }
         
         .header-stats {
             color: #81c784;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             justify-content: center;
-            gap: 25px;
+            gap: 15px;
             flex-wrap: wrap;
-            text-shadow: 0 0 10px rgba(129, 199, 132, 0.5);
-        }
-        
-        .header-stats span {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px 15px;
-            border-radius: 15px;
-            border: 2px solid rgba(79, 195, 247, 0.3);
         }
         
         .map-container {
             flex: 1;
-            margin: 15px;
-            border-radius: 15px;
+            margin: 10px;
+            border-radius: 12px;
             overflow: hidden;
             position: relative;
-            border: 4px solid #2196f3;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(33, 150, 243, 0.2);
-            transform-style: preserve-3d;
+            border: 3px solid #2196f3;
         }
         
         #yandex-map {
@@ -360,211 +294,340 @@
             height: 100%;
         }
         
+        /* Онлайн индикатор */
         .online-indicator {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.8);
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
             color: #81c784;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
             z-index: 1000;
-            border: 2px solid rgba(129, 199, 132, 0.6);
+            border: 1px solid rgba(129, 199, 132, 0.4);
             display: flex;
             align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            transform: translateZ(20px);
-        }
-        
-        .connection-status {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            z-index: 1000;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            transform: translateZ(20px);
+            gap: 5px;
         }
         
         .tools {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            padding: 15px;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.95) 0%, rgba(22, 36, 71, 0.95) 100%);
-            backdrop-filter: blur(15px);
-            border-top: 4px solid #2196f3;
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
-            transform-style: preserve-3d;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(10px);
         }
         
         .tool-btn {
-            padding: 12px 8px;
-            background: linear-gradient(135deg, rgba(33, 150, 243, 0.3) 0%, rgba(79, 195, 247, 0.2) 100%);
-            border: 3px solid #2196f3;
-            border-radius: 15px;
+            padding: 10px 5px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196f3;
+            border-radius: 8px;
             color: white;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            transform-style: preserve-3d;
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
-        }
-        
-        .tool-btn i {
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            gap: 5px;
+            transition: all 0.2s;
         }
         
         .tool-btn.active {
-            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-            box-shadow: 0 0 25px #2196f3, 0 0 40px rgba(33, 150, 243, 0.5);
-            transform: translateZ(10px);
-        }
-        
-        .tool-btn:hover:not(.active):not(:disabled) {
-            transform: translateZ(5px);
-            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.6);
+            background: #2196f3;
+            box-shadow: 0 0 15px #2196f3;
         }
         
         .tool-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.5;
             cursor: not-allowed;
             border-color: #666;
-            box-shadow: none;
-            transform: none;
         }
         
         .marker-limit {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.9) 0%, rgba(239, 108, 0, 0.9) 100%);
+            top: 5px;
+            left: 5px;
+            background: rgba(255, 152, 0, 0.9);
             color: white;
-            padding: 10px 20px;
-            border-radius: 15px;
-            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
             z-index: 1000;
             animation: pulse 2s infinite;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
-            transform: translateZ(20px);
-            backdrop-filter: blur(10px);
         }
         
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            padding: 15px;
-            background: linear-gradient(135deg, rgba(13, 27, 42, 0.9) 0%, rgba(22, 36, 71, 0.9) 100%);
-            border-top: 4px solid #2196f3;
+            padding: 10px;
+            background: rgba(13, 27, 42, 0.9);
+            border-top: 2px solid #2196f3;
             text-align: center;
-            font-size: 0.9rem;
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
-            transform-style: preserve-3d;
-        }
-        
-        .stat-item {
-            transform: translateZ(5px);
+            font-size: 0.85rem;
         }
         
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: #4fc3f7;
-            text-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
-            margin-bottom: 5px;
         }
         
-        .notification {
+        /* Модальное окно */
+        .modal {
             position: fixed;
-            top: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #4caf50 0%, #2E7D32 100%);
-            color: white;
-            padding: 20px 25px;
-            border-radius: 15px;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            max-width: 350px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #0d1b2a, #1b3a4b);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 3px solid #2196f3;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .modal-header h2 {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-close {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: #ff4444;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            color: #e0e0e0;
+        }
+        
+        .rules-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .rules-section h3 {
+            color: #81c784;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rules-section p {
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+        
+        /* Модальное окно подписки */
+        .subscription-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30000;
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            transform-style: preserve-3d;
-            transform: translateZ(50px);
         }
         
-        .notification.error { 
-            background: linear-gradient(135deg, #f44336 0%, #c62828 100%); 
+        .subscription-modal .modal-content {
+            max-width: 400px;
+            animation: scaleIn 0.3s ease;
         }
         
-        .notification.warning { 
-            background: linear-gradient(135deg, #ff9800 0%, #ef6c00 100%); 
+        .features-list {
+            margin: 20px 0;
         }
         
-        .notification.info { 
-            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); 
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 8px;
         }
         
+        .feature i {
+            color: #4CAF50;
+        }
+        
+        .pricing {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .price-btn {
+            flex: 1;
+            background: rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .price-btn:hover {
+            background: rgba(33, 150, 243, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .price-btn.recommended {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #FFC107;
+        }
+        
+        .price-btn.recommended:hover {
+            background: rgba(255, 193, 7, 0.3);
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .period {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Уведомление о пробном периоде */
+        .trial-notification {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #FF9800, #F57C00);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+            animation: slideDown 0.5s ease;
+        }
+        
+        .trial-notification button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid white;
+            border-radius: 15px;
+            color: white;
+            padding: 5px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .trial-notification button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Анимация сирены */
+        .fa-siren::before {
+            content: "\f024";
+            animation: siren 1s infinite alternate;
+        }
+        
+        @keyframes siren {
+            0% { color: #2196f3; }
+            50% { color: #f44336; }
+            100% { color: #2196f3; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        /* Анимации */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateZ(-50px); }
-            to { opacity: 1; transform: translateZ(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px) translateZ(-50px); }
-            to { opacity: 1; transform: translateY(0) translateZ(0); }
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px) translateZ(-50px); }
-            to { opacity: 1; transform: translateY(0) translateZ(0); }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%) translateZ(-50px); opacity: 0; }
-            to { transform: translateX(0) translateZ(0); opacity: 1; }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes pulse {
-            0% { box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3); }
-            50% { box-shadow: 0 5px 30px rgba(255, 255, 255, 0.6); }
-            100% { box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3); }
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
         }
         
-        @keyframes spinSlow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateZ(10px); }
-            50% { transform: translateY(-10px) translateZ(20px); }
-        }
-        
+        /* Адаптивность */
         @media (max-height: 700px) {
             .splash-title { font-size: 2rem; }
             .splash-subtitle { font-size: 1rem; }
-            .game-info { padding: 15px; margin-bottom: 15px; }
-            .game-info h3 { font-size: 1.2rem; margin-bottom: 10px; }
-            .controls-list { font-size: 0.9rem; }
+            .menu-buttons { gap: 10px; }
+            .menu-btn { padding: 14px 20px; font-size: 1rem; }
             .start-btn { padding: 16px 30px; font-size: 1.1rem; }
             .skip-intro-btn { padding: 12px 20px; font-size: 0.95rem; }
             .tools { grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -574,7 +637,6 @@
         @media (max-height: 600px) {
             .splash-header { margin-top: 10px; }
             .splash-title { font-size: 1.8rem; }
-            .game-info { display: none; }
             .splash-center { justify-content: flex-start; padding-top: 20px; }
             .tools { grid-template-columns: repeat(5, 1fr); }
             .tg-badge-bottom { margin-bottom: 5px; }
@@ -582,57 +644,63 @@
         
         @media (max-width: 768px) {
             .splash-title { font-size: 2rem; }
-            .game-info h3 { font-size: 1.2rem; }
             .tools { grid-template-columns: repeat(5, 1fr); }
+            .pricing { flex-direction: column; }
         }
         
         @media (max-width: 480px) {
             .tools { grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .tool-btn span { font-size: 0.65rem; }
             .header-stats { gap: 10px; font-size: 0.8rem; }
+            .modal-content { padding: 15px; }
         }
     </style>
 </head>
 <body>
-    <!-- ЗАСТАВКА -->
+    <!-- Заставка с картинкой на весь экран -->
     <div id="splashScreen" class="splash-screen">
+        <!-- Картинка на весь экран -->
         <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
              class="splash-image" 
              alt="Полиция Майями"
-             onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='linear-gradient(135deg, #0a1931 0%, #162447 100%)';">
+             onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='#0a1931';">
         
+        <!-- Затемнение поверх картинки -->
         <div class="image-overlay"></div>
         
+        <!-- Контент поверх картинки -->
         <div class="splash-content">
+            <!-- Таймер автозапуска -->
             <div class="auto-start-timer" id="autoStartTimer">
                 Автозапуск через: <span id="countdown">20</span> сек
             </div>
             
+            <!-- Заголовок сверху -->
             <div class="splash-header">
                 <h1 class="splash-title">👮‍♂️ Полиция Майями 🚔</h1>
-                <p class="splash-subtitle" id="userWelcome">Загрузка системы патрулирования...</p>
-                <div class="online-status" id="onlineStatus" style="display: none;">
-                    <i class="fas fa-users"></i> Игроков онлайн: <span class="online-count" id="onlineCount">1</span>
-                </div>
+                <p class="splash-subtitle" id="userWelcome">Мультиплеерная игра</p>
             </div>
             
+            <!-- Центральный блок с кнопками меню -->
             <div class="splash-center">
-                <div class="game-info">
-                    <h3>🌍 МУЛЬТИПЛЕЕРНАЯ ИГРА</h3>
-                    <div class="controls-list">
-                        <p><i class="fas fa-globe"></i> <strong>Общие метки</strong> - видны всем игрокам</p>
-                        <p><i class="fas fa-sync"></i> <strong>Синхронизация</strong> - в реальном времени</p>
-                        <p><i class="fas fa-users"></i> <strong>Мультиплеер</strong> - играйте вместе</p>
-                        <p><i class="fas fa-shield-alt"></i> <strong>Защита</strong> - от дураков и читеров</p>
-                        <p><i class="fas fa-database"></i> <strong>Облачное сохранение</strong> - не теряется</p>
-                    </div>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="openRulesModal()">
+                        <i class="fas fa-book"></i> Правила игры
+                    </button>
+                    <button class="menu-btn" onclick="openMultiplayerInfo()">
+                        <i class="fas fa-users"></i> Мультиплеер
+                    </button>
+                    <button class="menu-btn" onclick="openControlsInfo()">
+                        <i class="fas fa-gamepad"></i> Управление
+                    </button>
                 </div>
             </div>
             
+            <!-- Кнопки внизу -->
             <div class="splash-buttons">
                 <button class="start-btn" onclick="startGame()">
                     <i class="fas fa-play-circle"></i>
-                    ПРИСОЕДИНИТЬСЯ К ИГРЕ
+                    НАЧАТЬ ИГРУ
                 </button>
                 
                 <button class="skip-intro-btn" onclick="skipIntro()">
@@ -640,21 +708,22 @@
                     Пропустить заставку
                 </button>
                 
+                <!-- Бейдж Telegram в самом низу -->
                 <div class="tg-badge-bottom">
-                    <i class="fab fa-telegram"></i> Мультиплеер • Telegram Mini App
+                    <i class="fab fa-telegram"></i> Telegram Mini App • Мультиплеер
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <!-- Основной игровой интерфейс -->
     <div class="app" id="mainApp">
         <div class="header">
             <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
             <div class="header-stats">
-                <span>Патрулей: <span id="markerCount">0</span>/15</span>
-                <span>Очки: <span id="points">1000</span></span>
-                <span>Истекает: <span id="expiringCount">0</span></span>
+                <span>Меток: <span id="markerCount">0</span>/<span id="maxMarkers">40</span></span>
+                <span>Очки: <span id="points">100</span></span>
+                <span>Онлайн: <span id="onlineCount">1</span></span>
             </div>
         </div>
         
@@ -662,24 +731,20 @@
             <div id="yandex-map"></div>
             <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
                 <i class="fas fa-sync fa-spin" style="font-size: 2.5rem; margin-bottom: 20px; color: #4fc3f7;"></i>
-                <p style="color: #81c784; font-size: 1.1rem;">Загрузка карт и синхронизация...</p>
-                <p id="syncStatus" style="color: #4fc3f7; font-size: 0.9rem; margin-top: 10px;">Подключение к серверу...</p>
+                <p style="color: #81c784; font-size: 1.1rem;">Загрузка карт...</p>
+                <p id="syncStatus" style="color: #4fc3f7; font-size: 0.9rem; margin-top: 10px;">Подключение к Firebase...</p>
             </div>
             <div class="marker-limit" id="markerLimit" style="display: none;">
-                🔴 Лимит: 15 патрулей
+                🔴 Лимит: 40 меток
             </div>
-            <div class="online-indicator" id="gameOnlineIndicator">
-                <i class="fas fa-wifi"></i> <span id="onlinePlayers">1</span>
-            </div>
-            <div class="connection-status" id="connectionStatus">
-                <i class="fas fa-circle" style="color: #ff9800;"></i>
-                <span>Подключение...</span>
+            <div class="online-indicator" id="onlineIndicator">
+                <i class="fas fa-wifi"></i> <span id="playersOnline">1</span>
             </div>
         </div>
         
         <div class="tools">
             <button class="tool-btn active" onclick="selectTool('police')">
-                <i class="fas fa-police-car"></i>
+                <i class="fas fa-siren" style="font-size: 1.2em;"></i>
                 <span>Патруль</span>
             </button>
             <button class="tool-btn" onclick="selectTool('accident')">
@@ -701,19 +766,60 @@
         </div>
         
         <div class="stats">
-            <div class="stat-item">
+            <div>
                 <div class="stat-value" id="activity">0</div>
                 <div>Активность</div>
             </div>
-            <div class="stat-item">
+            <div>
                 <div class="stat-value" id="rankPoints">100%</div>
                 <div>Прогресс</div>
             </div>
-            <div class="stat-item">
+            <div>
                 <div class="stat-value" id="userRank">Новичок</div>
                 <div>Ранг</div>
             </div>
         </div>
+    </div>
+
+    <!-- Модальное окно правил -->
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> Правила игры</h2>
+                <button class="modal-close" onclick="closeRulesModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="rules-section">
+                    <h3><i class="fas fa-users"></i> Мультиплеер</h3>
+                    <p>Все игроки видят одни и те же метки в реальном времени через Firebase Cloud.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-sync"></i> Синхронизация</h3>
+                    <p>Данные обновляются каждые 10 секунд автоматически.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-database"></i> Ограничения</h3>
+                    <p>Максимум <span id="rulesMaxMarkers">40</span> меток на всю игру. Старые метки удаляются через 24 часа.</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-trophy"></i> Рейтинг</h3>
+                    <p>Зарабатывайте очки за добавление меток. Чем активнее - тем выше ранг!</p>
+                </div>
+                <div class="rules-section">
+                    <h3><i class="fas fa-shield-alt"></i> Подписка</h3>
+                    <p>Бесплатный период: 30 дней. Затем требуется подписка для продолжения игры.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление о пробном периоде -->
+    <div id="trialNotification" class="trial-notification" style="display: none;">
+        <i class="fas fa-clock"></i> 
+        <span id="trialDays">30</span> дней пробного периода
+        <button onclick="showSubscriptionModal()">⭐ Премиум</button>
     </div>
 
     <script>
@@ -727,40 +833,47 @@
             messagingSenderId: "4861394604",
             appId: "1:4861394604:web:f2acb3a189f99396a66909"
         };
-
+        
+        // ============ СИСТЕМА МОНЕТИЗАЦИИ ============
+        const TRIAL_PERIOD_DAYS = 30;
+        const PREMIUM_FEATURES = {
+            maxMarkers: 100,
+            customIcons: true,
+            prioritySync: true,
+            noAds: true,
+            analytics: true
+        };
+        
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         const tg = window.Telegram.WebApp;
         let telegramUser = null;
-        const EXPIRATION_TIME = 24 * 60 * 60 * 1000;
-        const MAX_MARKERS = 15;
-        const STARTING_POINTS = 1000;
-        const POINTS_PER_REMOVE = 1;
+        const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
+        let MAX_MARKERS = 40; // Будет изменяться в зависимости от подписки
         let autoDeleteInterval = null;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
+        // Игровые переменные
         let ymap = null;
-        let markers = new Map();
-        let markerPlacemarks = new Map();
-        let deletedMarkers = new Set();
+        let markers = [];
         let selectedTool = 'police';
-        let points = STARTING_POINTS;
+        let points = 100;
         let activity = 0;
         let pendingCommentData = null;
-        let isWaitingForComment = false;
         
-        let onlinePlayers = 1;
-        let lastSyncTime = 0;
-        let syncInterval = null;
-        let firebaseInitialized = false;
+        // Firebase
         let firebaseApp = null;
-        let firebaseDb = null;
-
+        let firebaseDatabase = null;
+        let syncInterval = null;
+        let onlinePlayers = 1;
+        
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
             
             tg.expand();
+            tg.setHeaderColor('#0d1b2a');
+            tg.setBackgroundColor('#0a1931');
             
             telegramUser = tg.initDataUnsafe?.user;
             
@@ -769,524 +882,377 @@
                 document.getElementById('userWelcome').textContent = `Добро пожаловать, ${userName}!`;
                 window.userId = telegramUser.id;
                 window.userName = userName;
-                document.getElementById('onlineStatus').style.display = 'inline-block';
             } else {
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
                 window.userId = 'guest_' + Math.random().toString(36).substr(2, 9);
                 window.userName = 'Гость';
             }
             
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                tg.showConfirm('Закрыть игру?', (confirmed) => {
+                    if (confirmed) tg.close();
+                });
+            });
+            
             startAutoStartTimer();
             initFirebase();
         }
-
-        // ============ FIREBASE ИНИЦИАЛИЗАЦИЯ ============
+        
+        // ============ ПРОВЕРКА ПОДПИСКИ ============
+        function checkSubscription() {
+            const installDate = getInstallDate();
+            const currentDate = new Date();
+            const daysPassed = Math.floor((currentDate - installDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysPassed <= TRIAL_PERIOD_DAYS) {
+                return { 
+                    status: 'trial', 
+                    daysLeft: TRIAL_PERIOD_DAYS - daysPassed,
+                    features: PREMIUM_FEATURES 
+                };
+            } else {
+                const subscription = checkActiveSubscription();
+                return {
+                    status: subscription ? 'premium' : 'expired',
+                    daysLeft: 0,
+                    features: subscription ? PREMIUM_FEATURES : null
+                };
+            }
+        }
+        
+        function getInstallDate() {
+            let installDate = localStorage.getItem('app_install_date');
+            if (!installDate) {
+                installDate = new Date().toISOString();
+                localStorage.setItem('app_install_date', installDate);
+                console.log('Дата установки сохранена:', installDate);
+            }
+            return new Date(installDate);
+        }
+        
+        function checkActiveSubscription() {
+            return localStorage.getItem('premium_subscription') === 'active';
+        }
+        
+        function updatePremiumFeatures() {
+            const subscription = checkSubscription();
+            
+            if (subscription.status === 'trial') {
+                MAX_MARKERS = 40;
+                document.getElementById('trialDays').textContent = subscription.daysLeft;
+                document.getElementById('trialNotification').style.display = 'flex';
+                document.getElementById('rulesMaxMarkers').textContent = '40';
+                showNotification(`Пробный период: ${subscription.daysLeft} дней осталось`, 'info');
+                
+                // Скрываем уведомление через 5 секунд
+                setTimeout(() => {
+                    document.getElementById('trialNotification').style.display = 'none';
+                }, 5000);
+            } else if (subscription.status === 'premium') {
+                MAX_MARKERS = 100;
+                document.getElementById('markerLimit').innerHTML = '⭐ Премиум: 100 меток';
+                document.getElementById('maxMarkers').textContent = '100';
+                document.getElementById('rulesMaxMarkers').textContent = '100';
+                document.getElementById('trialNotification').style.display = 'none';
+                showNotification('⭐ Премиум функции активны', 'success');
+            } else if (subscription.status === 'expired') {
+                MAX_MARKERS = 40;
+                document.getElementById('rulesMaxMarkers').textContent = '40';
+                setTimeout(() => {
+                    showSubscriptionModal();
+                }, 2000);
+            }
+            
+            document.getElementById('maxMarkers').textContent = MAX_MARKERS;
+        }
+        
+        function purchaseSubscription(plan) {
+            tg.showPopup({
+                title: 'Премиум подписка',
+                message: 'Доступ ко всем функциям:\n• 100 меток вместо 40\n• Приоритетная синхронизация\n• Без рекламы\n• Расширенная статистика',
+                buttons: [
+                    { id: 'monthly', type: 'default', text: '99₽/месяц' },
+                    { id: 'yearly', type: 'default', text: '990₽/год' },
+                    { id: 'cancel', type: 'cancel' }
+                ]
+            }, function(buttonId) {
+                if (buttonId === 'monthly' || buttonId === 'yearly') {
+                    initiateTelegramPayment(buttonId);
+                }
+            });
+        }
+        
+        function initiateTelegramPayment(plan) {
+            // Демо-режим для тестирования
+            localStorage.setItem('premium_subscription', 'active');
+            showNotification('✅ Подписка активирована! (демо-режим)', 'success');
+            updatePremiumFeatures();
+            
+            // В реальном приложении используйте:
+            /*
+            const paymentData = {
+                title: 'Премиум подписка',
+                description: plan === 'monthly' ? 'Месячная подписка' : 'Годовая подписка',
+                payload: JSON.stringify({
+                    userId: window.userId,
+                    plan: plan,
+                    timestamp: Date.now()
+                }),
+                prices: plan === 'monthly' ? 
+                    [{ label: 'Месячная подписка', amount: 9900 }] :
+                    [{ label: 'Годовая подписка', amount: 99000 }],
+                provider_token: 'YOUR_PROVIDER_TOKEN'
+            };
+            
+            tg.openInvoice(paymentData, function(status) {
+                if (status === 'paid') {
+                    localStorage.setItem('premium_subscription', 'active');
+                    showNotification('✅ Подписка активирована!', 'success');
+                    updatePremiumFeatures();
+                }
+            });
+            */
+        }
+        
+        function showSubscriptionModal() {
+            const modal = document.createElement('div');
+            modal.className = 'subscription-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-crown"></i> Пробный период закончился</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>Для продолжения игры требуется подписка.</p>
+                        <div class="features-list">
+                            <div class="feature">
+                                <i class="fas fa-check"></i> 100 меток вместо 40
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Приоритетная синхронизация
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Без рекламы
+                            </div>
+                            <div class="feature">
+                                <i class="fas fa-check"></i> Расширенная статистика
+                            </div>
+                        </div>
+                        <div class="pricing">
+                            <button class="price-btn" onclick="purchaseSubscription('monthly')">
+                                <div class="price">99₽</div>
+                                <div class="period">в месяц</div>
+                            </button>
+                            <button class="price-btn recommended" onclick="purchaseSubscription('yearly')">
+                                <div class="price">990₽</div>
+                                <div class="period">в год (экономия 20%)</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Закрытие по клику вне окна
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+        
+        // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
-                console.log('🔄 Инициализация Firebase...');
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseDatabase = firebase.database();
                 
-                if (typeof firebase === 'undefined') {
-                    console.error('❌ Библиотека Firebase не загрузилась');
-                    updateConnectionStatus('error');
-                    return;
+                console.log('✅ Firebase успешно инициализирован!');
+                
+                const syncStatus = document.getElementById('syncStatus');
+                if (syncStatus) {
+                    syncStatus.textContent = 'Подключено к Firebase ✓';
+                    syncStatus.style.color = '#4CAF50';
                 }
                 
-                firebaseApp = firebase.initializeApp(firebaseConfig);
-                firebaseDb = firebase.database();
-                firebaseInitialized = true;
-                
-                console.log('✅ Firebase инициализирован');
-                
-                firebaseDb.ref('.info/connected').on('value', (snapshot) => {
-                    if (snapshot.val() === true) {
-                        console.log('✅ Подключено к Firebase');
-                        updateConnectionStatus('connected');
-                        updateSyncStatus('В сети ✓', '#4CAF50');
-                    } else {
-                        console.log('❌ Отключено от Firebase');
-                        updateConnectionStatus('error');
-                        updateSyncStatus('Оффлайн', '#f44336');
-                    }
-                });
-                
-                startSync();
+                startFirebaseSync();
                 
             } catch (error) {
-                console.error('❌ Ошибка инициализации Firebase:', error);
-                updateConnectionStatus('error');
-                updateSyncStatus('Ошибка Firebase', '#f44336');
+                console.error('❌ Ошибка Firebase:', error);
+                
+                const syncStatus = document.getElementById('syncStatus');
+                if (syncStatus) {
+                    syncStatus.textContent = 'Firebase недоступен, используем локальное хранилище';
+                    syncStatus.style.color = '#FF9800';
+                }
+                
+                useLocalStorage();
             }
         }
-
-        // ============ ФУНКЦИИ СИНХРОНИЗАЦИИ ============
-        function startSync() {
-            console.log('🔄 Запуск синхронизации...');
-            
+        
+        // ============ СИНХРОНИЗАЦИЯ С FIREBASE ============
+        function startFirebaseSync() {
             loadMarkersFromFirebase();
-            
-            syncInterval = setInterval(() => {
-                if (markers.size > 0) {
-                    syncMarkersToFirebase();
-                }
-            }, 5000);
-            
-            updatePlayerPresence();
-            updateOnlinePlayers();
+            listenToFirebaseChanges();
+            syncInterval = setInterval(syncToFirebase, 10000);
+            updateOnlineStatus();
         }
-
-        async function loadMarkersFromFirebase() {
+        
+        function loadMarkersFromFirebase() {
             try {
-                if (!firebaseInitialized) return;
+                const markersRef = firebaseDatabase.ref('markers');
                 
-                console.log('📥 Загрузка меток из Firebase...');
+                markersRef.once('value').then((snapshot) => {
+                    const firebaseMarkers = snapshot.val() || [];
+                    console.log(`Загружено ${firebaseMarkers.length} меток из Firebase`);
+                    updateMarkersFromCloud(firebaseMarkers);
+                });
                 
-                const markersRef = firebaseDb.ref('markers');
+            } catch (error) {
+                console.error('Ошибка загрузки из Firebase:', error);
+                useLocalStorage();
+            }
+        }
+        
+        function listenToFirebaseChanges() {
+            try {
+                const markersRef = firebaseDatabase.ref('markers');
                 
                 markersRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
+                    const firebaseMarkers = snapshot.val() || [];
                     
-                    if (data) {
-                        const markersArray = Object.values(data);
-                        
-                        const filteredMarkers = markersArray.filter(marker => {
-                            if (deletedMarkers.has(marker.id)) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        
-                        console.log(`✅ Загружено ${filteredMarkers.length} меток из Firebase`);
-                        
-                        updateLocalMarkers(filteredMarkers);
-                    } else {
-                        console.log('ℹ️ В Firebase пока нет меток');
+                    if (JSON.stringify(firebaseMarkers) !== JSON.stringify(markers.map(m => ({...m, placemark: undefined})))) {
+                        console.log('Обновление меток из Firebase...');
+                        updateMarkersFromCloud(firebaseMarkers);
                     }
                 });
                 
             } catch (error) {
-                console.error('❌ Ошибка загрузки меток:', error);
+                console.error('Ошибка прослушивания Firebase:', error);
             }
         }
-
-        async function syncMarkersToFirebase() {
-            try {
-                if (!firebaseInitialized || markers.size === 0) return;
-                
-                console.log('🔄 Синхронизация меток в Firebase...');
-                
-                const markersObj = {};
-                markers.forEach((markerData, markerId) => {
-                    if (deletedMarkers.has(markerId)) {
-                        return;
-                    }
-                    
-                    markersObj[markerId] = {
-                        id: markerId,
-                        type: markerData.type || '',
-                        coords: markerData.coords || [0, 0],
-                        comment: markerData.comment || null,
-                        timestamp: markerData.timestamp || Date.now(),
-                        author: markerData.author || window.userName || '',
-                        authorId: markerData.authorId || window.userId || '',
-                        status: 'active'
-                    };
-                });
-                
-                await firebaseDb.ref('markers').set(markersObj);
-                
-                lastSyncTime = Date.now();
-                console.log(`✅ Синхронизировано ${markers.size} меток`);
-                
-                updateSyncStatus('Синхронизировано', '#4CAF50');
-                
-            } catch (error) {
-                console.error('❌ Ошибка синхронизации:', error);
-                updateSyncStatus('Ошибка синхронизации', '#f44336');
-            }
-        }
-
-        // ============ ФУНКЦИИ ДЛЯ РАБОТЫ С МЕТКАМИ ============
-        function updateLocalMarkers(cloudMarkers) {
+        
+        function updateMarkersFromCloud(cloudMarkers) {
             if (!ymap) return;
             
             const now = Date.now();
-            const existingMarkerIds = new Set(markers.keys());
-            const newMarkerIds = new Set(cloudMarkers.map(m => m.id));
             
-            existingMarkerIds.forEach(markerId => {
-                if (!newMarkerIds.has(markerId)) {
-                    removeMarkerFromMap(markerId);
-                    markers.delete(markerId);
+            markers.forEach(marker => {
+                if (marker.placemark) {
+                    ymap.geoObjects.remove(marker.placemark);
                 }
             });
+            
+            markers = [];
             
             cloudMarkers.forEach(markerData => {
                 if (now - markerData.timestamp > EXPIRATION_TIME) {
                     return;
                 }
                 
-                if (!markers.has(markerData.id)) {
-                    addMarkerToMap(markerData);
-                    markers.set(markerData.id, markerData);
-                }
+                addMarkerToMap(markerData);
+                markers.push(markerData);
             });
             
             updateUI();
             updateExpiringCount();
             checkMarkerLimit();
+            
+            console.log(`Обновлено ${markers.length} меток`);
         }
-
-        function addMarkerToMap(markerData) {
-            if (!ymap) return;
-            
-            const existingMarker = Array.from(markers.values()).find(marker => 
-                Math.abs(marker.coords[0] - markerData.coords[0]) < 0.0001 && 
-                Math.abs(marker.coords[1] - markerData.coords[1]) < 0.0001
-            );
-            
-            if (existingMarker) {
-                console.log(`⚠️ Метка уже существует по этим координатам: ${markerData.id}`);
-                return;
-            }
-            
-            let preset, iconColor;
-            
-            switch(markerData.type) {
-                case 'police':
-                    preset = 'islands#blueAutoIcon';
-                    iconColor = '#2196F3';
-                    break;
-                case 'accident':
-                    preset = 'islands#redAutoIcon';
-                    iconColor = '#F44336';
-                    break;
-                case 'help':
-                    preset = 'islands#greenAutoIcon';
-                    iconColor = '#4CAF50';
-                    break;
-                case 'hazard':
-                    preset = 'islands#orangeAutoIcon';
-                    iconColor = '#FF9800';
-                    break;
-            }
-            
-            const balloonContent = `
-                <div style="padding: 15px; max-width: 250px; background: #0d1b2a; color: white; border-radius: 10px; border-left: 5px solid ${iconColor}">
-                    <strong style="color: ${iconColor}; font-size: 1.1em;">${getToolName(markerData.type)}</strong>
-                    <div style="font-size: 0.85em; color: #aaa; margin-bottom: 8px;">
-                        <i class="fas fa-user"></i> ${markerData.author || 'Неизвестно'}
-                    </div>
-                    ${markerData.comment ? `<div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 5px; font-style: italic; color: #81c784;">
-                        💬 "${markerData.comment}"
-                    </div>` : ''}
-                    <div style="margin-top: 10px; font-size: 0.85em; color: #aaa;">
-                        Добавлено: ${new Date(markerData.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </div>
-                    <button onclick="window.deleteMarker('${markerData.id}')" 
-                            style="margin-top: 10px; padding: 8px 15px; background: linear-gradient(135deg, #f44336, #c62828); 
-                                   color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">
-                        <i class="fas fa-trash"></i> Удалить (+${POINTS_PER_REMOVE} очко)
-                    </button>
-                </div>
-            `;
-            
-            const placemark = new ymaps.Placemark(markerData.coords, {
-                hintContent: `${getToolName(markerData.type)} (${markerData.author})`,
-                balloonContent: balloonContent
-            }, {
-                preset: preset,
-                iconColor: iconColor,
-                draggable: false,
-                hasBalloon: true,
-                openBalloonOnClick: true
-            });
-            
-            ymap.geoObjects.add(placemark);
-            markerPlacemarks.set(markerData.id, placemark);
-        }
-
-        function removeMarkerFromMap(markerId) {
-            const placemark = markerPlacemarks.get(markerId);
-            if (placemark && ymap) {
-                ymap.geoObjects.remove(placemark);
-                markerPlacemarks.delete(markerId);
-            }
-        }
-
-        // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
-        function addMarker(coords, type, comment = null) {
-            if (markers.size >= MAX_MARKERS) {
-                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} патрулей!`, 'error');
-                return;
-            }
-            
-            const cost = getCost(type);
-            if (points < cost) {
-                showNotification(`❌ Нужно ${cost} очков! У вас: ${points}`, 'error');
-                return;
-            }
-            
-            const existingMarker = Array.from(markers.values()).find(marker => 
-                Math.abs(marker.coords[0] - coords[0]) < 0.0001 && 
-                Math.abs(marker.coords[1] - coords[1]) < 0.0001
-            );
-            
-            if (existingMarker) {
-                showNotification('❌ На этой позиции уже есть патруль!', 'error');
-                return;
-            }
-            
-            const markerId = 'marker_' + Date.now() + '_' + window.userId;
-            const timestamp = Date.now();
-            
-            const markerData = {
-                id: markerId,
-                type: type,
-                coords: coords,
-                comment: comment,
-                timestamp: timestamp,
-                author: window.userName,
-                authorId: window.userId
-            };
-            
-            addMarkerToMap(markerData);
-            markers.set(markerId, markerData);
-            
-            points -= cost;
-            activity++;
-            
-            saveUserData();
-            syncMarkersToFirebase();
-            updateUI();
-            checkMarkerLimit();
-            
-            showNotification(`✅ ${getToolName(type)} добавлен! Виден всем игрокам`, 'info');
-        }
-
-        async function deleteMarker(markerId) {
+        
+        function syncToFirebase() {
             try {
-                console.log(`🗑️ Удаление метки: ${markerId}`);
+                const markersData = markers.map(marker => ({
+                    id: marker.id,
+                    type: marker.type,
+                    coords: marker.coords,
+                    comment: marker.comment,
+                    timestamp: marker.timestamp,
+                    author: marker.author || window.userName,
+                    authorId: marker.authorId || window.userId
+                }));
                 
-                removeMarkerFromMap(markerId);
-                markers.delete(markerId);
-                deletedMarkers.add(markerId);
-                
-                if (firebaseInitialized) {
-                    await firebaseDb.ref('markers/' + markerId).remove();
-                }
-                
-                // Обновляем очки у всех пользователей через Firebase
-                updateUserPoints(POINTS_PER_REMOVE);
-                
-                activity++;
-                
-                saveUserData();
-                updateUI();
-                checkMarkerLimit();
-                
-                showNotification(`✅ Патруль удален! +${POINTS_PER_REMOVE} очко`, 'info');
+                firebaseDatabase.ref('markers').set(markersData)
+                    .then(() => {
+                        console.log('✅ Синхронизировано с Firebase');
+                    })
+                    .catch(error => {
+                        console.error('❌ Ошибка синхронизации:', error);
+                    });
                 
             } catch (error) {
-                console.error('❌ Ошибка удаления метки:', error);
-                showNotification('❌ Ошибка удаления патруля', 'error');
+                console.error('Ошибка синхронизации:', error);
             }
         }
-
-        // Функция обновления очков пользователя через Firebase
-        async function updateUserPoints(pointsToAdd) {
+        
+        function updateOnlineStatus() {
             try {
-                if (!firebaseInitialized) return;
-                
-                const userRef = firebaseDb.ref('users/' + window.userId);
-                
-                // Получаем текущие данные пользователя
-                const snapshot = await userRef.once('value');
-                const userData = snapshot.val() || { points: STARTING_POINTS };
-                
-                // Обновляем очки
-                const newPoints = (userData.points || STARTING_POINTS) + pointsToAdd;
-                
-                // Сохраняем в Firebase
-                await userRef.set({
+                const userStatusRef = firebaseDatabase.ref('online/' + window.userId);
+                userStatusRef.set({
                     name: window.userName,
-                    points: newPoints,
-                    lastUpdate: Date.now()
+                    lastSeen: Date.now()
                 });
                 
-                // Обновляем локально
-                points = newPoints;
-                updateUI();
+                userStatusRef.onDisconnect().remove();
+                
+                const onlineRef = firebaseDatabase.ref('online');
+                onlineRef.on('value', (snapshot) => {
+                    const users = snapshot.val() || {};
+                    const userCount = Object.keys(users).length;
+                    onlinePlayers = userCount || 1;
+                    
+                    document.getElementById('onlineCount').textContent = onlinePlayers;
+                    document.getElementById('playersOnline').textContent = onlinePlayers;
+                    document.getElementById('onlineIndicator').innerHTML = 
+                        `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
+                });
                 
             } catch (error) {
-                console.error('❌ Ошибка обновления очков:', error);
+                console.error('Ошибка онлайн статуса:', error);
             }
         }
-
-        function selectTool(tool) {
-            selectedTool = tool;
-            document.querySelectorAll('.tool-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            showNotification(`🔧 Выбрано: ${getToolName(tool)}`, 'info');
-        }
-
-        function updateUI() {
-            document.getElementById('markerCount').textContent = markers.size;
-            document.getElementById('points').textContent = points;
-            document.getElementById('activity').textContent = activity;
-            document.getElementById('userRank').textContent = getRank();
+        
+        // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
+        function useLocalStorage() {
+            console.log('Используем локальное хранилище...');
             
-            const progress = Math.min(points / 5000, 1) * 100;
-            document.getElementById('rankPoints').textContent = Math.round(progress) + '%';
-            
-            updateToolButtons();
-        }
-
-        function checkMarkerLimit() {
-            const currentMarkers = markers.size;
-            const limitElement = document.getElementById('markerLimit');
-            
-            if (currentMarkers >= MAX_MARKERS) {
-                limitElement.style.display = 'block';
-                limitElement.innerHTML = `🔴 Лимит: ${currentMarkers}/${MAX_MARKERS}`;
-                return false;
-            } else if (currentMarkers >= MAX_MARKERS * 0.8) {
-                limitElement.style.display = 'block';
-                limitElement.style.background = 'linear-gradient(135deg, rgba(255, 152, 0, 0.9) 0%, rgba(239, 108, 0, 0.9) 100%)';
-                limitElement.innerHTML = `⚠️ Лимит: ${currentMarkers}/${MAX_MARKERS}`;
-                return true;
-            } else {
-                limitElement.style.display = 'none';
-                return true;
-            }
-        }
-
-        function updateToolButtons() {
-            const toolButtons = document.querySelectorAll('.tool-btn:not([onclick*="clear"])');
-            const atLimit = markers.size >= MAX_MARKERS;
-            
-            toolButtons.forEach(btn => {
-                btn.disabled = atLimit;
-                btn.style.opacity = atLimit ? '0.4' : '1';
-                btn.style.cursor = atLimit ? 'not-allowed' : 'pointer';
-            });
-        }
-
-        function getRank() {
-            if (points >= 5000) return '👑 ШЕФ';
-            if (points >= 3000) return '🦅 КАПИТАН';
-            if (points >= 1500) return '⭐ ЛЕЙТЕНАНТ';
-            if (points >= 800) return '👮 СЕРЖАНТ';
-            if (points >= 300) return '🚓 ОФИЦЕР';
-            if (points >= 100) return '👮‍♂️ ПАТРУЛЬНЫЙ';
-            return '🎓 НОВИЧОК';
-        }
-
-        function getToolName(tool) {
-            const names = {
-                police: '🚓 ПАТРУЛЬ',
-                accident: '💥 ДТП',
-                help: '🆘 ПОМОЩЬ',
-                hazard: '🚦 ПРОБКА',
-                clear: '🗑️ УДАЛЕНИЕ'
-            };
-            return names[tool] || tool;
-        }
-
-        function getCost(type) {
-            const costs = {
-                police: 2,
-                accident: 3,
-                help: 2.5,
-                hazard: 1.5
-            };
-            return costs[type] || 2;
-        }
-
-        // ============ ОНЛАЙН ИГРОКИ ============
-        function updatePlayerPresence() {
-            if (!firebaseInitialized) return;
-            
-            const userPresenceRef = firebaseDb.ref('online/' + window.userId);
-            
-            userPresenceRef.set({
-                name: window.userName,
-                lastSeen: Date.now(),
-                points: points
-            });
-            
-            userPresenceRef.onDisconnect().remove();
-        }
-
-        function updateOnlinePlayers() {
-            if (!firebaseInitialized) return;
-            
-            const onlineRef = firebaseDb.ref('online');
-            
-            onlineRef.on('value', (snapshot) => {
-                const users = snapshot.val() || {};
-                onlinePlayers = Object.keys(users).length || 1;
-                
-                document.getElementById('onlineCount').textContent = onlinePlayers;
-                document.getElementById('onlinePlayers').textContent = onlinePlayers;
-                document.getElementById('gameOnlineIndicator').innerHTML = 
-                    `<i class="fas fa-wifi"></i> ${onlinePlayers}`;
-            });
-        }
-
-        // Загрузка очков пользователя из Firebase
-        async function loadUserPoints() {
             try {
-                if (!firebaseInitialized) return;
-                
-                const userRef = firebaseDb.ref('users/' + window.userId);
-                
-                userRef.on('value', (snapshot) => {
-                    const userData = snapshot.val();
-                    if (userData && userData.points) {
-                        points = userData.points;
-                        updateUI();
+                const saved = localStorage.getItem('miami_police_shared');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.markers) {
+                        updateMarkersFromCloud(data.markers);
                     }
-                });
+                }
+            } catch (e) {
+                console.error('Ошибка локального хранилища:', e);
+            }
+        }
+        
+        function saveToLocalStorage() {
+            try {
+                const data = {
+                    markers: markers.map(m => ({
+                        id: m.id,
+                        type: m.type,
+                        coords: m.coords,
+                        comment: m.comment,
+                        timestamp: m.timestamp,
+                        author: m.author || window.userName
+                    })),
+                    lastUpdate: Date.now()
+                };
                 
-            } catch (error) {
-                console.error('❌ Ошибка загрузки очков:', error);
+                localStorage.setItem('miami_police_shared', JSON.stringify(data));
+            } catch (e) {
+                console.error('Ошибка сохранения:', e);
             }
         }
-
-        // ============ СТАТУСЫ ============
-        function updateConnectionStatus(status) {
-            const statusEl = document.getElementById('connectionStatus');
-            if (!statusEl) return;
-            
-            const icon = statusEl.querySelector('i');
-            const text = statusEl.querySelector('span');
-            
-            if (status === 'connected') {
-                icon.style.color = '#4CAF50';
-                text.textContent = 'В сети ✓';
-                statusEl.style.borderColor = '#4CAF50';
-            } else if (status === 'error') {
-                icon.style.color = '#f44336';
-                text.textContent = 'Оффлайн ✗';
-                statusEl.style.borderColor = '#f44336';
-            } else {
-                icon.style.color = '#ff9800';
-                text.textContent = 'Подключение...';
-                statusEl.style.borderColor = '#ff9800';
-            }
-        }
-
-        function updateSyncStatus(message, color) {
-            const syncStatus = document.getElementById('syncStatus');
-            if (syncStatus) {
-                syncStatus.textContent = message;
-                syncStatus.style.color = color;
-            }
-        }
-
-        // ============ ТАЙМЕРЫ ============
+        
+        // ============ ТАЙМЕР АВТОЗАПУСКА ============
         function startAutoStartTimer() {
             const countdownElement = document.getElementById('countdown');
             countdownElement.textContent = countdownSeconds;
@@ -1303,61 +1269,33 @@
                 }
             }, 1000);
         }
-
-        function startAutoDeleteChecker() {
-            autoDeleteInterval = setInterval(checkExpiredMarkers, 30000);
-            setTimeout(checkExpiredMarkers, 1000);
+        
+        // ============ МОДАЛЬНЫЕ ОКНА ============
+        function openRulesModal() {
+            document.getElementById('rulesModal').style.display = 'flex';
         }
-
-        function checkExpiredMarkers() {
-            const now = Date.now();
-            const expiredMarkerIds = [];
-            
-            markers.forEach((marker, markerId) => {
-                if (now - marker.timestamp > EXPIRATION_TIME) {
-                    expiredMarkerIds.push(markerId);
-                }
-            });
-            
-            if (expiredMarkerIds.length > 0) {
-                deleteExpiredMarkers(expiredMarkerIds);
+        
+        function closeRulesModal() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+        
+        function openMultiplayerInfo() {
+            openRulesModal();
+        }
+        
+        function openControlsInfo() {
+            openRulesModal();
+        }
+        
+        // Закрытие по клику вне окна
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('rulesModal');
+            if (event.target === modal) {
+                closeRulesModal();
             }
-            
-            updateExpiringCount();
-        }
-
-        function deleteExpiredMarkers(expiredMarkerIds) {
-            expiredMarkerIds.forEach(markerId => {
-                deletedMarkers.add(markerId);
-                removeMarkerFromMap(markerId);
-                if (firebaseInitialized) {
-                    firebaseDb.ref('markers/' + markerId).remove();
-                }
-                markers.delete(markerId);
-            });
-            
-            updateUI();
-        }
-
-        function updateExpiringCount() {
-            const now = Date.now();
-            let expiringSoon = 0;
-            
-            markers.forEach(marker => {
-                const hoursLeft = 24 - ((now - marker.timestamp) / (60 * 60 * 1000));
-                if (hoursLeft <= 6 && hoursLeft > 0) {
-                    expiringSoon++;
-                }
-            });
-            
-            document.getElementById('expiringCount').textContent = expiringSoon;
-            if (expiringSoon > 0) {
-                document.getElementById('expiringCount').style.color = '#ff9800';
-                document.getElementById('expiringCount').style.fontWeight = 'bold';
-            }
-        }
-
-        // ============ ИГРОВЫЕ ФУНКЦИИ ============
+        });
+        
+        // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
         function skipIntro() {
             clearInterval(autoStartInterval);
             const splash = document.getElementById('splashScreen');
@@ -1372,7 +1310,7 @@
                 initGame();
             }, 300);
         }
-
+        
         function startGame() {
             clearInterval(autoStartInterval);
             const splash = document.getElementById('splashScreen');
@@ -1387,12 +1325,12 @@
                 initGame();
             }, 500);
         }
-
+        
         function initGame() {
-            console.log('🚔 Запуск многопользовательской игры...');
+            console.log('🚔 Запуск игры...');
             
+            updatePremiumFeatures();
             loadUserData();
-            loadUserPoints(); // Загружаем очки из Firebase
             startAutoDeleteChecker();
             
             if (window.ymaps) {
@@ -1401,205 +1339,341 @@
                 showError('❌ Яндекс.Карты не загрузились');
             }
         }
-
+        
+        // ============ КАРТА И ГЕОЛОКАЦИЯ ============
         function initMap() {
             try {
-                ymap = new ymaps.Map('yandex-map', {
-                    center: [55.459619, 38.438920],
-                    zoom: 15,
-                    controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
-                });
+                let center = [55.459619, 38.438920];
+                let zoom = 15;
                 
-                document.getElementById('loading').style.display = 'none';
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            center = [position.coords.latitude, position.coords.longitude];
+                            zoom = 17;
+                            createMap(center, zoom);
+                        },
+                        function(error) {
+                            console.warn('Геолокация недоступна:', error);
+                            createMap(center, zoom);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    createMap(center, zoom);
+                }
                 
-                ymap.events.add('click', function(e) {
-                    const coords = e.get('coords');
+                function createMap(centerCoords, zoomLevel) {
+                    ymap = new ymaps.Map('yandex-map', {
+                        center: centerCoords,
+                        zoom: zoomLevel,
+                        controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
+                    });
                     
-                    if (isWaitingForComment) return; // Защита от повторных кликов
+                    const geolocationControl = new ymaps.control.GeolocationControl({
+                        options: {
+                            noPlacemark: true,
+                            position: { right: 10, top: 80 }
+                        }
+                    });
+                    ymap.controls.add(geolocationControl);
                     
-                    if (selectedTool === 'clear') {
-                        removeNearMarker(coords);
-                    } else if (selectedTool === 'police' || selectedTool === 'accident' || selectedTool === 'help') {
-                        // Для этих типов запрашиваем комментарий
-                        isWaitingForComment = true;
-                        pendingCommentData = { coords, type: selectedTool };
-                        showCommentModal();
-                    } else {
-                        // Для hazard сразу ставим без комментария
-                        addMarker(coords, selectedTool, null);
-                    }
-                });
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    ymap.events.add('click', function(e) {
+                        const coords = e.get('coords');
+                        
+                        if (selectedTool === 'clear') {
+                            removeNearMarker(coords);
+                        } else if (selectedTool === 'police' || selectedTool === 'help') {
+                            pendingCommentData = { coords, type: selectedTool };
+                            showCommentModal();
+                        } else {
+                            addMarker(coords, selectedTool, null);
+                        }
+                    });
+                }
                 
-                loadMarkersFromFirebase();
                 updateUI();
                 updateExpiringCount();
                 checkMarkerLimit();
                 
-                showNotification('✅ Многопользовательская игра запущена!', 'info');
+                showNotification('✅ Игра запущена! Используйте геолокацию для навигации', 'info');
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
                 showError('❌ Ошибка загрузки карты');
             }
         }
-
+        
+        // ============ МЕТКИ ============
+        function addMarker(coords, type, comment = null) {
+            if (markers.length >= MAX_MARKERS) {
+                showNotification(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`, 'error');
+                return;
+            }
+            
+            const markerId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            const markerData = {
+                id: markerId,
+                type: type,
+                coords: coords,
+                comment: comment,
+                timestamp: Date.now(),
+                author: window.userName,
+                authorId: window.userId
+            };
+            
+            addMarkerToMap(markerData);
+            markers.push(markerData);
+            
+            points += 10;
+            activity += 1;
+            
+            updateUI();
+            checkMarkerLimit();
+            saveToLocalStorage();
+            syncToFirebase();
+            
+            const typeNames = {
+                'police': 'Патруль',
+                'accident': 'ДТП',
+                'help': 'Помощь',
+                'hazard': 'Пробка'
+            };
+            
+            showNotification(`✅ Добавлена метка: ${typeNames[type]}`, 'success');
+        }
+        
+        function addMarkerToMap(markerData) {
+            if (!ymap) return;
+            
+            const iconColor = {
+                'police': '#2196F3',
+                'accident': '#F44336',
+                'help': '#4CAF50',
+                'hazard': '#FF9800'
+            }[markerData.type] || '#2196F3';
+            
+            const iconContent = {
+                'police': '<i class="fas fa-siren" style="color: white;"></i>',
+                'accident': '<i class="fas fa-car-crash" style="color: white;"></i>',
+                'help': '<i class="fas fa-flag" style="color: white;"></i>',
+                'hazard': '<i class="fas fa-traffic-light" style="color: white;"></i>'
+            }[markerData.type] || '<i class="fas fa-map-marker" style="color: white;"></i>';
+            
+            const placemark = new ymaps.Placemark(
+                markerData.coords,
+                {
+                    balloonContent: `
+                        <div style="padding: 10px;">
+                            <h3 style="margin: 0 0 10px 0; color: ${iconColor}">
+                                ${markerData.type === 'police' ? '👮‍♂️ Патруль' : 
+                                  markerData.type === 'accident' ? '🚗 ДТП' :
+                                  markerData.type === 'help' ? '🆘 Помощь' : '🚦 Пробка'}
+                            </h3>
+                            ${markerData.comment ? `<p><strong>Комментарий:</strong> ${markerData.comment}</p>` : ''}
+                            <p><strong>Автор:</strong> ${markerData.author}</p>
+                            <p><strong>Время:</strong> ${new Date(markerData.timestamp).toLocaleString()}</p>
+                        </div>
+                    `,
+                    iconCaption: markerData.comment || ''
+                },
+                {
+                    preset: 'islands#icon',
+                    iconColor: iconColor,
+                    iconLayout: 'default#imageWithContent',
+                    iconImageHref: '',
+                    iconImageSize: [40, 40],
+                    iconImageOffset: [-20, -40],
+                    iconContentOffset: [0, 0],
+                    iconContentLayout: ymaps.templateLayoutFactory.createClass(
+                        `<div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${iconContent}</div>`
+                    )
+                }
+            );
+            
+            markerData.placemark = placemark;
+            ymap.geoObjects.add(placemark);
+        }
+        
         function removeNearMarker(coords) {
+            if (!markers.length) {
+                showNotification('Нет меток для удаления', 'info');
+                return;
+            }
+            
             let closestMarker = null;
             let minDistance = Infinity;
-            let closestMarkerId = null;
             
-            markers.forEach((marker, markerId) => {
+            markers.forEach(marker => {
                 const distance = Math.sqrt(
                     Math.pow(marker.coords[0] - coords[0], 2) + 
                     Math.pow(marker.coords[1] - coords[1], 2)
-                );
+                ) * 111000; // Примерное расстояние в метрах
                 
-                if (distance < minDistance && distance < 0.001) {
+                if (distance < 50 && distance < minDistance) { // 50 метров
                     minDistance = distance;
                     closestMarker = marker;
-                    closestMarkerId = markerId;
                 }
             });
             
-            if (closestMarkerId) {
-                deleteMarker(closestMarkerId);
-            } else {
-                showNotification('❌ Нет патрулей для удаления рядом', 'warning');
-            }
-        }
-
-        // ============ УВЕДОМЛЕНИЯ ============
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                    <div>${message}</div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100px) translateZ(-50px)';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        function showError(message) {
-            document.getElementById('loading').innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="color: #f44336; font-size: 3rem;"></i>
-                <p style="color: #f44336;">${message}</p>
-                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #2196f3, #1976d2); color: white; border: none; border-radius: 5px;">
-                    Перезагрузить
-                </button>
-            `;
-        }
-
-        function showCommentModal() {
-            const comment = prompt(`💬 Введите комментарий для ${getToolName(pendingCommentData.type)} (до 30 символов, необязательно):`, '');
-            
-            isWaitingForComment = false; // Сбрасываем флаг ожидания
-            
-            if (comment === null) {
-                // Пользователь нажал "Отмена" - НЕ добавляем метку
-                showNotification('❌ Установка патруля отменена', 'warning');
-                pendingCommentData = null;
-                return;
-            }
-            
-            if (comment.length > 30) {
-                showNotification('❌ Максимум 30 символов!', 'error');
-                pendingCommentData = null;
-                return;
-            }
-            
-            if (pendingCommentData) {
-                addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim() || null);
-                pendingCommentData = null;
-            }
-        }
-
-        // ============ СОХРАНЕНИЕ ДАННЫХ ============
-        function saveUserData() {
-            try {
-                const userData = {
-                    points: points,
-                    activity: activity,
-                    userId: window.userId,
-                    userName: window.userName,
-                    lastPlayed: Date.now(),
-                    deletedMarkers: Array.from(deletedMarkers)
-                };
-                
-                localStorage.setItem(`miami_police_user_${window.userId}`, JSON.stringify(userData));
-                
-                // Также сохраняем в Firebase
-                if (firebaseInitialized) {
-                    firebaseDb.ref('users/' + window.userId).set({
-                        name: window.userName,
-                        points: points,
-                        lastUpdate: Date.now()
-                    });
+            if (closestMarker) {
+                if (closestMarker.placemark) {
+                    ymap.geoObjects.remove(closestMarker.placemark);
                 }
                 
-            } catch (e) {
-                console.error('Ошибка сохранения пользовательских данных:', e);
+                markers = markers.filter(m => m.id !== closestMarker.id);
+                
+                points += 5;
+                updateUI();
+                checkMarkerLimit();
+                saveToLocalStorage();
+                syncToFirebase();
+                
+                showNotification('🗑️ Метка удалена', 'success');
+            } else {
+                showNotification('❌ Нет меток рядом', 'error');
             }
         }
-
+        
+        // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+        function selectTool(tool) {
+            selectedTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tool-btn').classList.add('active');
+        }
+        
+        function showCommentModal() {
+            const comment = prompt('Введите комментарий к метке:', '');
+            if (comment !== null && comment.trim() !== '') {
+                addMarker(pendingCommentData.coords, pendingCommentData.type, comment.trim());
+            }
+            pendingCommentData = null;
+        }
+        
+        function updateUI() {
+            document.getElementById('markerCount').textContent = markers.length;
+            document.getElementById('points').textContent = points;
+            document.getElementById('activity').textContent = activity;
+            
+            const rank = calculateRank();
+            document.getElementById('userRank').textContent = rank.name;
+            document.getElementById('rankPoints').textContent = rank.progress + '%';
+        }
+        
+        function calculateRank() {
+            if (activity >= 100) return { name: 'Комиссар', progress: 100 };
+            if (activity >= 50) return { name: 'Детектив', progress: Math.min(100, (activity - 50) * 2) };
+            if (activity >= 20) return { name: 'Сержант', progress: Math.min(100, (activity - 20) * 3.33) };
+            if (activity >= 5) return { name: 'Патрульный', progress: Math.min(100, (activity - 5) * 6.67) };
+            return { name: 'Новичок', progress: Math.min(100, activity * 20) };
+        }
+        
+        function checkMarkerLimit() {
+            const limitElement = document.getElementById('markerLimit');
+            if (markers.length >= MAX_MARKERS * 0.9) {
+                limitElement.style.display = 'block';
+            } else {
+                limitElement.style.display = 'none';
+            }
+        }
+        
+        function updateExpiringCount() {
+            const now = Date.now();
+            const expiringSoon = markers.filter(m => now - m.timestamp > EXPIRATION_TIME * 0.9).length;
+            if (expiringSoon > 0) {
+                showNotification(`${expiringSoon} меток скоро будут удалены`, 'warning');
+            }
+        }
+        
+        function startAutoDeleteChecker() {
+            if (autoDeleteInterval) clearInterval(autoDeleteInterval);
+            
+            autoDeleteInterval = setInterval(() => {
+                const now = Date.now();
+                const initialCount = markers.length;
+                
+                markers = markers.filter(marker => {
+                    if (now - marker.timestamp > EXPIRATION_TIME) {
+                        if (marker.placemark && ymap) {
+                            ymap.geoObjects.remove(marker.placemark);
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+                
+                if (markers.length < initialCount) {
+                    updateUI();
+                    checkMarkerLimit();
+                    syncToFirebase();
+                    console.log(`Автоудаление: удалено ${initialCount - markers.length} старых меток`);
+                }
+            }, 60000); // Проверка каждую минуту
+        }
+        
         function loadUserData() {
             try {
-                const saved = localStorage.getItem(`miami_police_user_${window.userId}`);
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    points = data.points || STARTING_POINTS;
-                    activity = data.activity || 0;
-                    if (data.deletedMarkers) {
-                        deletedMarkers = new Set(data.deletedMarkers);
-                    }
-                    updateUI();
-                } else {
-                    points = STARTING_POINTS;
+                const savedData = localStorage.getItem('user_data_' + window.userId);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    points = data.points || points;
+                    activity = data.activity || activity;
                     updateUI();
                 }
             } catch (e) {
-                console.error('Ошибка загрузки пользовательских данных:', e);
+                console.error('Ошибка загрузки данных:', e);
             }
         }
-
-        // ============ ЗАПУСК ============
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.Telegram?.WebApp) {
-                initTelegram();
+        
+        function showNotification(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // Простое уведомление через alert для демо
+            if (type === 'error') {
+                alert('❌ ' + message);
+            } else if (type === 'success') {
+                console.log('✅ ' + message);
             } else {
-                document.getElementById('userWelcome').textContent = 'Добро пожаловать в браузерную версию!';
-                window.userId = 'browser_' + Math.random().toString(36).substr(2, 9);
-                window.userName = 'Гость';
-                setTimeout(() => {
-                    startAutoStartTimer();
-                    initFirebase();
-                }, 1000);
+                console.log('ℹ️ ' + message);
             }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
+                <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки</p>
+                <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${message}</p>
+            `;
+        }
+        
+        // ============ ЗАПУСК ПРИЛОЖЕНИЯ ============
+        document.addEventListener('DOMContentLoaded', function() {
+            initTelegram();
+            
+            setTimeout(() => {
+                const subscription = checkSubscription();
+                if (subscription.status === 'expired') {
+                    setTimeout(showSubscriptionModal, 2000);
+                }
+            }, 1000);
         });
-
-        window.addEventListener('beforeunload', function() {
-            if (autoDeleteInterval) clearInterval(autoDeleteInterval);
-            if (autoStartInterval) clearInterval(autoStartInterval);
-            if (syncInterval) clearInterval(syncInterval);
-            saveUserData();
-        });
-
-        // Глобальные функции
-        window.selectTool = selectTool;
-        window.deleteMarker = deleteMarker;
+        
+        // Экспорт функций для глобального доступа
         window.startGame = startGame;
         window.skipIntro = skipIntro;
+        window.selectTool = selectTool;
+        window.openRulesModal = openRulesModal;
+        window.closeRulesModal = closeRulesModal;
+        window.openMultiplayerInfo = openMultiplayerInfo;
+        window.openControlsInfo = openControlsInfo;
+        window.purchaseSubscription = purchaseSubscription;
+        window.showSubscriptionModal = showSubscriptionModal;
     </script>
 </body>
 </html>
