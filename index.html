@@ -7,10 +7,9 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase SDK версии 8.10.0 (совместимая) -->
+    <!-- Firebase SDK версии 8.10.0 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
@@ -349,6 +348,7 @@
             color: #4fc3f7;
         }
         
+        /* Чат - ФИКС ВАЖНЫЙ! */
         .chat-container {
             position: fixed;
             top: 10px;
@@ -364,6 +364,44 @@
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* НОВЫЙ СТИЛЬ ДЛЯ СВЕРНУТОГО ЧАТА */
+        .chat-container.minimized {
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 25px !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: visible !important;
+        }
+        
+        .chat-container.minimized .chat-header {
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(33, 150, 243, 0.5) !important;
+            border-radius: 25px !important;
+            border-bottom: none !important;
+        }
+        
+        .chat-container.minimized .chat-header h3 {
+            margin: 0 !important;
+            font-size: 1.5rem !important;
+        }
+        
+        .chat-container.minimized .chat-header h3 i {
+            margin: 0 !important;
+        }
+        
+        .chat-container.minimized .chat-messages,
+        .chat-container.minimized .chat-input-container {
+            display: none !important;
         }
         
         .chat-header {
@@ -391,6 +429,11 @@
             font-size: 1.2rem;
             cursor: pointer;
             padding: 5px;
+            min-width: 30px;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .chat-messages {
@@ -471,27 +514,6 @@
             justify-content: center;
         }
         
-        .chat-minimized {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-        
-        .chat-minimized .chat-header {
-            padding: 0;
-            background: rgba(33, 150, 243, 0.5);
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .chat-minimized .chat-header h3 {
-            font-size: 1.2rem;
-        }
-        
         .chat-badge {
             position: absolute;
             top: -5px;
@@ -505,6 +527,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1001;
         }
         
         .modal {
@@ -678,6 +701,81 @@
             width: 90%;
             max-width: 400px;
             border: 3px solid #2196f3;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .comment-header h2 {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .comment-textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            color: white;
+            padding: 15px;
+            font-size: 1rem;
+            resize: none;
+            margin-bottom: 20px;
+        }
+        
+        .comment-textarea::placeholder {
+            color: #aaa;
+        }
+        
+        .comment-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .comment-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .comment-btn.add {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .comment-btn.add:hover {
+            background: #1976d2;
+        }
+        
+        .comment-btn.skip {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .comment-btn.skip:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .comment-info {
+            color: #aaa;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 15px;
         }
         
         .fa-siren::before {
@@ -857,10 +955,10 @@
             </div>
         </div>
         
-        <!-- Чат в правом верхнем углу -->
+        <!-- Чат -->
         <div id="chatContainer" class="chat-container">
             <div class="chat-header">
-                <h3><i class="fas fa-comments"></i> Чат игры</h3>
+                <h3><i class="fas fa-comments"></i> <span class="chat-title">Чат игры</span></h3>
                 <button class="chat-toggle" onclick="toggleChat()">
                     <i class="fas fa-minus"></i>
                 </button>
@@ -885,7 +983,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно правил -->
+    <!-- Модальные окна -->
     <div id="rulesModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1055,6 +1153,9 @@
         const MARKER_LIFETIME = 3 * 60 * 60 * 1000;
         const ONLINE_TIMEOUT = 30000;
         
+        // Типы меток, которые требуют комментарий
+        const TOOLS_WITH_COMMENT = ['police', 'accident', 'help']; // hazard НЕ требует комментария
+        
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         let telegramUser = null;
         let firebaseApp = null;
@@ -1219,7 +1320,12 @@
                     delete markers[markerId];
                     updateMarkerCount();
                     
-                    addChatMessage('system', `🗑️ Метка удалена: ${getMarkerTypeName(markerData.type)}`);
+                    // ФИКС: Проверяем, существует ли markerData перед использованием
+                    if (markerData && markerData.type) {
+                        addChatMessage('system', `🗑️ Метка удалена: ${getMarkerTypeName(markerData.type)}`);
+                    } else {
+                        addChatMessage('system', '🗑️ Метка удалена');
+                    }
                 }
             });
             
@@ -1464,12 +1570,26 @@
         }
         
         function deleteMarker(markerId) {
-            if (!markers[markerId]) return;
+            if (!markers[markerId]) {
+                console.error('Метка не найдена:', markerId);
+                alert('Метка не найдена или уже удалена');
+                return;
+            }
             
-            if (markers[markerId].authorId !== currentUserId) {
+            // ФИКС: Проверяем, что метка существует перед проверкой авторства
+            const marker = markers[markerId];
+            if (!marker) {
+                console.error('Метка не найдена в локальном хранилище:', markerId);
+                return;
+            }
+            
+            if (marker.authorId !== currentUserId) {
                 alert('Вы можете удалять только свои метки!');
                 return;
             }
+            
+            // ФИКС: Сохраняем тип метки перед удалением
+            const markerType = marker.type;
             
             firebaseDatabase.ref('markers/' + markerId).update({
                 isActive: false
@@ -1480,8 +1600,9 @@
                 points += 5;
                 updateUI();
                 
+                // ФИКС: Используем сохраненный тип метки
                 sendChatMessage(
-                    `${currentUserName} удалил(а) метку: ${getMarkerTypeName(markers[markerId].type)}`,
+                    `${currentUserName} удалил(а) метку: ${getMarkerTypeName(markerType)}`,
                     'marker_deleted'
                 );
             })
@@ -1565,25 +1686,42 @@
             }
         }
         
+        // ФИКС: НОВАЯ ФУНКЦИЯ ДЛЯ ЧАТА
         function toggleChat() {
             const chatContainer = document.getElementById('chatContainer');
             const toggleIcon = document.querySelector('.chat-toggle i');
+            const chatTitle = document.querySelector('.chat-title');
             
             if (chatMinimized) {
-                chatContainer.classList.remove('chat-minimized');
+                // Разворачиваем
+                chatContainer.classList.remove('minimized');
                 chatContainer.style.width = '300px';
+                chatContainer.style.height = 'auto';
                 chatContainer.style.maxHeight = '400px';
                 toggleIcon.className = 'fas fa-minus';
+                chatTitle.style.display = 'inline';
                 chatMinimized = false;
                 
+                // Показываем скрытые элементы
+                chatContainer.querySelector('.chat-messages').style.display = 'flex';
+                chatContainer.querySelector('.chat-input-container').style.display = 'flex';
+                
+                // Сбрасываем счетчик новых сообщений
                 unreadMessages = 0;
                 document.getElementById('newMessageBadge').style.display = 'none';
             } else {
-                chatContainer.classList.add('chat-minimized');
-                chatContainer.style.width = '40px';
-                chatContainer.style.maxHeight = '40px';
+                // Сворачиваем
+                chatContainer.classList.add('minimized');
+                chatContainer.style.width = '50px';
+                chatContainer.style.height = '50px';
+                chatContainer.style.maxHeight = '50px';
                 toggleIcon.className = 'fas fa-comments';
+                chatTitle.style.display = 'none';
                 chatMinimized = true;
+                
+                // Скрываем элементы
+                chatContainer.querySelector('.chat-messages').style.display = 'none';
+                chatContainer.querySelector('.chat-input-container').style.display = 'none';
             }
         }
         
@@ -1657,19 +1795,20 @@
         // ============ КАРТА ============
         function initMap() {
             try {
-                let center = [25.7617, -80.1918];
-                let zoom = 12;
+                // ФИКС: Используем Белоозерский как центр по умолчанию
+                let center = [55.459619, 38.438920]; // Белоозерский
+                let zoom = 15;
                 
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
                             center = [position.coords.latitude, position.coords.longitude];
-                            zoom = 15;
+                            zoom = 17;
                             createMap(center, zoom);
                         },
                         function(error) {
-                            console.warn('Геолокация недоступна, используем Майами:', error);
-                            addChatMessage('system', '📍 Используется карта Майами (геолокация недоступна)');
+                            console.warn('Геолокация недоступна, используем Белоозерский:', error);
+                            addChatMessage('system', '📍 Используется карта Белоозерского (геолокация недоступна)');
                             createMap(center, zoom);
                         },
                         {
@@ -1680,6 +1819,7 @@
                     );
                 } else {
                     console.log('Geolocation API не поддерживается');
+                    addChatMessage('system', '📍 Используется карта Белоозерского');
                     createMap(center, zoom);
                 }
                 
@@ -1728,7 +1868,13 @@
                             }
                         } else {
                             pendingMarkerData = { coords, type: selectedTool };
-                            openCommentModal();
+                            
+                            // ФИКС: Для метки "Пробка" не спрашиваем комментарий
+                            if (selectedTool === 'hazard') {
+                                addMarker(pendingMarkerData.coords, pendingMarkerData.type, null);
+                            } else {
+                                openCommentModal();
+                            }
                         }
                     });
                 }
@@ -1872,6 +2018,13 @@
                         }
                     }
                 });
+            });
+            
+            // ФИКС: Обработчик клика по свернутому чату
+            document.getElementById('chatContainer').addEventListener('click', function(event) {
+                if (this.classList.contains('minimized')) {
+                    toggleChat();
+                }
             });
         });
         
