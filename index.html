@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Полиция Майями👮‍♂️🚔👮‍♂️</title>
+    <title>Полиция Майами👮‍♂️🚔👮‍♂️</title>
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -43,7 +43,7 @@
             color: var(--tg-theme-text-color, white);
         }
         
-        /* Заставка с картинкой на весь экран */
+        /* Заставка */
         .splash-screen {
             position: fixed;
             top: 0;
@@ -56,7 +56,6 @@
             overflow: hidden;
         }
         
-        /* Картинка на весь экран */
         .splash-image {
             position: absolute;
             top: 0;
@@ -67,7 +66,6 @@
             z-index: 1;
         }
         
-        /* Затемнение поверх картинки */
         .image-overlay {
             position: absolute;
             top: 0;
@@ -112,7 +110,6 @@
             font-size: 1.2rem;
         }
         
-        /* Контент в центре */
         .splash-center {
             flex: 1;
             display: flex;
@@ -122,7 +119,6 @@
             animation: fadeIn 1s ease;
         }
         
-        /* Меню кнопки на заставке */
         .menu-buttons {
             display: flex;
             flex-direction: column;
@@ -154,7 +150,6 @@
             transform: translateY(-2px);
         }
         
-        /* Кнопки внизу */
         .splash-buttons {
             position: relative;
             z-index: 3;
@@ -209,7 +204,6 @@
             border-color: rgba(255, 255, 255, 0.5);
         }
         
-        /* Бейдж Telegram в самом низу */
         .tg-badge-bottom {
             margin-top: 5px;
             padding: 8px 16px;
@@ -223,7 +217,6 @@
             margin-bottom: 10px;
         }
         
-        /* Таймер автозапуска */
         .auto-start-timer {
             position: absolute;
             top: 20px;
@@ -358,6 +351,165 @@
             color: #4fc3f7;
         }
         
+        /* Новый чат в правом верхнем углу */
+        .chat-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            max-height: 400px;
+            background: rgba(13, 27, 42, 0.95);
+            border-radius: 12px;
+            border: 2px solid #2196f3;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .chat-header {
+            padding: 12px 15px;
+            background: rgba(33, 150, 243, 0.2);
+            border-bottom: 1px solid rgba(33, 150, 243, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h3 {
+            color: #4fc3f7;
+            margin: 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .chat-toggle {
+            background: none;
+            border: none;
+            color: #4fc3f7;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            max-height: 300px;
+        }
+        
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .chat-message.system {
+            background: rgba(33, 150, 243, 0.1);
+            border-left: 3px solid #2196f3;
+        }
+        
+        .chat-message.user {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .chat-message.marker {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #FFC107;
+        }
+        
+        .message-author {
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-right: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #aaa;
+            float: right;
+        }
+        
+        .chat-input-container {
+            padding: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 20px;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .chat-send {
+            background: #2196f3;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-minimized {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .chat-minimized .chat-header {
+            padding: 0;
+            background: rgba(33, 150, 243, 0.5);
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-minimized .chat-header h3 {
+            font-size: 1.2rem;
+        }
+        
+        .chat-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         /* Модальные окна */
         .modal {
             position: fixed;
@@ -423,33 +575,7 @@
             transform: rotate(90deg);
         }
         
-        .modal-body {
-            color: #e0e0e0;
-        }
-        
-        .rules-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border-left: 4px solid #2196f3;
-        }
-        
-        .rules-section h3 {
-            color: #81c784;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .rules-section p {
-            line-height: 1.5;
-            font-size: 1rem;
-        }
-        
-        /* Список игроков */
+        /* Список игроков с рангами */
         .players-list {
             max-height: 300px;
             overflow-y: auto;
@@ -467,9 +593,19 @@
             border-left: 4px solid #4CAF50;
         }
         
-        .player-item.offline {
-            border-left-color: #757575;
-            opacity: 0.7;
+        .player-item.rank-1 {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(33, 150, 243, 0.1));
+            border-left-color: #FFD700;
+        }
+        
+        .player-item.rank-2 {
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), rgba(33, 150, 243, 0.1));
+            border-left-color: #C0C0C0;
+        }
+        
+        .player-item.rank-3 {
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), rgba(33, 150, 243, 0.1));
+            border-left-color: #CD7F32;
         }
         
         .player-info {
@@ -487,66 +623,43 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+            position: relative;
+        }
+        
+        .player-rank-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #FF9800;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .player-details {
+            display: flex;
+            flex-direction: column;
         }
         
         .player-name {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
-        .player-status {
-            font-size: 0.8rem;
+        .player-stats {
+            font-size: 0.75rem;
             color: #81c784;
-        }
-        
-        .player-status.offline {
-            color: #757575;
-        }
-        
-        .player-actions {
             display: flex;
             gap: 8px;
         }
         
-        .action-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            padding: 5px 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s;
-        }
-        
-        .action-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Кнопка удаления на метках */
-        .marker-delete-btn {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-        }
-        
-        .marker-delete-btn:hover {
-            background: #d32f2f;
-            transform: scale(1.1);
+        .player-score {
+            color: #FFD700;
         }
         
         /* Модальное окно комментария */
@@ -573,193 +686,6 @@
             border: 3px solid #2196f3;
         }
         
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(33, 150, 243, 0.3);
-        }
-        
-        .comment-header h2 {
-            color: #4fc3f7;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .comment-textarea {
-            width: 100%;
-            height: 120px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #2196f3;
-            border-radius: 10px;
-            color: white;
-            padding: 15px;
-            font-size: 1rem;
-            resize: none;
-            margin-bottom: 20px;
-        }
-        
-        .comment-textarea::placeholder {
-            color: #aaa;
-        }
-        
-        .comment-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .comment-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .comment-btn.add {
-            background: #2196f3;
-            color: white;
-        }
-        
-        .comment-btn.add:hover {
-            background: #1976d2;
-        }
-        
-        .comment-btn.skip {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .comment-btn.skip:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .comment-info {
-            color: #aaa;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-top: 15px;
-        }
-        
-        /* Модальное окно подписки */
-        .subscription-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 30000;
-            backdrop-filter: blur(10px);
-        }
-        
-        .subscription-modal .modal-content {
-            max-width: 400px;
-            animation: scaleIn 0.3s ease;
-        }
-        
-        .features-list {
-            margin: 20px 0;
-        }
-        
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-            padding: 10px;
-            background: rgba(33, 150, 243, 0.1);
-            border-radius: 8px;
-        }
-        
-        .feature i {
-            color: #4CAF50;
-        }
-        
-        .pricing {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .price-btn {
-            flex: 1;
-            background: rgba(33, 150, 243, 0.2);
-            border: 2px solid #2196f3;
-            border-radius: 15px;
-            padding: 15px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .price-btn:hover {
-            background: rgba(33, 150, 243, 0.3);
-            transform: translateY(-3px);
-        }
-        
-        .price-btn.recommended {
-            background: rgba(255, 193, 7, 0.2);
-            border-color: #FFC107;
-        }
-        
-        .price-btn.recommended:hover {
-            background: rgba(255, 193, 7, 0.3);
-        }
-        
-        .price {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .period {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        /* Уведомление о пробном периоде */
-        .trial-notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(90deg, #FF9800, #F57C00);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            z-index: 10000;
-            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
-            animation: slideDown 0.5s ease;
-        }
-        
-        .trial-notification button {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid white;
-            border-radius: 15px;
-            color: white;
-            padding: 5px 15px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: all 0.3s;
-        }
-        
-        .trial-notification button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
         /* Анимация сирены */
         .fa-siren::before {
             content: "🚨";
@@ -772,17 +698,6 @@
             100% { transform: scale(1); }
         }
         
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes slideDown {
-            from { transform: translate(-50%, -100%); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        
-        /* Анимации */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -804,6 +719,11 @@
             100% { opacity: 0.7; }
         }
         
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
         /* Адаптивность */
         @media (max-height: 700px) {
             .splash-title { font-size: 2rem; }
@@ -812,60 +732,51 @@
             .menu-btn { padding: 14px 20px; font-size: 1rem; }
             .start-btn { padding: 16px 30px; font-size: 1.1rem; }
             .skip-intro-btn { padding: 12px 20px; font-size: 0.95rem; }
-            .tools { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-            .tool-btn { font-size: 0.7rem; padding: 8px 3px; }
-        }
-        
-        @media (max-height: 600px) {
-            .splash-header { margin-top: 10px; }
-            .splash-title { font-size: 1.8rem; }
-            .splash-center { justify-content: flex-start; padding-top: 20px; }
-            .tools { grid-template-columns: repeat(5, 1fr); }
-            .tg-badge-bottom { margin-bottom: 5px; }
+            .chat-container { max-height: 300px; }
         }
         
         @media (max-width: 768px) {
-            .splash-title { font-size: 2rem; }
-            .tools { grid-template-columns: repeat(5, 1fr); }
-            .pricing { flex-direction: column; }
+            .chat-container {
+                width: 250px;
+                max-height: 350px;
+            }
         }
         
         @media (max-width: 480px) {
-            .tools { grid-template-columns: repeat(3, 1fr); gap: 5px; }
-            .tool-btn span { font-size: 0.65rem; }
-            .header-stats { gap: 10px; font-size: 0.8rem; }
-            .modal-content { padding: 15px; }
-            .player-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .player-actions { width: 100%; justify-content: flex-end; }
+            .chat-container {
+                width: 200px;
+                max-height: 300px;
+            }
+            .chat-input-container {
+                padding: 8px;
+            }
+            .chat-input {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Заставка с картинкой на весь экран -->
+    <!-- Заставка -->
     <div id="splashScreen" class="splash-screen">
-        <!-- Картинка на весь экран -->
         <img src="https://static.craftum.com/9F-qvclCZh6dtPwdnNtlBy-tW_0=/380x0/filters:no_upscale()/https://274418.selcdn.ru/cv08300-33250f0d-0664-43fc-9dbf-9d89738d114e/uploads/655846/14f3a178-0a4b-4df5-bf77-949d65a34e3a.jpg" 
              class="splash-image" 
-             alt="Полиция Майями"
+             alt="Полиция Майами"
              onerror="this.style.display='none'; document.querySelector('.image-overlay').style.background='#0a1931';">
         
-        <!-- Затемнение поверх картинки -->
         <div class="image-overlay"></div>
         
-        <!-- Контент поверх картинки -->
         <div class="splash-content">
-            <!-- Таймер автозапуска -->
             <div class="auto-start-timer" id="autoStartTimer">
                 Автозапуск через: <span id="countdown">20</span> сек
             </div>
             
-            <!-- Заголовок сверху -->
             <div class="splash-header">
-                <h1 class="splash-title">👮‍♂️ Полиция Майями 🚔</h1>
+                <h1 class="splash-title">👮‍♂️ Полиция Майами 🚔</h1>
                 <p class="splash-subtitle" id="userWelcome">Мультиплеерная игра</p>
             </div>
             
-            <!-- Центральный блок с кнопками меню -->
             <div class="splash-center">
                 <div class="menu-buttons">
                     <button class="menu-btn" onclick="openRulesModal()">
@@ -880,7 +791,6 @@
                 </div>
             </div>
             
-            <!-- Кнопки внизу -->
             <div class="splash-buttons">
                 <button class="start-btn" onclick="startGame()">
                     <i class="fas fa-play-circle"></i>
@@ -892,7 +802,6 @@
                     Пропустить заставку
                 </button>
                 
-                <!-- Бейдж Telegram в самом низу -->
                 <div class="tg-badge-bottom">
                     <i class="fab fa-telegram"></i> Telegram Mini App • Мультиплеер
                 </div>
@@ -903,7 +812,7 @@
     <!-- Основной игровой интерфейс -->
     <div class="app" id="mainApp">
         <div class="header">
-            <h1><i class="fas fa-police-car"></i> Полиция Майями 👮‍♂️🚔</h1>
+            <h1><i class="fas fa-police-car"></i> Полиция Майами 👮‍♂️🚔</h1>
             <div class="header-stats">
                 <span>Меток: <span id="markerCount">0</span>/<span id="maxMarkers">40</span></span>
                 <span>Очки: <span id="points">100</span></span>
@@ -960,6 +869,33 @@
                 <div>Ранг</div>
             </div>
         </div>
+        
+        <!-- Чат в правом верхнем углу -->
+        <div id="chatContainer" class="chat-container">
+            <div class="chat-header">
+                <h3><i class="fas fa-comments"></i> Чат игры</h3>
+                <button class="chat-toggle" onclick="toggleChat()">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message system">
+                    <span class="message-author">🚨 Система:</span> Добро пожаловать в игру!
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" 
+                       class="chat-input" 
+                       id="chatInput" 
+                       placeholder="Введите сообщение..."
+                       maxlength="200"
+                       onkeypress="handleChatKeyPress(event)">
+                <button class="chat-send" onclick="sendChatMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-badge" id="newMessageBadge" style="display: none;">1</div>
+        </div>
     </div>
 
     <!-- Модальное окно правил -->
@@ -989,14 +925,15 @@
                 
                 <div class="rules-section">
                     <h3><i class="fas fa-sync"></i> Синхронизация</h3>
-                    <p>Данные обновляются каждые 10 секунд автоматически.</p>
-                    <p>Метки сохраняются в облаке и доступны всем игрокам.</p>
+                    <p>Данные обновляются мгновенно благодаря Firebase Realtime Database.</p>
+                    <p>Новые метки появляются у всех игроков в течение 1-2 секунд.</p>
                 </div>
                 
                 <div class="rules-section">
                     <h3><i class="fas fa-database"></i> Ограничения</h3>
                     <p>Максимум <span id="rulesMaxMarkers">40</span> меток на всю игру.</p>
-                    <p>Старые метки автоматически удаляются через 24 часа.</p>
+                    <p><strong>Метки автоматически удаляются через 3 часа!</strong></p>
+                    <p>Это ограничение тарифа Firebase для предотвращения переполнения базы данных.</p>
                 </div>
                 
                 <div class="rules-section">
@@ -1007,11 +944,10 @@
                 </div>
                 
                 <div class="rules-section">
-                    <h3><i class="fas fa-shield-alt"></i> Правила поведения</h3>
-                    <p>1. Используйте игру только в развлекательных целях</p>
-                    <p>2. Не создавайте метки с оскорбительным содержанием</p>
-                    <p>3. Помогайте другим игрокам виртуальными советами</p>
-                    <p>4. Не злоупотребляйте системой меток</p>
+                    <h3><i class="fas fa-comments"></i> Игровой чат</h3>
+                    <p>1. Используйте чат для координации действий</p>
+                    <p>2. Сообщайте о новых метках и удалениях</p>
+                    <p>3. Не спамьте и не нарушайте правила общения</p>
                 </div>
                 
                 <div class="rules-section">
@@ -1035,14 +971,12 @@
             </div>
             <div class="modal-body">
                 <div class="players-list" id="playersList">
-                    <!-- Список игроков будет загружен здесь -->
                     <p style="text-align: center; color: #aaa;">Загрузка списка игроков...</p>
                 </div>
                 <div style="text-align: center; margin-top: 20px;">
                     <p><i class="fas fa-info-circle"></i> Игроков онлайн: <span id="modalOnlineCount">1</span></p>
                     <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
-                        Отображаются все игроки, подключённые к игре<br>
-                        через Telegram или вошедшие как ГОСТЬ
+                        Таблица лидеров обновляется в реальном времени
                     </p>
                 </div>
             </div>
@@ -1066,6 +1000,21 @@
                     <p>3. Для удаления: выберите инструмент "Удалить" или нажмите на крестик на метке</p>
                     <p>4. Используйте кнопку геолокации на карте для перемещения к своему местоположению</p>
                     <p>5. Метки синхронизируются автоматически со всеми игроками</p>
+                </div>
+                
+                <div class="rules-section">
+                    <h3><i class="fas fa-comments"></i> Игровой чат</h3>
+                    <p>• Чат расположен в правом верхнем углу</p>
+                    <p>• Нажмите на "-" чтобы свернуть/развернуть</p>
+                    <p>• Красный значок показывает новые сообщения</p>
+                </div>
+                
+                <div class="rules-section">
+                    <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                    <p>Чат автоматически показывает:</p>
+                    <p>• Новые метки на карте</p>
+                    <p>• Удаления меток</p>
+                    <p>• Сообщения других игроков</p>
                 </div>
             </div>
         </div>
@@ -1101,13 +1050,6 @@
         </div>
     </div>
 
-    <!-- Уведомление о пробном периоде -->
-    <div id="trialNotification" class="trial-notification">
-        <i class="fas fa-clock"></i> 
-        <span id="trialDays">30</span> дней пробного периода
-        <button onclick="showSubscriptionModal()">⭐ Премиум</button>
-    </div>
-
     <script>
         // ============ КОНФИГУРАЦИЯ FIREBASE ============
         const firebaseConfig = {
@@ -1120,39 +1062,35 @@
             appId: "1:4861394604:web:f2acb3a189f99396a66909"
         };
         
-        // ============ СИСТЕМА МОНЕТИЗАЦИИ ============
-        const TRIAL_PERIOD_DAYS = 30;
-        const PREMIUM_FEATURES = {
-            maxMarkers: 100,
-            customIcons: true,
-            prioritySync: true,
-            noAds: true,
-            analytics: true
-        };
+        // ============ КОНСТАНТЫ ИГРЫ ============
+        const tg = window.Telegram.WebApp;
+        const MAX_MARKERS = 40; // Максимум меток на всю карту
+        const MARKER_LIFETIME = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
+        const ONLINE_TIMEOUT = 30000; // 30 секунд для офлайн статуса
         
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
-        const tg = window.Telegram.WebApp;
         let telegramUser = null;
-        const EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 24 часа
-        let MAX_MARKERS = 40;
-        let autoDeleteInterval = null;
-        let autoStartInterval = null;
-        let countdownSeconds = 20;
-        
-        // Игровые переменные
+        let firebaseApp = null;
+        let firebaseDatabase = null;
         let ymap = null;
-        let markers = [];
+        
+        // Данные игры
+        let markers = {}; // Объект { markerId: markerData }
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
         let pendingMarkerData = null;
         
-        // Firebase
-        let firebaseApp = null;
-        let firebaseDatabase = null;
-        let syncInterval = null;
+        // Онлайн игроки
         let onlinePlayers = {};
-        let currentOnlineCount = 1;
+        let currentUserId = null;
+        let currentUserName = 'Гость';
+        
+        // Чат
+        let chatMinimized = false;
+        let unreadMessages = 0;
+        let autoStartInterval = null;
+        let countdownSeconds = 20;
         
         // ============ ИНИЦИАЛИЗАЦИЯ TELEGRAM ============
         function initTelegram() {
@@ -1165,161 +1103,27 @@
             telegramUser = tg.initDataUnsafe?.user;
             
             if (telegramUser) {
-                const userName = telegramUser.first_name || telegramUser.username || 'Игрок';
-                document.getElementById('userWelcome').textContent = `Добро пожаловать, ${userName}!`;
-                window.userId = telegramUser.id.toString();
-                window.userName = userName;
+                currentUserName = telegramUser.first_name || telegramUser.username || 'Игрок';
+                currentUserId = telegramUser.id.toString();
+                document.getElementById('userWelcome').textContent = `Добро пожаловать, ${currentUserName}!`;
             } else {
+                currentUserName = 'Гость_' + Math.random().toString(36).substr(2, 6);
+                currentUserId = 'guest_' + Math.random().toString(36).substr(2, 9);
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
-                window.userId = 'guest_' + Math.random().toString(36).substr(2, 9);
-                window.userName = 'Гость';
             }
             
             tg.BackButton.show();
             tg.BackButton.onClick(() => {
                 tg.showConfirm('Закрыть игру?', (confirmed) => {
-                    if (confirmed) tg.close();
+                    if (confirmed) {
+                        cleanupBeforeExit();
+                        tg.close();
+                    }
                 });
             });
             
             startAutoStartTimer();
             initFirebase();
-        }
-        
-        // ============ ПРОВЕРКА ПОДПИСКИ ============
-        function checkSubscription() {
-            const installDate = getInstallDate();
-            const currentDate = new Date();
-            const daysPassed = Math.floor((currentDate - installDate) / (1000 * 60 * 60 * 24));
-            
-            if (daysPassed <= TRIAL_PERIOD_DAYS) {
-                return { 
-                    status: 'trial', 
-                    daysLeft: TRIAL_PERIOD_DAYS - daysPassed,
-                    features: PREMIUM_FEATURES 
-                };
-            } else {
-                const subscription = checkActiveSubscription();
-                return {
-                    status: subscription ? 'premium' : 'expired',
-                    daysLeft: 0,
-                    features: subscription ? PREMIUM_FEATURES : null
-                };
-            }
-        }
-        
-        function getInstallDate() {
-            let installDate = localStorage.getItem('app_install_date');
-            if (!installDate) {
-                installDate = new Date().toISOString();
-                localStorage.setItem('app_install_date', installDate);
-                console.log('Дата установки сохранена:', installDate);
-            }
-            return new Date(installDate);
-        }
-        
-        function checkActiveSubscription() {
-            return localStorage.getItem('premium_subscription') === 'active';
-        }
-        
-        function updatePremiumFeatures() {
-            const subscription = checkSubscription();
-            
-            if (subscription.status === 'trial') {
-                MAX_MARKERS = 40;
-                document.getElementById('trialDays').textContent = subscription.daysLeft;
-                document.getElementById('trialNotification').style.display = 'flex';
-                document.getElementById('rulesMaxMarkers').textContent = '40';
-                
-                setTimeout(() => {
-                    document.getElementById('trialNotification').style.display = 'none';
-                }, 5000);
-            } else if (subscription.status === 'premium') {
-                MAX_MARKERS = 100;
-                document.getElementById('markerLimit').innerHTML = '⭐ Премиум: 100 меток';
-                document.getElementById('maxMarkers').textContent = '100';
-                document.getElementById('rulesMaxMarkers').textContent = '100';
-                document.getElementById('trialNotification').style.display = 'none';
-            } else if (subscription.status === 'expired') {
-                MAX_MARKERS = 40;
-                document.getElementById('rulesMaxMarkers').textContent = '40';
-                setTimeout(() => {
-                    showSubscriptionModal();
-                }, 2000);
-            }
-            
-            document.getElementById('maxMarkers').textContent = MAX_MARKERS;
-        }
-        
-        function purchaseSubscription(plan) {
-            tg.showPopup({
-                title: 'Премиум подписка',
-                message: 'Доступ ко всем функциям:\n• 100 меток вместо 40\n• Приоритетная синхронизация\n• Без рекламы\n• Расширенная статистика',
-                buttons: [
-                    { id: 'monthly', type: 'default', text: '99₽/месяц' },
-                    { id: 'yearly', type: 'default', text: '990₽/год' },
-                    { id: 'cancel', type: 'cancel' }
-                ]
-            }, function(buttonId) {
-                if (buttonId === 'monthly' || buttonId === 'yearly') {
-                    initiateTelegramPayment(buttonId);
-                }
-            });
-        }
-        
-        function initiateTelegramPayment(plan) {
-            // Демо-режим для тестирования
-            localStorage.setItem('premium_subscription', 'active');
-            updatePremiumFeatures();
-            
-            // В реальном приложении используйте Telegram Payments API
-        }
-        
-        function showSubscriptionModal() {
-            const modal = document.createElement('div');
-            modal.className = 'subscription-modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2><i class="fas fa-crown"></i> Пробный период закончился</h2>
-                    </div>
-                    <div class="modal-body">
-                        <p>Для продолжения игры требуется подписка.</p>
-                        <div class="features-list">
-                            <div class="feature">
-                                <i class="fas fa-check"></i> 100 меток вместо 40
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Приоритетная синхронизация
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Без рекламы
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check"></i> Расширенная статистика
-                            </div>
-                        </div>
-                        <div class="pricing">
-                            <button class="price-btn" onclick="purchaseSubscription('monthly')">
-                                <div class="price">99₽</div>
-                                <div class="period">в месяц</div>
-                            </button>
-                            <button class="price-btn recommended" onclick="purchaseSubscription('yearly')">
-                                <div class="price">990₽</div>
-                                <div class="period">в год (экономия 20%)</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            });
         }
         
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
@@ -1336,160 +1140,131 @@
                     syncStatus.style.color = '#4CAF50';
                 }
                 
-                startFirebaseSync();
+                // Запускаем синхронизацию
+                setupFirebaseListeners();
                 
             } catch (error) {
                 console.error('❌ Ошибка Firebase:', error);
                 
                 const syncStatus = document.getElementById('syncStatus');
                 if (syncStatus) {
-                    syncStatus.textContent = 'Firebase недоступен, используем локальное хранилище';
+                    syncStatus.textContent = 'Firebase недоступен';
                     syncStatus.style.color = '#FF9800';
                 }
-                
-                useLocalStorage();
             }
         }
         
-        // ============ СИНХРОНИЗАЦИЯ С FIREBASE ============
-        function startFirebaseSync() {
-            loadMarkersFromFirebase();
-            listenToFirebaseChanges();
-            syncInterval = setInterval(syncToFirebase, 10000);
-            updateOnlineStatus();
-        }
-        
-        function loadMarkersFromFirebase() {
-            try {
-                const markersRef = firebaseDatabase.ref('markers');
+        // ============ СИНХРОНИЗАЦИЯ FIREBASE ============
+        function setupFirebaseListeners() {
+            // Слушаем метки
+            const markersRef = firebaseDatabase.ref('markers');
+            
+            markersRef.on('child_added', (snapshot) => {
+                const markerId = snapshot.key;
+                const markerData = snapshot.val();
                 
-                markersRef.once('value').then((snapshot) => {
-                    const firebaseMarkers = snapshot.val() || [];
-                    console.log(`Загружено ${firebaseMarkers.length} меток из Firebase`);
-                    updateMarkersFromCloud(firebaseMarkers);
-                });
-                
-            } catch (error) {
-                console.error('Ошибка загрузки из Firebase:', error);
-                useLocalStorage();
-            }
-        }
-        
-        function listenToFirebaseChanges() {
-            try {
-                const markersRef = firebaseDatabase.ref('markers');
-                
-                markersRef.on('value', (snapshot) => {
-                    const firebaseMarkers = snapshot.val() || [];
+                if (markerData.isActive && !markers[markerId]) {
+                    addMarkerToMap(markerId, markerData);
+                    markers[markerId] = markerData;
+                    updateMarkerCount();
                     
-                    if (JSON.stringify(firebaseMarkers) !== JSON.stringify(markers.map(m => ({...m, placemark: undefined})))) {
-                        console.log('Обновление меток из Firebase...');
-                        updateMarkersFromCloud(firebaseMarkers);
+                    // Уведомление в чат если не наш метка
+                    if (markerData.authorId !== currentUserId) {
+                        addChatMessage('system', `📍 ${markerData.author} добавил(а) метку: ${getMarkerTypeName(markerData.type)}`);
                     }
-                });
-                
-            } catch (error) {
-                console.error('Ошибка прослушивания Firebase:', error);
-            }
-        }
-        
-        function updateMarkersFromCloud(cloudMarkers) {
-            if (!ymap) return;
-            
-            const now = Date.now();
-            
-            markers.forEach(marker => {
-                if (marker.placemark) {
-                    ymap.geoObjects.remove(marker.placemark);
                 }
             });
             
-            markers = [];
-            
-            cloudMarkers.forEach(markerData => {
-                if (now - markerData.timestamp > EXPIRATION_TIME) {
-                    return;
-                }
+            markersRef.on('child_changed', (snapshot) => {
+                const markerId = snapshot.key;
+                const markerData = snapshot.val();
                 
-                addMarkerToMap(markerData);
-                markers.push(markerData);
+                if (!markerData.isActive && markers[markerId]) {
+                    // Метка удалена (soft delete)
+                    removeMarkerFromMap(markerId);
+                    delete markers[markerId];
+                    updateMarkerCount();
+                    
+                    // Уведомление в чат
+                    addChatMessage('system', `🗑️ Метка удалена: ${getMarkerTypeName(markerData.type)}`);
+                }
             });
             
-            updateUI();
-            updateExpiringCount();
-            checkMarkerLimit();
+            markersRef.on('child_removed', (snapshot) => {
+                const markerId = snapshot.key;
+                if (markers[markerId]) {
+                    removeMarkerFromMap(markerId);
+                    delete markers[markerId];
+                    updateMarkerCount();
+                }
+            });
             
-            console.log(`Обновлено ${markers.length} меток`);
-        }
-        
-        function syncToFirebase() {
-            try {
-                const markersData = markers.map(marker => ({
-                    id: marker.id,
-                    type: marker.type,
-                    coords: marker.coords,
-                    comment: marker.comment,
-                    timestamp: marker.timestamp,
-                    author: marker.author || window.userName,
-                    authorId: marker.authorId || window.userId
-                }));
-                
-                firebaseDatabase.ref('markers').set(markersData)
-                    .then(() => {
-                        console.log('✅ Синхронизировано с Firebase');
-                    })
-                    .catch(error => {
-                        console.error('❌ Ошибка синхронизации:', error);
-                    });
-                
-            } catch (error) {
-                console.error('Ошибка синхронизации:', error);
-            }
+            // Слушаем онлайн игроков
+            const onlineRef = firebaseDatabase.ref('online');
+            onlineRef.on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                onlinePlayers = users;
+                updateOnlinePlayers(users);
+            });
+            
+            // Слушаем чат
+            const chatRef = firebaseDatabase.ref('chat');
+            chatRef.limitToLast(20).on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                if (message.authorId !== currentUserId || message.type === 'system') {
+                    addChatMessage(message.type, `${message.author}: ${message.text}`);
+                }
+            });
+            
+            // Обновляем свой онлайн статус
+            updateOnlineStatus();
+            
+            // Автоочистка старых меток
+            cleanupOldMarkers();
         }
         
         function updateOnlineStatus() {
-            try {
-                const userStatusRef = firebaseDatabase.ref('online/' + window.userId);
-                
-                // Обновляем свой статус каждые 10 секунд
-                const updateMyStatus = () => {
-                    userStatusRef.set({
-                        name: window.userName,
-                        lastSeen: Date.now(),
-                        userId: window.userId
-                    });
-                };
-                
-                updateMyStatus();
-                setInterval(updateMyStatus, 10000);
-                
-                // Удаляем при выходе
-                userStatusRef.onDisconnect().remove();
-                
-                // Слушаем других игроков
-                const onlineRef = firebaseDatabase.ref('online');
-                onlineRef.on('value', (snapshot) => {
-                    const users = snapshot.val() || {};
-                    onlinePlayers = users;
-                    
-                    const now = Date.now();
-                    const onlineUserIds = Object.keys(users).filter(id => {
-                        const user = users[id];
-                        return now - user.lastSeen < 30000; // 30 секунд
-                    });
-                    
-                    currentOnlineCount = Math.max(1, onlineUserIds.length);
-                    
-                    // Обновляем счетчики
-                    document.getElementById('onlineCount').textContent = currentOnlineCount;
-                    document.getElementById('modalOnlineCount').textContent = currentOnlineCount;
-                    
-                    updatePlayersList(users);
-                });
-                
-            } catch (error) {
-                console.error('Ошибка онлайн статуса:', error);
-            }
+            const userStatusRef = firebaseDatabase.ref('online/' + currentUserId);
+            
+            const userData = {
+                name: currentUserName,
+                userId: currentUserId,
+                lastSeen: Date.now(),
+                stats: {
+                    markersCreated: activity,
+                    points: points,
+                    rank: calculateRank().name
+                }
+            };
+            
+            userStatusRef.set(userData);
+            
+            // Обновляем каждые 10 секунд
+            setInterval(() => {
+                userData.lastSeen = Date.now();
+                userData.stats.markersCreated = activity;
+                userData.stats.points = points;
+                userData.stats.rank = calculateRank().name;
+                userStatusRef.update(userData);
+            }, 10000);
+            
+            // Удаляем при выходе
+            userStatusRef.onDisconnect().remove();
+        }
+        
+        function updateOnlinePlayers(users) {
+            const now = Date.now();
+            const onlineUserIds = Object.keys(users).filter(id => {
+                const user = users[id];
+                return now - user.lastSeen < ONLINE_TIMEOUT;
+            });
+            
+            const onlineCount = Math.max(1, onlineUserIds.length);
+            
+            document.getElementById('onlineCount').textContent = onlineCount;
+            document.getElementById('modalOnlineCount').textContent = onlineCount;
+            
+            updatePlayersList(users);
         }
         
         function updatePlayersList(users) {
@@ -1497,209 +1272,382 @@
             if (!playersList) return;
             
             const now = Date.now();
-            const onlinePlayersArray = Object.entries(users)
-                .filter(([id, user]) => now - user.lastSeen < 30000)
-                .sort((a, b) => b[1].lastSeen - a[1].lastSeen);
+            
+            // Преобразуем в массив и сортируем по очкам
+            const playersArray = Object.entries(users)
+                .filter(([id, user]) => now - user.lastSeen < ONLINE_TIMEOUT)
+                .map(([id, user]) => ({
+                    id,
+                    ...user,
+                    isOnline: now - user.lastSeen < ONLINE_TIMEOUT
+                }))
+                .sort((a, b) => b.stats.points - a.stats.points);
             
             playersList.innerHTML = '';
             
-            if (onlinePlayersArray.length === 0) {
+            if (playersArray.length === 0) {
                 playersList.innerHTML = '<p style="text-align: center; color: #aaa;">Нет игроков онлайн</p>';
                 return;
             }
             
-            onlinePlayersArray.forEach(([id, user]) => {
-                const isOnline = now - user.lastSeen < 30000;
-                // Используем имя пользователя или "Гость" если нет имени
-                const playerName = user.name || 'Гость';
-                const isCurrentUser = id === window.userId;
+            playersArray.forEach((player, index) => {
                 const playerItem = document.createElement('div');
-                playerItem.className = `player-item ${isOnline ? '' : 'offline'}`;
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+                playerItem.className = `player-item ${rankClass}`;
                 
-                const initials = playerName.split(' ').map(n => n[0]).join('').toUpperCase() || 'Г';
+                const initials = player.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'Г';
+                const isCurrentUser = player.id === currentUserId;
                 
                 playerItem.innerHTML = `
                     <div class="player-info">
                         <div class="player-avatar" style="${isCurrentUser ? 'background: linear-gradient(135deg, #FF9800, #F57C00);' : ''}">
                             ${initials}
                             ${isCurrentUser ? '⭐' : ''}
+                            ${index < 3 ? `<div class="player-rank-badge">${index + 1}</div>` : ''}
                         </div>
-                        <div>
+                        <div class="player-details">
                             <div class="player-name">
-                                ${playerName} ${isCurrentUser ? '(Вы)' : ''}
+                                ${player.name} ${isCurrentUser ? '(Вы)' : ''}
                             </div>
-                            <div class="player-status ${isOnline ? '' : 'offline'}">
-                                ${isOnline ? '🟢 Онлайн' : '⚫ Не в сети'}
+                            <div class="player-stats">
+                                <span>🏆 ${player.stats.points} очков</span>
+                                <span>📍 ${player.stats.markersCreated} меток</span>
+                                <span class="player-score">${player.stats.rank}</span>
                             </div>
                         </div>
                     </div>
-                    ${!isCurrentUser ? `
-                    <div class="player-actions">
-                        <button class="action-btn" onclick="sendMessageToPlayer('${id}', '${playerName}')">
-                            <i class="fas fa-comment"></i>
-                        </button>
-                    </div>
-                    ` : ''}
                 `;
                 
                 playersList.appendChild(playerItem);
             });
         }
         
-        function sendMessageToPlayer(playerId, playerName) {
-            const message = prompt(`Отправить сообщение ${playerName}:`, '');
-            if (message && message.trim()) {
-                alert(`Сообщение "${message}" отправлено ${playerName}`);
-                // Здесь можно добавить отправку через Firebase
+        // ============ РАБОТА С МЕТКАМИ ============
+        function addMarker(coords, type, comment = null) {
+            // Проверяем лимит
+            const activeMarkersCount = Object.values(markers).filter(m => m.isActive).length;
+            if (activeMarkersCount >= MAX_MARKERS) {
+                alert(`❌ Достигнут лимит в ${MAX_MARKERS} меток на карте!`);
+                return null;
             }
-        }
-        
-        // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
-        function useLocalStorage() {
-            console.log('Используем локальное хранилище...');
             
-            try {
-                const saved = localStorage.getItem('miami_police_shared');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (data.markers) {
-                        updateMarkersFromCloud(data.markers);
-                    }
-                }
-            } catch (e) {
-                console.error('Ошибка локального хранилища:', e);
-            }
-        }
-        
-        function saveToLocalStorage() {
-            try {
-                const data = {
-                    markers: markers.map(m => ({
-                        id: m.id,
-                        type: m.type,
-                        coords: m.coords,
-                        comment: m.comment,
-                        timestamp: m.timestamp,
-                        author: m.author || window.userName
-                    })),
-                    lastUpdate: Date.now()
-                };
-                
-                localStorage.setItem('miami_police_shared', JSON.stringify(data));
-            } catch (e) {
-                console.error('Ошибка сохранения:', e);
-            }
-        }
-        
-        // ============ ТАЙМЕР АВТОЗАПУСКА ============
-        function startAutoStartTimer() {
-            const countdownElement = document.getElementById('countdown');
-            countdownElement.textContent = countdownSeconds;
+            const markerId = firebaseDatabase.ref('markers').push().key;
+            const timestamp = Date.now();
             
-            autoStartInterval = setInterval(() => {
-                countdownSeconds--;
-                countdownElement.textContent = countdownSeconds;
-                
-                if (countdownSeconds <= 0) {
-                    clearInterval(autoStartInterval);
-                    if (document.getElementById('splashScreen').style.display !== 'none') {
-                        startGame();
-                    }
+            const markerData = {
+                type: type,
+                coords: {
+                    lat: coords[0],
+                    lng: coords[1]
+                },
+                comment: comment || '',
+                author: currentUserName,
+                authorId: currentUserId,
+                timestamp: timestamp,
+                isActive: true,
+                expiresAt: timestamp + MARKER_LIFETIME
+            };
+            
+            // Отправляем в Firebase
+            firebaseDatabase.ref('markers/' + markerId).set(markerData)
+                .then(() => {
+                    console.log('✅ Метка добавлена в Firebase');
+                    
+                    // Обновляем статистику
+                    points += 10;
+                    activity += 1;
+                    updateUI();
+                    
+                    // Отправляем сообщение в чат
+                    sendChatMessage(
+                        `${currentUserName} добавил(а) метку: ${getMarkerTypeName(type)}`,
+                        'marker_added'
+                    );
+                    
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка добавления метки:', error);
+                    alert('Ошибка при добавлении метки');
+                });
+            
+            return markerId;
+        }
+        
+        function addMarkerToMap(markerId, markerData) {
+            if (!ymap) return;
+            
+            const iconColor = {
+                'police': '#2196F3',
+                'accident': '#F44336',
+                'help': '#4CAF50',
+                'hazard': '#FF9800'
+            }[markerData.type] || '#2196F3';
+            
+            const iconContent = {
+                'police': '🚨',
+                'accident': '🚗',
+                'help': '🆘',
+                'hazard': '🚦'
+            }[markerData.type] || '📍';
+            
+            const placemark = new ymaps.Placemark(
+                [markerData.coords.lat, markerData.coords.lng],
+                {
+                    balloonContent: `
+                        <div style="padding: 10px; max-width: 250px;">
+                            <h3 style="margin: 0 0 10px 0; color: ${iconColor}">
+                                ${getMarkerTypeName(markerData.type)}
+                            </h3>
+                            ${markerData.comment ? `<p><strong>Комментарий:</strong> ${markerData.comment}</p>` : ''}
+                            <p><strong>Автор:</strong> ${markerData.author}</p>
+                            <p><strong>Добавлено:</strong> ${new Date(markerData.timestamp).toLocaleTimeString()}</p>
+                            <p><strong>Удалится через:</strong> ${formatTimeRemaining(markerData.expiresAt)}</p>
+                            ${markerData.authorId === currentUserId ? `
+                            <button onclick="deleteMarker('${markerId}')" 
+                                    style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                                Удалить мою метку
+                            </button>
+                            ` : ''}
+                        </div>
+                    `,
+                    iconCaption: markerData.comment || ''
+                },
+                {
+                    preset: 'islands#icon',
+                    iconColor: iconColor,
+                    iconLayout: 'default#imageWithContent',
+                    iconImageHref: '',
+                    iconImageSize: [50, 50],
+                    iconImageOffset: [-25, -50],
+                    iconContentOffset: [0, 0],
+                    iconContentLayout: ymaps.templateLayoutFactory.createClass(
+                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative;">
+                            ${iconContent}
+                            ${markerData.authorId === currentUserId ? `
+                            <button onclick="deleteMarker('${markerId}')" 
+                                    style="position: absolute; top: -5px; right: -5px; background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                ×
+                            </button>
+                            ` : ''}
+                        </div>`
+                    )
                 }
-            }, 1000);
+            );
+            
+            placemark.events.add('click', function() {
+                placemark.balloon.open();
+            });
+            
+            markerData.placemark = placemark;
+            ymap.geoObjects.add(placemark);
         }
         
-        // ============ МОДАЛЬНЫЕ ОКНА ============
-        function openRulesModal() {
-            document.getElementById('rulesModal').style.display = 'flex';
+        function deleteMarker(markerId) {
+            if (!markers[markerId]) return;
+            
+            if (markers[markerId].authorId !== currentUserId) {
+                alert('Вы можете удалять только свои метки!');
+                return;
+            }
+            
+            // Soft delete - помечаем как неактивную
+            firebaseDatabase.ref('markers/' + markerId).update({
+                isActive: false
+            })
+            .then(() => {
+                console.log('✅ Метка помечена как удаленная');
+                
+                // Обновляем статистику
+                points += 5;
+                updateUI();
+                
+                // Сообщение в чат
+                sendChatMessage(
+                    `${currentUserName} удалил(а) метку: ${getMarkerTypeName(markers[markerId].type)}`,
+                    'marker_deleted'
+                );
+            })
+            .catch(error => {
+                console.error('❌ Ошибка удаления метки:', error);
+                alert('Ошибка при удалении метки');
+            });
         }
         
-        function openPlayersModal() {
-            document.getElementById('playersModal').style.display = 'flex';
+        function removeMarkerFromMap(markerId) {
+            if (markers[markerId] && markers[markerId].placemark && ymap) {
+                ymap.geoObjects.remove(markers[markerId].placemark);
+            }
         }
         
-        function openControlsModal() {
-            document.getElementById('controlsModal').style.display = 'flex';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function openCommentModal() {
-            document.getElementById('commentText').value = '';
-            document.getElementById('commentModal').style.display = 'flex';
-        }
-        
-        function closeCommentModal() {
-            document.getElementById('commentModal').style.display = 'none';
-            pendingMarkerData = null;
-        }
-        
-        // Закрытие по клику вне окна
-        document.addEventListener('click', function(event) {
-            const modals = ['rulesModal', 'playersModal', 'controlsModal', 'commentModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    if (modalId === 'commentModal') {
-                        closeCommentModal();
-                    } else {
-                        closeModal(modalId);
+        function cleanupOldMarkers() {
+            const now = Date.now();
+            const markersRef = firebaseDatabase.ref('markers');
+            
+            markersRef.once('value').then((snapshot) => {
+                const updates = {};
+                snapshot.forEach((childSnapshot) => {
+                    const marker = childSnapshot.val();
+                    
+                    // Удаляем метки старше 3 часов
+                    if (now - marker.timestamp > MARKER_LIFETIME && marker.isActive) {
+                        updates[childSnapshot.key + '/isActive'] = false;
                     }
+                });
+                
+                if (Object.keys(updates).length > 0) {
+                    markersRef.update(updates);
+                    console.log(`Автоочистка: удалено ${Object.keys(updates).length / 2} старых меток`);
                 }
             });
-        });
-        
-        // ============ ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ============
-        function skipIntro() {
-            clearInterval(autoStartInterval);
-            const splash = document.getElementById('splashScreen');
-            const mainApp = document.getElementById('mainApp');
             
-            splash.style.opacity = '0';
-            splash.style.transition = 'opacity 0.3s ease';
-            
-            setTimeout(() => {
-                splash.style.display = 'none';
-                mainApp.classList.add('active');
-                initGame();
-            }, 300);
+            // Повторяем каждые 5 минут
+            setTimeout(cleanupOldMarkers, 5 * 60 * 1000);
         }
         
-        function startGame() {
-            clearInterval(autoStartInterval);
-            const splash = document.getElementById('splashScreen');
-            const mainApp = document.getElementById('mainApp');
+        // ============ ЧАТ ============
+        function sendChatMessage(text, type = 'user') {
+            if (!text || text.trim() === '') return;
             
-            splash.style.opacity = '0';
-            splash.style.transition = 'opacity 0.5s ease';
+            const messageId = firebaseDatabase.ref('chat').push().key;
+            const messageData = {
+                text: text.trim(),
+                author: currentUserName,
+                authorId: currentUserId,
+                timestamp: Date.now(),
+                type: type
+            };
             
-            setTimeout(() => {
-                splash.style.display = 'none';
-                mainApp.classList.add('active');
-                initGame();
-            }, 500);
-        }
-        
-        function initGame() {
-            console.log('🚔 Запуск игры...');
+            firebaseDatabase.ref('chat/' + messageId).set(messageData)
+                .catch(error => {
+                    console.error('Ошибка отправки сообщения:', error);
+                });
             
-            updatePremiumFeatures();
-            loadUserData();
-            startAutoDeleteChecker();
-            
-            if (window.ymaps) {
-                ymaps.ready(initMap);
-            } else {
-                showError('❌ Яндекс.Карты не загрузились');
+            // Очищаем поле ввода
+            if (type === 'user') {
+                document.getElementById('chatInput').value = '';
             }
         }
         
-        // ============ КАРТА И ГЕОЛОКАЦИЯ ============
+        function addChatMessage(type, text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            messageDiv.innerHTML = `
+                <span class="message-time">${messageTime}</span>
+                ${text}
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Прокручиваем вниз
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Показываем значок новых сообщений если чат свернут
+            if (chatMinimized) {
+                unreadMessages++;
+                document.getElementById('newMessageBadge').textContent = unreadMessages;
+                document.getElementById('newMessageBadge').style.display = 'flex';
+            }
+        }
+        
+        function toggleChat() {
+            const chatContainer = document.getElementById('chatContainer');
+            const toggleIcon = document.querySelector('.chat-toggle i');
+            
+            if (chatMinimized) {
+                // Разворачиваем
+                chatContainer.classList.remove('chat-minimized');
+                chatContainer.style.width = '300px';
+                chatContainer.style.maxHeight = '400px';
+                toggleIcon.className = 'fas fa-minus';
+                chatMinimized = false;
+                
+                // Сбрасываем счетчик новых сообщений
+                unreadMessages = 0;
+                document.getElementById('newMessageBadge').style.display = 'none';
+            } else {
+                // Сворачиваем
+                chatContainer.classList.add('chat-minimized');
+                chatContainer.style.width = '40px';
+                chatContainer.style.maxHeight = '40px';
+                toggleIcon.className = 'fas fa-comments';
+                chatMinimized = true;
+            }
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendChatMessage(document.getElementById('chatInput').value);
+            }
+        }
+        
+        // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+        function getMarkerTypeName(type) {
+            const names = {
+                'police': 'Патруль 🚨',
+                'accident': 'ДТП 🚗',
+                'help': 'Помощь 🆘',
+                'hazard': 'Пробка 🚦'
+            };
+            return names[type] || 'Метка';
+        }
+        
+        function formatTimeRemaining(expiresAt) {
+            const remaining = expiresAt - Date.now();
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (hours > 0) {
+                return `${hours} ч ${minutes} мин`;
+            } else {
+                return `${minutes} минут`;
+            }
+        }
+        
+        function updateMarkerCount() {
+            const activeMarkersCount = Object.values(markers).filter(m => m.isActive).length;
+            document.getElementById('markerCount').textContent = activeMarkersCount;
+            
+            const limitElement = document.getElementById('markerLimit');
+            if (activeMarkersCount >= MAX_MARKERS * 0.9) {
+                limitElement.style.display = 'block';
+                limitElement.innerHTML = `🔴 Лимит: ${activeMarkersCount}/${MAX_MARKERS} меток`;
+            } else {
+                limitElement.style.display = 'none';
+            }
+        }
+        
+        function updateUI() {
+            updateMarkerCount();
+            document.getElementById('points').textContent = points;
+            document.getElementById('activity').textContent = activity;
+            
+            const rank = calculateRank();
+            document.getElementById('userRank').textContent = rank.name;
+            document.getElementById('rankPoints').textContent = rank.progress + '%';
+        }
+        
+        function calculateRank() {
+            if (activity >= 100) return { name: 'Комиссар', progress: 100 };
+            if (activity >= 50) return { name: 'Детектив', progress: Math.min(100, (activity - 50) * 2) };
+            if (activity >= 20) return { name: 'Сержант', progress: Math.min(100, (activity - 20) * 3.33) };
+            if (activity >= 5) return { name: 'Патрульный', progress: Math.min(100, (activity - 5) * 6.67) };
+            return { name: 'Новичок', progress: Math.min(100, activity * 20) };
+        }
+        
+        function selectTool(tool) {
+            selectedTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tool-btn').classList.add('active');
+        }
+        
+        // ============ КАРТА ============
         function initMap() {
             try {
-                let center = [55.459619, 38.438920];
+                let center = [25.7617, -80.1918]; // Майами по умолчанию
                 let zoom = 15;
                 
                 if (navigator.geolocation) {
@@ -1740,13 +1688,36 @@
                     
                     document.getElementById('loading').style.display = 'none';
                     
+                    // Обработчик кликов по карте
                     ymap.events.add('click', function(e) {
                         const coords = e.get('coords');
                         
                         if (selectedTool === 'clear') {
-                            removeNearMarker(coords);
+                            // Режим удаления - находим ближайшую свою метку
+                            let closestMarker = null;
+                            let minDistance = Infinity;
+                            
+                            Object.entries(markers).forEach(([id, marker]) => {
+                                if (marker.authorId === currentUserId && marker.isActive) {
+                                    const distance = Math.sqrt(
+                                        Math.pow(marker.coords.lat - coords[0], 2) + 
+                                        Math.pow(marker.coords.lng - coords[1], 2)
+                                    ) * 111000;
+                                    
+                                    if (distance < 50 && distance < minDistance) {
+                                        minDistance = distance;
+                                        closestMarker = { id, marker };
+                                    }
+                                }
+                            });
+                            
+                            if (closestMarker) {
+                                deleteMarker(closestMarker.id);
+                            } else {
+                                alert('❌ Нет ваших меток рядом для удаления');
+                            }
                         } else {
-                            // Открываем модальное окно для комментария (не обязательно)
+                            // Создание новой метки
                             pendingMarkerData = { coords, type: selectedTool };
                             openCommentModal();
                         }
@@ -1754,171 +1725,102 @@
                 }
                 
                 updateUI();
-                updateExpiringCount();
-                checkMarkerLimit();
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
-                showError('❌ Ошибка загрузки карты');
+                document.getElementById('loading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
+                    <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки карты</p>
+                    <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                `;
             }
         }
         
-        // ============ МЕТКИ ============
-        function addMarker(coords, type, comment = null) {
-            if (markers.length >= MAX_MARKERS) {
-                alert(`❌ Достигнут лимит в ${MAX_MARKERS} меток!`);
-                return;
-            }
+        // ============ ЗАСТАВКА И ЗАПУСК ============
+        function startAutoStartTimer() {
+            const countdownElement = document.getElementById('countdown');
+            countdownElement.textContent = countdownSeconds;
             
-            const markerId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-            const markerData = {
-                id: markerId,
-                type: type,
-                coords: coords,
-                comment: comment,
-                timestamp: Date.now(),
-                author: window.userName,
-                authorId: window.userId
-            };
-            
-            addMarkerToMap(markerData);
-            markers.push(markerData);
-            
-            points += 10;
-            activity += 1;
-            
-            updateUI();
-            checkMarkerLimit();
-            saveToLocalStorage();
-            syncToFirebase();
-            
-            const typeNames = {
-                'police': 'Патруль 🚨',
-                'accident': 'ДТП 🚗',
-                'help': 'Помощь 🆘',
-                'hazard': 'Пробка 🚦'
-            };
-            
-            console.log(`✅ Добавлена метка: ${typeNames[type]}`);
-        }
-        
-        function addMarkerToMap(markerData) {
-            if (!ymap) return;
-            
-            const iconColor = {
-                'police': '#2196F3',
-                'accident': '#F44336',
-                'help': '#4CAF50',
-                'hazard': '#FF9800'
-            }[markerData.type] || '#2196F3';
-            
-            const iconContent = {
-                'police': '🚨',
-                'accident': '🚗',
-                'help': '🆘',
-                'hazard': '🚦'
-            }[markerData.type] || '📍';
-            
-            const placemark = new ymaps.Placemark(
-                markerData.coords,
-                {
-                    balloonContent: `
-                        <div style="padding: 10px; max-width: 250px;">
-                            <h3 style="margin: 0 0 10px 0; color: ${iconColor}">
-                                ${markerData.type === 'police' ? '🚨 Патруль' : 
-                                  markerData.type === 'accident' ? '🚗 ДТП' :
-                                  markerData.type === 'help' ? '🆘 Помощь' : '🚦 Пробка'}
-                            </h3>
-                            ${markerData.comment ? `<p><strong>Комментарий:</strong> ${markerData.comment}</p>` : ''}
-                            <p><strong>Автор:</strong> ${markerData.author}</p>
-                            <p><strong>Время:</strong> ${new Date(markerData.timestamp).toLocaleString()}</p>
-                            <button onclick="deleteMarkerFromBalloon('${markerData.id}')" 
-                                    style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-                                Удалить метку
-                            </button>
-                        </div>
-                    `,
-                    iconCaption: markerData.comment || ''
-                },
-                {
-                    preset: 'islands#icon',
-                    iconColor: iconColor,
-                    iconLayout: 'default#imageWithContent',
-                    iconImageHref: '',
-                    iconImageSize: [50, 50],
-                    iconImageOffset: [-25, -50],
-                    iconContentOffset: [0, 0],
-                    iconContentLayout: ymaps.templateLayoutFactory.createClass(
-                        `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative;">
-                            ${iconContent}
-                            <button class="marker-delete-btn" onclick="deleteMarker('${markerData.id}')" 
-                                    style="position: absolute; top: -5px; right: -5px; background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                ×
-                            </button>
-                        </div>`
-                    )
+            autoStartInterval = setInterval(() => {
+                countdownSeconds--;
+                countdownElement.textContent = countdownSeconds;
+                
+                if (countdownSeconds <= 0) {
+                    clearInterval(autoStartInterval);
+                    if (document.getElementById('splashScreen').style.display !== 'none') {
+                        startGame();
+                    }
                 }
-            );
-            
-            // Открываем балун при клике
-            placemark.events.add('click', function() {
-                placemark.balloon.open();
-            });
-            
-            markerData.placemark = placemark;
-            ymap.geoObjects.add(placemark);
+            }, 1000);
         }
         
-        function deleteMarker(markerId) {
-            const markerIndex = markers.findIndex(m => m.id === markerId);
-            if (markerIndex !== -1) {
-                const marker = markers[markerIndex];
-                if (marker.placemark) {
-                    ymap.geoObjects.remove(marker.placemark);
-                }
-                
-                markers.splice(markerIndex, 1);
-                
-                points += 5;
-                updateUI();
-                checkMarkerLimit();
-                saveToLocalStorage();
-                syncToFirebase();
-                
-                alert('🗑️ Метка удалена');
-            }
+        function skipIntro() {
+            clearInterval(autoStartInterval);
+            transitionToGame();
         }
         
-        function deleteMarkerFromBalloon(markerId) {
-            deleteMarker(markerId);
+        function startGame() {
+            clearInterval(autoStartInterval);
+            transitionToGame();
         }
         
-        function removeNearMarker(coords) {
-            if (!markers.length) {
-                alert('Нет меток для удаления');
-                return;
-            }
+        function transitionToGame() {
+            const splash = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
             
-            let closestMarker = null;
-            let minDistance = Infinity;
+            splash.style.opacity = '0';
+            splash.style.transition = 'opacity 0.5s ease';
             
-            markers.forEach(marker => {
-                const distance = Math.sqrt(
-                    Math.pow(marker.coords[0] - coords[0], 2) + 
-                    Math.pow(marker.coords[1] - coords[1], 2)
-                ) * 111000; // Примерное расстояние в метрах
-                
-                if (distance < 50 && distance < minDistance) { // 50 метров
-                    minDistance = distance;
-                    closestMarker = marker;
-                }
-            });
+            setTimeout(() => {
+                splash.style.display = 'none';
+                mainApp.classList.add('active');
+                initGame();
+            }, 500);
+        }
+        
+        function initGame() {
+            console.log('🚔 Запуск игры...');
             
-            if (closestMarker) {
-                deleteMarker(closestMarker.id);
+            if (window.ymaps) {
+                ymaps.ready(initMap);
             } else {
-                alert('❌ Нет меток рядом');
+                showError('❌ Яндекс.Карты не загрузились');
             }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
+                <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки</p>
+                <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${message}</p>
+            `;
+        }
+        
+        // ============ МОДАЛЬНЫЕ ОКНА ============
+        function openRulesModal() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        
+        function openPlayersModal() {
+            document.getElementById('playersModal').style.display = 'flex';
+        }
+        
+        function openControlsModal() {
+            document.getElementById('controlsModal').style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function openCommentModal() {
+            document.getElementById('commentText').value = '';
+            document.getElementById('commentModal').style.display = 'flex';
+        }
+        
+        function closeCommentModal() {
+            document.getElementById('commentModal').style.display = 'none';
+            pendingMarkerData = null;
         }
         
         function addMarkerWithComment() {
@@ -1936,106 +1838,37 @@
             }
         }
         
-        // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
-        function selectTool(tool) {
-            selectedTool = tool;
-            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.tool-btn').classList.add('active');
-        }
-        
-        function updateUI() {
-            document.getElementById('markerCount').textContent = markers.length;
-            document.getElementById('points').textContent = points;
-            document.getElementById('activity').textContent = activity;
-            
-            const rank = calculateRank();
-            document.getElementById('userRank').textContent = rank.name;
-            document.getElementById('rankPoints').textContent = rank.progress + '%';
-        }
-        
-        function calculateRank() {
-            if (activity >= 100) return { name: 'Комиссар', progress: 100 };
-            if (activity >= 50) return { name: 'Детектив', progress: Math.min(100, (activity - 50) * 2) };
-            if (activity >= 20) return { name: 'Сержант', progress: Math.min(100, (activity - 20) * 3.33) };
-            if (activity >= 5) return { name: 'Патрульный', progress: Math.min(100, (activity - 5) * 6.67) };
-            return { name: 'Новичок', progress: Math.min(100, activity * 20) };
-        }
-        
-        function checkMarkerLimit() {
-            const limitElement = document.getElementById('markerLimit');
-            if (markers.length >= MAX_MARKERS * 0.9) {
-                limitElement.style.display = 'block';
-            } else {
-                limitElement.style.display = 'none';
-            }
-        }
-        
-        function updateExpiringCount() {
-            const now = Date.now();
-            const expiringSoon = markers.filter(m => now - m.timestamp > EXPIRATION_TIME * 0.9).length;
-            if (expiringSoon > 0) {
-                console.log(`${expiringSoon} меток скоро будут удалены`);
-            }
-        }
-        
-        function startAutoDeleteChecker() {
-            if (autoDeleteInterval) clearInterval(autoDeleteInterval);
-            
-            autoDeleteInterval = setInterval(() => {
-                const now = Date.now();
-                const initialCount = markers.length;
+        // ============ УБОРКА ПРИ ВЫХОДЕ ============
+        function cleanupBeforeExit() {
+            // Очищаем все слушатели Firebase
+            if (firebaseDatabase) {
+                firebaseDatabase.ref('markers').off();
+                firebaseDatabase.ref('online').off();
+                firebaseDatabase.ref('chat').off();
                 
-                markers = markers.filter(marker => {
-                    if (now - marker.timestamp > EXPIRATION_TIME) {
-                        if (marker.placemark && ymap) {
-                            ymap.geoObjects.remove(marker.placemark);
-                        }
-                        return false;
-                    }
-                    return true;
-                });
-                
-                if (markers.length < initialCount) {
-                    updateUI();
-                    checkMarkerLimit();
-                    syncToFirebase();
-                    console.log(`Автоудаление: удалено ${initialCount - markers.length} старых меток`);
-                }
-            }, 60000); // Проверка каждую минуту
-        }
-        
-        function loadUserData() {
-            try {
-                const savedData = localStorage.getItem('user_data_' + window.userId);
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    points = data.points || points;
-                    activity = data.activity || activity;
-                    updateUI();
-                }
-            } catch (e) {
-                console.error('Ошибка загрузки данных:', e);
+                // Удаляем свой онлайн статус
+                firebaseDatabase.ref('online/' + currentUserId).remove();
             }
-        }
-        
-        function showError(message) {
-            document.getElementById('loading').innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
-                <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки</p>
-                <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${message}</p>
-            `;
         }
         
         // ============ ЗАПУСК ПРИЛОЖЕНИЯ ============
         document.addEventListener('DOMContentLoaded', function() {
             initTelegram();
             
-            setTimeout(() => {
-                const subscription = checkSubscription();
-                if (subscription.status === 'expired') {
-                    setTimeout(showSubscriptionModal, 2000);
-                }
-            }, 1000);
+            // Закрытие модальных окон по клику вне
+            document.addEventListener('click', function(event) {
+                const modals = ['rulesModal', 'playersModal', 'controlsModal', 'commentModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        if (modalId === 'commentModal') {
+                            closeCommentModal();
+                        } else {
+                            closeModal(modalId);
+                        }
+                    }
+                });
+            });
         });
         
         // Экспорт функций для глобального доступа
@@ -2047,14 +1880,13 @@
         window.openControlsModal = openControlsModal;
         window.closeModal = closeModal;
         window.deleteMarker = deleteMarker;
-        window.deleteMarkerFromBalloon = deleteMarkerFromBalloon;
-        window.purchaseSubscription = purchaseSubscription;
-        window.showSubscriptionModal = showSubscriptionModal;
-        window.sendMessageToPlayer = sendMessageToPlayer;
         window.openCommentModal = openCommentModal;
         window.closeCommentModal = closeCommentModal;
         window.addMarkerWithComment = addMarkerWithComment;
         window.addMarkerWithoutComment = addMarkerWithoutComment;
+        window.toggleChat = toggleChat;
+        window.sendChatMessage = sendChatMessage;
+        window.handleChatKeyPress = handleChatKeyPress;
     </script>
 </body>
 </html>
