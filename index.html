@@ -7,15 +7,14 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Firebase SDK версии 8.10.0 (совместимая) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
-        /* Telegram оптимизация */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -44,7 +43,6 @@
             color: var(--tg-theme-text-color, white);
         }
         
-        /* Заставка */
         .splash-screen {
             position: fixed;
             top: 0;
@@ -233,7 +231,6 @@
             animation: fadeIn 1s ease;
         }
         
-        /* Основной интерфейс */
         .app { 
             display: flex; 
             flex-direction: column; 
@@ -352,7 +349,6 @@
             color: #4fc3f7;
         }
         
-        /* Новый чат в правом верхнем углу */
         .chat-container {
             position: fixed;
             top: 10px;
@@ -511,7 +507,6 @@
             justify-content: center;
         }
         
-        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -576,7 +571,6 @@
             transform: rotate(90deg);
         }
         
-        /* Список игроков с рангами */
         .players-list {
             max-height: 300px;
             overflow-y: auto;
@@ -663,7 +657,6 @@
             color: #FFD700;
         }
         
-        /* Модальное окно комментария */
         .comment-modal {
             position: fixed;
             top: 0;
@@ -687,7 +680,6 @@
             border: 3px solid #2196f3;
         }
         
-        /* Анимация сирены */
         .fa-siren::before {
             content: "🚨";
             animation: siren 1s infinite alternate;
@@ -720,12 +712,6 @@
             100% { opacity: 0.7; }
         }
         
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Адаптивность */
         @media (max-height: 700px) {
             .splash-title { font-size: 2rem; }
             .splash-subtitle { font-size: 1rem; }
@@ -1065,9 +1051,9 @@
         
         // ============ КОНСТАНТЫ ИГРЫ ============
         const tg = window.Telegram.WebApp;
-        const MAX_MARKERS = 40; // Максимум меток на всю карту
-        const MARKER_LIFETIME = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
-        const ONLINE_TIMEOUT = 30000; // 30 секунд для офлайн статуса
+        const MAX_MARKERS = 40;
+        const MARKER_LIFETIME = 3 * 60 * 60 * 1000;
+        const ONLINE_TIMEOUT = 30000;
         
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         let telegramUser = null;
@@ -1075,19 +1061,16 @@
         let firebaseDatabase = null;
         let ymap = null;
         
-        // Данные игры
-        let markers = {}; // Объект { markerId: markerData }
+        let markers = {};
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
         let pendingMarkerData = null;
         
-        // Онлайн игроки
         let onlinePlayers = {};
         let currentUserId = null;
         let currentUserName = 'Гость';
         
-        // Чат
         let chatMinimized = false;
         let unreadMessages = 0;
         let autoStartInterval = null;
@@ -1097,9 +1080,60 @@
         function initTelegram() {
             console.log('Initializing Telegram Web App...');
             
-            tg.expand();
-            tg.setHeaderColor('#0d1b2a');
-            tg.setBackgroundColor('#0a1931');
+            const version = parseFloat(tg.version) || 6.0;
+            console.log('Telegram WebApp version:', version);
+            
+            if (version >= 6.1) {
+                tg.expand();
+            }
+            
+            if (version >= 6.2) {
+                try {
+                    tg.setHeaderColor('#0d1b2a');
+                    tg.setBackgroundColor('#0a1931');
+                } catch (e) {
+                    console.log('Цвета не поддерживаются в этой версии');
+                }
+            }
+            
+            if (version >= 6.9) {
+                try {
+                    tg.BackButton.show();
+                    tg.BackButton.onClick(() => {
+                        tg.showConfirm('Закрыть игру?', (confirmed) => {
+                            if (confirmed) {
+                                cleanupBeforeExit();
+                                tg.close();
+                            }
+                        });
+                    });
+                } catch (e) {
+                    console.log('BackButton не поддерживается');
+                }
+            } else {
+                const backButton = document.createElement('button');
+                backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Назад';
+                backButton.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(33, 150, 243, 0.3);
+                    border: 2px solid #2196f3;
+                    color: white;
+                    padding: 8px 15px;
+                    border-radius: 20px;
+                    z-index: 10000;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                `;
+                backButton.onclick = () => {
+                    if (confirm('Закрыть игру?')) {
+                        cleanupBeforeExit();
+                        tg.close();
+                    }
+                };
+                document.body.appendChild(backButton);
+            }
             
             telegramUser = tg.initDataUnsafe?.user;
             
@@ -1113,16 +1147,6 @@
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
             }
             
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => {
-                tg.showConfirm('Закрыть игру?', (confirmed) => {
-                    if (confirmed) {
-                        cleanupBeforeExit();
-                        tg.close();
-                    }
-                });
-            });
-            
             startAutoStartTimer();
             initFirebase();
         }
@@ -1130,6 +1154,17 @@
         // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
         function initFirebase() {
             try {
+                if (typeof firebase === 'undefined') {
+                    console.error('Firebase не загружен!');
+                    document.getElementById('syncStatus').textContent = 'Firebase не загружен';
+                    document.getElementById('syncStatus').style.color = '#f44336';
+                    
+                    setTimeout(() => {
+                        alert('Ошибка загрузки Firebase. Проверьте интернет соединение.');
+                    }, 1000);
+                    return;
+                }
+                
                 firebaseApp = firebase.initializeApp(firebaseConfig);
                 firebaseDatabase = firebase.database();
                 
@@ -1141,7 +1176,6 @@
                     syncStatus.style.color = '#4CAF50';
                 }
                 
-                // Запускаем синхронизацию
                 setupFirebaseListeners();
                 
             } catch (error) {
@@ -1149,15 +1183,16 @@
                 
                 const syncStatus = document.getElementById('syncStatus');
                 if (syncStatus) {
-                    syncStatus.textContent = 'Firebase недоступен';
+                    syncStatus.textContent = 'Firebase недоступен: ' + error.message;
                     syncStatus.style.color = '#FF9800';
                 }
+                
+                addChatMessage('system', '⚠️ Работаем в локальном режиме (Firebase недоступен)');
             }
         }
         
         // ============ СИНХРОНИЗАЦИЯ FIREBASE ============
         function setupFirebaseListeners() {
-            // Слушаем метки
             const markersRef = firebaseDatabase.ref('markers');
             
             markersRef.on('child_added', (snapshot) => {
@@ -1169,7 +1204,6 @@
                     markers[markerId] = markerData;
                     updateMarkerCount();
                     
-                    // Уведомление в чат если не наш метка
                     if (markerData.authorId !== currentUserId) {
                         addChatMessage('system', `📍 ${markerData.author} добавил(а) метку: ${getMarkerTypeName(markerData.type)}`);
                     }
@@ -1181,12 +1215,10 @@
                 const markerData = snapshot.val();
                 
                 if (!markerData.isActive && markers[markerId]) {
-                    // Метка удалена (soft delete)
                     removeMarkerFromMap(markerId);
                     delete markers[markerId];
                     updateMarkerCount();
                     
-                    // Уведомление в чат
                     addChatMessage('system', `🗑️ Метка удалена: ${getMarkerTypeName(markerData.type)}`);
                 }
             });
@@ -1200,7 +1232,6 @@
                 }
             });
             
-            // Слушаем онлайн игроков
             const onlineRef = firebaseDatabase.ref('online');
             onlineRef.on('value', (snapshot) => {
                 const users = snapshot.val() || {};
@@ -1208,7 +1239,6 @@
                 updateOnlinePlayers(users);
             });
             
-            // Слушаем чат
             const chatRef = firebaseDatabase.ref('chat');
             chatRef.limitToLast(20).on('child_added', (snapshot) => {
                 const message = snapshot.val();
@@ -1217,10 +1247,7 @@
                 }
             });
             
-            // Обновляем свой онлайн статус
             updateOnlineStatus();
-            
-            // Автоочистка старых меток
             cleanupOldMarkers();
         }
         
@@ -1240,7 +1267,6 @@
             
             userStatusRef.set(userData);
             
-            // Обновляем каждые 10 секунд
             setInterval(() => {
                 userData.lastSeen = Date.now();
                 userData.stats.markersCreated = activity;
@@ -1249,7 +1275,6 @@
                 userStatusRef.update(userData);
             }, 10000);
             
-            // Удаляем при выходе
             userStatusRef.onDisconnect().remove();
         }
         
@@ -1274,7 +1299,6 @@
             
             const now = Date.now();
             
-            // Преобразуем в массив и сортируем по очкам
             const playersArray = Object.entries(users)
                 .filter(([id, user]) => now - user.lastSeen < ONLINE_TIMEOUT)
                 .map(([id, user]) => ({
@@ -1325,7 +1349,6 @@
         
         // ============ РАБОТА С МЕТКАМИ ============
         function addMarker(coords, type, comment = null) {
-            // Проверяем лимит
             const activeMarkersCount = Object.values(markers).filter(m => m.isActive).length;
             if (activeMarkersCount >= MAX_MARKERS) {
                 alert(`❌ Достигнут лимит в ${MAX_MARKERS} меток на карте!`);
@@ -1349,17 +1372,14 @@
                 expiresAt: timestamp + MARKER_LIFETIME
             };
             
-            // Отправляем в Firebase
             firebaseDatabase.ref('markers/' + markerId).set(markerData)
                 .then(() => {
                     console.log('✅ Метка добавлена в Firebase');
                     
-                    // Обновляем статистику
                     points += 10;
                     activity += 1;
                     updateUI();
                     
-                    // Отправляем сообщение в чат
                     sendChatMessage(
                         `${currentUserName} добавил(а) метку: ${getMarkerTypeName(type)}`,
                         'marker_added'
@@ -1451,18 +1471,15 @@
                 return;
             }
             
-            // Soft delete - помечаем как неактивную
             firebaseDatabase.ref('markers/' + markerId).update({
                 isActive: false
             })
             .then(() => {
                 console.log('✅ Метка помечена как удаленная');
                 
-                // Обновляем статистику
                 points += 5;
                 updateUI();
                 
-                // Сообщение в чат
                 sendChatMessage(
                     `${currentUserName} удалил(а) метку: ${getMarkerTypeName(markers[markerId].type)}`,
                     'marker_deleted'
@@ -1489,7 +1506,6 @@
                 snapshot.forEach((childSnapshot) => {
                     const marker = childSnapshot.val();
                     
-                    // Удаляем метки старше 3 часов
                     if (now - marker.timestamp > MARKER_LIFETIME && marker.isActive) {
                         updates[childSnapshot.key + '/isActive'] = false;
                     }
@@ -1501,7 +1517,6 @@
                 }
             });
             
-            // Повторяем каждые 5 минут
             setTimeout(cleanupOldMarkers, 5 * 60 * 1000);
         }
         
@@ -1523,7 +1538,6 @@
                     console.error('Ошибка отправки сообщения:', error);
                 });
             
-            // Очищаем поле ввода
             if (type === 'user') {
                 document.getElementById('chatInput').value = '';
             }
@@ -1542,10 +1556,8 @@
             
             chatMessages.appendChild(messageDiv);
             
-            // Прокручиваем вниз
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            // Показываем значок новых сообщений если чат свернут
             if (chatMinimized) {
                 unreadMessages++;
                 document.getElementById('newMessageBadge').textContent = unreadMessages;
@@ -1558,18 +1570,15 @@
             const toggleIcon = document.querySelector('.chat-toggle i');
             
             if (chatMinimized) {
-                // Разворачиваем
                 chatContainer.classList.remove('chat-minimized');
                 chatContainer.style.width = '300px';
                 chatContainer.style.maxHeight = '400px';
                 toggleIcon.className = 'fas fa-minus';
                 chatMinimized = false;
                 
-                // Сбрасываем счетчик новых сообщений
                 unreadMessages = 0;
                 document.getElementById('newMessageBadge').style.display = 'none';
             } else {
-                // Сворачиваем
                 chatContainer.classList.add('chat-minimized');
                 chatContainer.style.width = '40px';
                 chatContainer.style.maxHeight = '40px';
@@ -1648,27 +1657,29 @@
         // ============ КАРТА ============
         function initMap() {
             try {
-                let center = [25.7617, -80.1918]; // Майами по умолчанию
-                let zoom = 15;
+                let center = [25.7617, -80.1918];
+                let zoom = 12;
                 
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
                             center = [position.coords.latitude, position.coords.longitude];
-                            zoom = 17;
+                            zoom = 15;
                             createMap(center, zoom);
                         },
                         function(error) {
-                            console.warn('Геолокация недоступна:', error);
+                            console.warn('Геолокация недоступна, используем Майами:', error);
+                            addChatMessage('system', '📍 Используется карта Майами (геолокация недоступна)');
                             createMap(center, zoom);
                         },
                         {
                             enableHighAccuracy: true,
-                            timeout: 5000,
-                            maximumAge: 0
+                            timeout: 10000,
+                            maximumAge: 60000
                         }
                     );
                 } else {
+                    console.log('Geolocation API не поддерживается');
                     createMap(center, zoom);
                 }
                 
@@ -1689,12 +1700,10 @@
                     
                     document.getElementById('loading').style.display = 'none';
                     
-                    // Обработчик кликов по карте
                     ymap.events.add('click', function(e) {
                         const coords = e.get('coords');
                         
                         if (selectedTool === 'clear') {
-                            // Режим удаления - находим ближайшую свою метку
                             let closestMarker = null;
                             let minDistance = Infinity;
                             
@@ -1718,7 +1727,6 @@
                                 alert('❌ Нет ваших меток рядом для удаления');
                             }
                         } else {
-                            // Создание новой метки
                             pendingMarkerData = { coords, type: selectedTool };
                             openCommentModal();
                         }
@@ -1733,6 +1741,10 @@
                     <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
                     <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки карты</p>
                     <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                    <button onclick="location.reload()" 
+                            style="background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 10px; margin-top: 20px; cursor: pointer;">
+                        Перезагрузить
+                    </button>
                 `;
             }
         }
@@ -1785,16 +1797,11 @@
             if (window.ymaps) {
                 ymaps.ready(initMap);
             } else {
-                showError('❌ Яндекс.Карты не загрузились');
+                document.getElementById('loading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
+                    <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки Яндекс.Карт</p>
+                `;
             }
-        }
-        
-        function showError(message) {
-            document.getElementById('loading').innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; margin-bottom: 20px; color: #f44336;"></i>
-                <p style="color: #f44336; font-size: 1.1rem;">Ошибка загрузки</p>
-                <p style="color: #ff9800; font-size: 0.9rem; margin-top: 10px;">${message}</p>
-            `;
         }
         
         // ============ МОДАЛЬНЫЕ ОКНА ============
@@ -1839,15 +1846,12 @@
             }
         }
         
-        // ============ УБОРКА ПРИ ВЫХОДЕ ============
         function cleanupBeforeExit() {
-            // Очищаем все слушатели Firebase
             if (firebaseDatabase) {
                 firebaseDatabase.ref('markers').off();
                 firebaseDatabase.ref('online').off();
                 firebaseDatabase.ref('chat').off();
                 
-                // Удаляем свой онлайн статус
                 firebaseDatabase.ref('online/' + currentUserId).remove();
             }
         }
@@ -1856,7 +1860,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             initTelegram();
             
-            // Закрытие модальных окон по клику вне
             document.addEventListener('click', function(event) {
                 const modals = ['rulesModal', 'playersModal', 'controlsModal', 'commentModal'];
                 modals.forEach(modalId => {
@@ -1872,7 +1875,6 @@
             });
         });
         
-        // Экспорт функций для глобального доступа
         window.startGame = startGame;
         window.skipIntro = skipIntro;
         window.selectTool = selectTool;
