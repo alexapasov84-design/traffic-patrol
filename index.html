@@ -7,13 +7,12 @@
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase SDK версии 8.10.0 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Firebase SDK УБРАН -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=365e247d-d853-4425-b9cc-13bfa1169a49&lang=ru_RU"></script>
     
     <style>
+        /* Стили остаются без изменений, только убираем связанные с Firebase элементы */
         :root {
             --tg-theme-bg-color: #0a1931;
             --tg-theme-text-color: #ffffff;
@@ -1056,7 +1055,7 @@
             
             <div class="splash-header">
                 <h1 class="splash-title">👮‍♂️ Полиция Майами 🚔</h1>
-                <p class="splash-subtitle" id="userWelcome">Мультиплеерная игра</p>
+                <p class="splash-subtitle" id="userWelcome">Одиночная игра</p> <!-- Изменено с "Мультиплеерная игра" -->
             </div>
             
             <div class="splash-center">
@@ -1065,8 +1064,8 @@
                         <i class="fas fa-book"></i> Правила игры
                     </button>
                     <button class="menu-btn" onclick="openPlayersModal()">
-                        <i class="fas fa-users"></i> Мультиплеер
-                    </button>
+                        <i class="fas fa-users"></i> Рейтинг
+                    </button> <!-- Изменено с "Мультиплеер" -->
                     <button class="menu-btn" onclick="openControlsModal()">
                         <i class="fas fa-gamepad"></i> Управление
                     </button>
@@ -1098,7 +1097,7 @@
             <div class="header-stats">
                 <span>Меток: <span id="markerCount">0</span>/<span id="maxMarkers">40</span></span>
                 <span>Очки: <span id="points">100</span></span>
-                <span>Онлайн: <span id="onlineCount">1</span></span>
+                <span>Режим: <span id="onlineCount">Локальный</span></span> <!-- Изменено -->
             </div>
         </div>
         
@@ -1107,7 +1106,7 @@
             <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
                 <i class="fas fa-sync fa-spin" style="font-size: 2.5rem; margin-bottom: 20px; color: #4fc3f7;"></i>
                 <p style="color: #81c784; font-size: 1.1rem;">Загрузка карт...</p>
-                <p id="syncStatus" style="color: #4fc3f7; font-size: 0.9rem; margin-top: 10px;">Подключение к Firebase...</p>
+                <p id="syncStatus" style="color: #4fc3f7; font-size: 0.9rem; margin-top: 10px;">Локальный режим</p> <!-- Изменено -->
             </div>
             <div class="marker-limit" id="markerLimit" style="display: none;">
                 🔴 Лимит: 40 меток
@@ -1152,216 +1151,158 @@
             </div>
         </div>
         
-        <!-- Кнопка чата -->
-        <button id="chatButton" class="chat-button" onclick="toggleChatWindow()">
-            <i class="fas fa-comments"></i>
-            <div class="chat-badge" id="chatBadge" style="display: none;">0</div>
-        </button>
+        <!-- Кнопка чата УБРАНА - в локальном режиме чат не нужен -->
         
-        <!-- Окно чата -->
-        <div id="chatWindow" class="chat-window">
-            <div class="chat-header">
-                <h3><i class="fas fa-comments"></i> Чат игры</h3>
-                <button class="chat-close" onclick="toggleChatWindow()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-message system">
-                    <span class="message-author">🚨 Система:</span>
-                    <span class="message-text">Добро пожаловать в игру!</span>
-                    <span class="message-time" id="systemMessageTime"></span>
-                </div>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" 
-                       class="chat-input" 
-                       id="chatInput" 
-                       placeholder="Введите сообщение (до 30 символов)..."
-                       maxlength="30"
-                       onkeypress="handleChatKeyPress(event)">
-                <button class="chat-send" onclick="sendChatMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальные окна -->
-    <div id="rulesModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-book"></i> Правила игры</h2>
-                <button class="modal-close" onclick="closeModal('rulesModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="rules-section">
-                    <h3><i class="fas fa-exclamation-triangle"></i> ВАЖНОЕ УВЕДОМЛЕНИЕ</h3>
-                    <p>Данная игра создана <strong>исключительно в ознакомительных целях и для виртуальной помощи на дороге</strong>.</p>
-                    <p style="color: #ff9800; margin-top: 10px;">
-                        <strong>За любые совпадения с реальными ситуациями, событиями или лицами автор игры ответственности не несёт.</strong>
-                    </p>
-                    <p style="margin-top: 10px;">Игра не является официальным приложением полиции и не предоставляет реальные услуги экстренных служб.</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-users"></i> Мультиплеер</h3>
-                    <p>Все игроки видят одни и те же метки в реальном времени через Firebase Cloud.</p>
-                    <p>Создавайте метки, чтобы предупредить других игроков о ситуации на дороге.</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-sync"></i> Синхронизация</h3>
-                    <p>Данные обновляются мгновенно благодаря Firebase Realtime Database.</p>
-                    <p>Новые метки появляются у всех игроков в течение 1-2 секунд.</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-database"></i> Ограничения</h3>
-                    <p>Максимум <span id="rulesMaxMarkers">40</span> меток на всю игру.</p>
-                    <p><strong>Метки автоматически удаляются через 3 часа!</strong></p>
-                    <p>Это ограничение тарифа Firebase для предотвращения переполнения базы данных.</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-trophy"></i> Рейтинг</h3>
-                    <p>Зарабатывайте очки за добавление полезных меток.</p>
-                    <p>Чем активнее вы помогаете другим игрокам - тем выше ваш ранг!</p>
-                    <p>Ранги: Новичок → Патрульный → Сержант → Детектив → Комиссар</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-comments"></i> Игровой чат</h3>
-                    <p>1. Используйте чат для координации действий</p>
-                    <p>2. Сообщайте о новых метках и удалениях</p>
-                    <p>3. Не спамьте и не нарушайте правила общения</p>
-                    <p>4. Максимальная длина сообщения: 30 символов</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-phone"></i> Реальная помощь</h3>
-                    <p>В случае реальной аварии или необходимости помощи:</p>
-                    <p style="color: #f44336;"><strong>Немедленно звоните по номеру 112!</strong></p>
-                    <p>Эта игра НЕ заменяет вызов реальных экстренных служб.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно игроков -->
-    <div id="playersModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-users"></i> Мультиплеер</h2>
-                <button class="modal-close" onclick="closeModal('playersModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="players-list" id="playersList">
-                    <p style="text-align: center; color: #aaa;">Загрузка списка игроков...</p>
-                </div>
-                <div style="text-align: center; margin-top: 20px;">
-                    <p><i class="fas fa-info-circle"></i> Игроков онлайн: <span id="modalOnlineCount">1</span></p>
-                    <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
-                        Таблица лидеров обновляется в реальном времени
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно управления -->
-    <div id="controlsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-gamepad"></i> Управление</h2>
-                <button class="modal-close" onclick="closeModal('controlsModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="rules-section">
-                    <h3><i class="fas fa-mouse-pointer"></i> Основные правила управления</h3>
-                    <p>1. Выберите тип метки в панели инструментов</p>
-                    <p>2. Кликните на карту для размещения метки</p>
-                    <p>3. Для удаления: выберите инструмент "Удалить" или нажмите на крестик на метке</p>
-                    <p>4. Используйте кнопку геолокации на карте для перемещения к своему местоположению</p>
-                    <p>5. Метки синхронизируются автоматически со всеми игроками</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-comments"></i> Игровой чат</h3>
-                    <p>• Нажмите на синюю кнопку в правом нижнем углу</p>
-                    <p>• Красный значок показывает новые сообщения</p>
-                    <p>• Максимальная длина сообщения: 30 символов</p>
-                </div>
-                
-                <div class="rules-section">
-                    <h3><i class="fas fa-bell"></i> Уведомления</h3>
-                    <p>Чат автоматически показывает:</p>
-                    <p>• Новые метки на карте</p>
-                    <p>• Удаления меток</p>
-                    <p>• Сообщения других игроков</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно комментария -->
-    <div id="commentModal" class="comment-modal">
-        <div class="comment-modal-content">
-            <div class="comment-header">
-                <h2><i class="fas fa-comment"></i> Комментарий к метке</h2>
-                <button class="modal-close" onclick="closeCommentModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="comment-input-container">
-                    <input type="text" 
-                           class="comment-input" 
-                           id="commentText" 
-                           placeholder="Введите комментарий (до 30 символов)..."
-                           maxlength="30"
-                           oninput="updateCommentChars()">
-                    <div class="comment-chars" id="commentChars">0/30</div>
-                </div>
-                <div class="comment-buttons">
-                    <button class="comment-btn skip" onclick="addMarkerWithoutComment()">
-                        Без комментария
-                    </button>
-                    <button class="comment-btn add" id="addWithCommentBtn" onclick="addMarkerWithComment()" disabled>
-                        Добавить
+        <!-- Модальные окна -->
+        <div id="rulesModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-book"></i> Правила игры</h2>
+                    <button class="modal-close" onclick="closeModal('rulesModal')">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="comment-info">
-                    Комментарий будет виден всем игрокам на карте
+                <div class="modal-body">
+                    <div class="rules-section">
+                        <h3><i class="fas fa-exclamation-triangle"></i> ВАЖНОЕ УВЕДОМЛЕНИЕ</h3>
+                        <p>Данная игра создана <strong>исключительно в ознакомительных целях и для виртуальной помощи на дороге</strong>.</p>
+                        <p style="color: #ff9800; margin-top: 10px;">
+                            <strong>За любые совпадения с реальными ситуациями, событиями или лицами автор игры ответственности не несёт.</strong>
+                        </p>
+                        <p style="margin-top: 10px;">Игра не является официальным приложением полиции и не предоставляет реальные услуги экстренных служб.</p>
+                    </div>
+                    
+                    <div class="rules-section">
+                        <h3><i class="fas fa-user"></i> Локальный режим</h3> <!-- Изменено -->
+                        <p>Игра работает в локальном режиме. Все метки сохраняются только в вашем браузере.</p>
+                        <p>Метки автоматически удаляются при закрытии вкладки браузера.</p>
+                    </div>
+                    
+                    <div class="rules-section">
+                        <h3><i class="fas fa-database"></i> Ограничения</h3>
+                        <p>Максимум <span id="rulesMaxMarkers">40</span> меток на карте.</p>
+                        <p><strong>Метки сохраняются только в текущей сессии!</strong></p>
+                        <p>Для сохранения меток используйте скриншоты.</p>
+                    </div>
+                    
+                    <div class="rules-section">
+                        <h3><i class="fas fa-trophy"></i> Рейтинг</h3>
+                        <p>Зарабатывайте очки за добавление полезных меток.</p>
+                        <p>Чем активнее вы играете - тем выше ваш ранг!</p>
+                        <p>Ранги: Новичок → Патрульный → Сержант → Детектив → Комиссар</p>
+                    </div>
+                    
+                    <div class="rules-section">
+                        <h3><i class="fas fa-phone"></i> Реальная помощь</h3>
+                        <p>В случае реальной аварии или необходимости помощи:</p>
+                        <p style="color: #f44336;"><strong>Немедленно звоните по номеру 112!</strong></p>
+                        <p>Эта игра НЕ заменяет вызов реальных экстренных служб.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно рейтинга (было игроков) -->
+        <div id="playersModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-trophy"></i> Ваш рейтинг</h2> <!-- Изменено -->
+                    <button class="modal-close" onclick="closeModal('playersModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="players-list" id="playersList">
+                        <div style="text-align: center; padding: 20px;">
+                            <div class="player-avatar" style="width: 80px; height: 80px; margin: 0 auto 20px; font-size: 2rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 style="color: #4fc3f7; margin-bottom: 10px;">Текущий статус</h3>
+                            <p>Игрок: <strong id="modalPlayerName">Гость</strong></p>
+                            <p>Очки: <strong id="modalPlayerPoints">100</strong></p>
+                            <p>Меток создано: <strong id="modalPlayerMarkers">0</strong></p>
+                            <p>Ранг: <strong id="modalPlayerRank">Новичок</strong></p>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p><i class="fas fa-info-circle"></i> Рейтинг обновляется автоматически</p>
+                        <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">
+                            Для сохранения результатов сделайте скриншот
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно управления -->
+        <div id="controlsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-gamepad"></i> Управление</h2>
+                    <button class="modal-close" onclick="closeModal('controlsModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="rules-section">
+                        <h3><i class="fas fa-mouse-pointer"></i> Основные правила управления</h3>
+                        <p>1. Выберите тип метки в панели инструментов</p>
+                        <p>2. Кликните на карту для размещения метки</p>
+                        <p>3. Для удаления: выберите инструмент "Удалить" или нажмите на крестик на метке</p>
+                        <p>4. Используйте кнопку геолокации на карте для перемещения к своему местоположению</p>
+                        <p>5. Метки сохраняются только в текущей сессии браузера</p>
+                    </div>
+                    
+                    <div class="rules-section">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Важно знать</h3>
+                        <p>• Данные не сохраняются после закрытия вкладки</p>
+                        <p>• Для сохранения используйте скриншоты</p>
+                        <p>• Игра работает полностью оффлайн</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно комментария -->
+        <div id="commentModal" class="comment-modal">
+            <div class="comment-modal-content">
+                <div class="comment-header">
+                    <h2><i class="fas fa-comment"></i> Комментарий к метке</h2>
+                    <button class="modal-close" onclick="closeCommentModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="comment-input-container">
+                        <input type="text" 
+                               class="comment-input" 
+                               id="commentText" 
+                               placeholder="Введите комментарий (до 30 символов)..."
+                               maxlength="30"
+                               oninput="updateCommentChars()">
+                        <div class="comment-chars" id="commentChars">0/30</div>
+                    </div>
+                    <div class="comment-buttons">
+                        <button class="comment-btn skip" onclick="addMarkerWithoutComment()">
+                            Без комментария
+                        </button>
+                        <button class="comment-btn add" id="addWithCommentBtn" onclick="addMarkerWithComment()" disabled>
+                            Добавить
+                        </button>
+                    </div>
+                    <div class="comment-info">
+                        Комментарий будет виден при нажатии на метку
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============ КОНФИГУРАЦИЯ FIREBASE ============
-        const firebaseConfig = {
-            apiKey: "AIzaSyD0zwcRZs7mI0RzPq3O18WOIWjhUO6yKZQ",
-            authDomain: "miami-police-game.firebaseapp.com",
-            databaseURL: "https://miami-police-game-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "miami-police-game",
-            storageBucket: "miami-police-game.firebasestorage.app",
-            messagingSenderId: "4861394604",
-            appId: "1:4861394604:web:f2acb3a189f99396a66909"
-        };
-        
         // ============ КОНСТАНТЫ ИГРЫ ============
         const tg = window.Telegram.WebApp;
         const MAX_MARKERS = 40;
-        const MARKER_LIFETIME = 3 * 60 * 60 * 1000;
-        const ONLINE_TIMEOUT = 30000;
-        const MAX_CHAT_CHARS = 30;
+        const MARKER_LIFETIME = 3 * 60 * 60 * 1000; // 3 часа
         const MAX_COMMENT_CHARS = 30;
         
         // Типы меток, которые требуют комментарий
@@ -1369,22 +1310,16 @@
         
         // ============ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ============
         let telegramUser = null;
-        let firebaseApp = null;
-        let firebaseDatabase = null;
         let ymap = null;
         
-        let markers = {};
+        let markers = {}; // Локальное хранение меток
         let selectedTool = 'police';
         let points = 100;
         let activity = 0;
         let pendingMarkerData = null;
         
-        let onlinePlayers = {};
-        let currentUserId = null;
         let currentUserName = 'Гость';
         
-        let chatWindowOpen = false;
-        let unreadMessages = 0;
         let autoStartInterval = null;
         let countdownSeconds = 20;
         
@@ -1403,240 +1338,61 @@
             
             if (telegramUser) {
                 currentUserName = telegramUser.first_name || telegramUser.username || 'Игрок';
-                currentUserId = telegramUser.id.toString();
                 document.getElementById('userWelcome').textContent = `Добро пожаловать, ${currentUserName}!`;
+                document.getElementById('modalPlayerName').textContent = currentUserName;
             } else {
                 currentUserName = 'Гость_' + Math.random().toString(36).substr(2, 6);
-                currentUserId = 'guest_' + Math.random().toString(36).substr(2, 9);
                 document.getElementById('userWelcome').textContent = 'Добро пожаловать в игру!';
+                document.getElementById('modalPlayerName').textContent = currentUserName;
             }
-            
-            // Устанавливаем время для системного сообщения
-            const now = new Date();
-            document.getElementById('systemMessageTime').textContent = 
-                now.getHours().toString().padStart(2, '0') + ':' + 
-                now.getMinutes().toString().padStart(2, '0');
             
             startAutoStartTimer();
-            initFirebase();
+            
+            // Загружаем сохраненные метки из localStorage (если есть)
+            loadLocalMarkers();
         }
         
-        // ============ ИНИЦИАЛИЗАЦИЯ FIREBASE ============
-        function initFirebase() {
+        // ============ ЛОКАЛЬНОЕ ХРАНЕНИЕ МЕТОК ============
+        function loadLocalMarkers() {
             try {
-                if (typeof firebase === 'undefined') {
-                    console.error('Firebase не загружен!');
-                    document.getElementById('syncStatus').textContent = 'Firebase не загружен';
-                    document.getElementById('syncStatus').style.color = '#f44336';
-                    return;
+                const savedMarkers = localStorage.getItem('miami_police_markers');
+                if (savedMarkers) {
+                    markers = JSON.parse(savedMarkers);
+                    console.log(`Загружено ${Object.keys(markers).length} меток из localStorage`);
+                    
+                    // Отображаем метки на карте после ее загрузки
+                    if (ymap) {
+                        displayLocalMarkers();
+                    }
+                    
+                    updateMarkerCount();
+                    updateUI();
                 }
-                
-                firebaseApp = firebase.initializeApp(firebaseConfig);
-                firebaseDatabase = firebase.database();
-                
-                console.log('✅ Firebase успешно инициализирован!');
-                
-                const syncStatus = document.getElementById('syncStatus');
-                if (syncStatus) {
-                    syncStatus.textContent = 'Подключено к Firebase ✓';
-                    syncStatus.style.color = '#4CAF50';
-                }
-                
-                // ФИКС: Загружаем ВСЕ метки при запуске
-                loadAllMarkers();
-                setupFirebaseListeners();
-                
             } catch (error) {
-                console.error('❌ Ошибка Firebase:', error);
-                
-                const syncStatus = document.getElementById('syncStatus');
-                if (syncStatus) {
-                    syncStatus.textContent = 'Firebase недоступен';
-                    syncStatus.style.color = '#FF9800';
-                }
-                
-                addChatMessage('system', '⚠️ Работаем в локальном режиме (Firebase недоступен)');
-            }
-        }
-        
-        // ФИКС: Функция загрузки ВСЕХ меток при старте
-        function loadAllMarkers() {
-            const markersRef = firebaseDatabase.ref('markers');
-            
-            markersRef.once('value').then((snapshot) => {
-                const allMarkers = snapshot.val() || {};
-                const now = Date.now();
-                
-                console.log(`Загружено ${Object.keys(allMarkers).length} меток из Firebase`);
-                
-                Object.entries(allMarkers).forEach(([markerId, markerData]) => {
-                    // Загружаем только активные метки
-                    if (markerData.isActive && now - markerData.timestamp < MARKER_LIFETIME) {
-                        if (!markers[markerId]) {
-                            addMarkerToMap(markerId, markerData);
-                            markers[markerId] = markerData;
-                        }
-                    }
-                });
-                
-                updateMarkerCount();
-                console.log(`Отображено ${Object.keys(markers).length} активных меток`);
-                
-            }).catch(error => {
                 console.error('Ошибка загрузки меток:', error);
-            });
-        }
-        
-        // ============ СИНХРОНИЗАЦИЯ FIREBASE ============
-        function setupFirebaseListeners() {
-            const markersRef = firebaseDatabase.ref('markers');
-            
-            // Слушаем добавление новых меток
-            markersRef.on('child_added', (snapshot) => {
-                const markerId = snapshot.key;
-                const markerData = snapshot.val();
-                
-                if (markerData.isActive && !markers[markerId]) {
-                    addMarkerToMap(markerId, markerData);
-                    markers[markerId] = markerData;
-                    updateMarkerCount();
-                    
-                    if (markerData.authorId !== currentUserId) {
-                        addChatMessage('system', `📍 ${markerData.author} добавил(а) метку: ${getMarkerTypeName(markerData.type)}`);
-                    }
-                }
-            });
-            
-            // Слушаем изменения меток
-            markersRef.on('child_changed', (snapshot) => {
-                const markerId = snapshot.key;
-                const markerData = snapshot.val();
-                
-                if (!markerData.isActive && markers[markerId]) {
-                    removeMarkerFromMap(markerId);
-                    delete markers[markerId];
-                    updateMarkerCount();
-                    
-                    if (markerData && markerData.type) {
-                        addChatMessage('system', `🗑️ Метка удалена: ${getMarkerTypeName(markerData.type)}`);
-                    }
-                }
-            });
-            
-            // Слушаем онлайн игроков
-            const onlineRef = firebaseDatabase.ref('online');
-            onlineRef.on('value', (snapshot) => {
-                const users = snapshot.val() || {};
-                onlinePlayers = users;
-                updateOnlinePlayers(users);
-            });
-            
-            // Слушаем чат
-            const chatRef = firebaseDatabase.ref('chat');
-            chatRef.limitToLast(20).on('child_added', (snapshot) => {
-                const message = snapshot.val();
-                if (message.authorId !== currentUserId || message.type === 'system') {
-                    addChatMessage(message.type, `${message.author}: ${message.text}`);
-                }
-            });
-            
-            updateOnlineStatus();
-            cleanupOldMarkers();
-        }
-        
-        function updateOnlineStatus() {
-            const userStatusRef = firebaseDatabase.ref('online/' + currentUserId);
-            
-            const userData = {
-                name: currentUserName,
-                userId: currentUserId,
-                lastSeen: Date.now(),
-                stats: {
-                    markersCreated: activity,
-                    points: points,
-                    rank: calculateRank().name
-                }
-            };
-            
-            userStatusRef.set(userData);
-            
-            setInterval(() => {
-                userData.lastSeen = Date.now();
-                userData.stats.markersCreated = activity;
-                userData.stats.points = points;
-                userData.stats.rank = calculateRank().name;
-                userStatusRef.update(userData);
-            }, 10000);
-            
-            userStatusRef.onDisconnect().remove();
-        }
-        
-        function updateOnlinePlayers(users) {
-            const now = Date.now();
-            const onlineUserIds = Object.keys(users).filter(id => {
-                const user = users[id];
-                return now - user.lastSeen < ONLINE_TIMEOUT;
-            });
-            
-            const onlineCount = Math.max(1, onlineUserIds.length);
-            
-            document.getElementById('onlineCount').textContent = onlineCount;
-            document.getElementById('modalOnlineCount').textContent = onlineCount;
-            
-            updatePlayersList(users);
-        }
-        
-        function updatePlayersList(users) {
-            const playersList = document.getElementById('playersList');
-            if (!playersList) return;
-            
-            const now = Date.now();
-            
-            const playersArray = Object.entries(users)
-                .filter(([id, user]) => now - user.lastSeen < ONLINE_TIMEOUT)
-                .map(([id, user]) => ({
-                    id,
-                    ...user,
-                    isOnline: now - user.lastSeen < ONLINE_TIMEOUT
-                }))
-                .sort((a, b) => b.stats.points - a.stats.points);
-            
-            playersList.innerHTML = '';
-            
-            if (playersArray.length === 0) {
-                playersList.innerHTML = '<p style="text-align: center; color: #aaa;">Нет игроков онлайн</p>';
-                return;
+                markers = {};
             }
+        }
+        
+        function saveLocalMarkers() {
+            try {
+                localStorage.setItem('miami_police_markers', JSON.stringify(markers));
+            } catch (error) {
+                console.error('Ошибка сохранения меток:', error);
+            }
+        }
+        
+        function displayLocalMarkers() {
+            if (!ymap) return;
             
-            playersArray.forEach((player, index) => {
-                const playerItem = document.createElement('div');
-                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-                playerItem.className = `player-item ${rankClass}`;
-                
-                const initials = player.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'Г';
-                const isCurrentUser = player.id === currentUserId;
-                
-                playerItem.innerHTML = `
-                    <div class="player-info">
-                        <div class="player-avatar" style="${isCurrentUser ? 'background: linear-gradient(135deg, #FF9800, #F57C00);' : ''}">
-                            ${initials}
-                            ${isCurrentUser ? '⭐' : ''}
-                            ${index < 3 ? `<div class="player-rank-badge">${index + 1}</div>` : ''}
-                        </div>
-                        <div class="player-details">
-                            <div class="player-name">
-                                ${player.name} ${isCurrentUser ? '(Вы)' : ''}
-                            </div>
-                            <div class="player-stats">
-                                <span>🏆 ${player.stats.points} очков</span>
-                                <span>📍 ${player.stats.markersCreated} меток</span>
-                                <span class="player-score">${player.stats.rank}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                playersList.appendChild(playerItem);
+            // Очищаем старые метки
+            ymap.geoObjects.removeAll();
+            
+            // Добавляем все метки на карту
+            Object.entries(markers).forEach(([markerId, markerData]) => {
+                if (markerData.isActive) {
+                    addLocalMarkerToMap(markerId, markerData);
+                }
             });
         }
         
@@ -1648,7 +1404,7 @@
                 return null;
             }
             
-            const markerId = firebaseDatabase.ref('markers').push().key;
+            const markerId = 'marker_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             const timestamp = Date.now();
             
             const markerData = {
@@ -1659,35 +1415,30 @@
                 },
                 comment: comment || '',
                 author: currentUserName,
-                authorId: currentUserId,
                 timestamp: timestamp,
                 isActive: true,
                 expiresAt: timestamp + MARKER_LIFETIME
             };
             
-            firebaseDatabase.ref('markers/' + markerId).set(markerData)
-                .then(() => {
-                    console.log('✅ Метка добавлена в Firebase');
-                    
-                    points += 10;
-                    activity += 1;
-                    updateUI();
-                    
-                    sendChatMessage(
-                        `${currentUserName} добавил(а) метку: ${getMarkerTypeName(type)}`,
-                        'marker_added'
-                    );
-                    
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка добавления метки:', error);
-                    alert('Ошибка при добавлении метки');
-                });
+            // Сохраняем локально
+            markers[markerId] = markerData;
+            
+            // Добавляем на карту
+            addLocalMarkerToMap(markerId, markerData);
+            
+            // Сохраняем в localStorage
+            saveLocalMarkers();
+            
+            console.log('✅ Метка добавлена локально');
+            
+            points += 10;
+            activity += 1;
+            updateUI();
             
             return markerId;
         }
         
-        function addMarkerToMap(markerId, markerData) {
+        function addLocalMarkerToMap(markerId, markerData) {
             if (!ymap) return;
             
             const iconColor = {
@@ -1716,12 +1467,10 @@
                             <p><strong>Автор:</strong> ${markerData.author}</p>
                             <p><strong>Добавлено:</strong> ${new Date(markerData.timestamp).toLocaleTimeString()}</p>
                             <p><strong>Удалится через:</strong> ${formatTimeRemaining(markerData.expiresAt)}</p>
-                            ${markerData.authorId === currentUserId ? `
                             <button onclick="deleteMarker('${markerId}')" 
                                     style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-                                Удалить мою метку
+                                Удалить метку
                             </button>
-                            ` : ''}
                         </div>
                     `,
                     iconCaption: markerData.comment || ''
@@ -1737,12 +1486,10 @@
                     iconContentLayout: ymaps.templateLayoutFactory.createClass(
                         `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative;">
                             ${iconContent}
-                            ${markerData.authorId === currentUserId ? `
                             <button onclick="deleteMarker('${markerId}')" 
                                     style="position: absolute; top: -5px; right: -5px; background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                                 ×
                             </button>
-                            ` : ''}
                         </div>`
                     )
                 }
@@ -1754,6 +1501,8 @@
             
             markerData.placemark = placemark;
             ymap.geoObjects.add(placemark);
+            
+            return placemark;
         }
         
         function deleteMarker(markerId) {
@@ -1764,179 +1513,47 @@
             }
             
             const marker = markers[markerId];
-            if (!marker) {
-                console.error('Метка не найдена в локальном хранилище:', markerId);
-                return;
+            
+            // Удаляем с карты
+            if (marker.placemark && ymap) {
+                ymap.geoObjects.remove(marker.placemark);
             }
             
-            if (marker.authorId !== currentUserId) {
-                alert('Вы можете удалять только свои метки!');
-                return;
-            }
+            // Удаляем из хранилища
+            markers[markerId].isActive = false;
+            saveLocalMarkers();
             
-            const markerType = marker.type;
+            console.log('✅ Метка удалена локально');
             
-            firebaseDatabase.ref('markers/' + markerId).update({
-                isActive: false
-            })
-            .then(() => {
-                console.log('✅ Метка помечена как удаленная');
-                
-                points += 5;
-                updateUI();
-                
-                sendChatMessage(
-                    `${currentUserName} удалил(а) метку: ${getMarkerTypeName(markerType)}`,
-                    'marker_deleted'
-                );
-            })
-            .catch(error => {
-                console.error('❌ Ошибка удаления метки:', error);
-                alert('Ошибка при удалении метки');
-            });
-        }
-        
-        function removeMarkerFromMap(markerId) {
-            if (markers[markerId] && markers[markerId].placemark && ymap) {
-                ymap.geoObjects.remove(markers[markerId].placemark);
-            }
+            points += 5;
+            updateUI();
         }
         
         function cleanupOldMarkers() {
             const now = Date.now();
-            const markersRef = firebaseDatabase.ref('markers');
+            let removedCount = 0;
             
-            markersRef.once('value').then((snapshot) => {
-                const updates = {};
-                snapshot.forEach((childSnapshot) => {
-                    const marker = childSnapshot.val();
-                    
-                    if (now - marker.timestamp > MARKER_LIFETIME && marker.isActive) {
-                        updates[childSnapshot.key + '/isActive'] = false;
+            Object.entries(markers).forEach(([markerId, markerData]) => {
+                if (markerData.isActive && now - markerData.timestamp > MARKER_LIFETIME) {
+                    // Удаляем с карты
+                    if (markerData.placemark && ymap) {
+                        ymap.geoObjects.remove(markerData.placemark);
                     }
-                });
-                
-                if (Object.keys(updates).length > 0) {
-                    markersRef.update(updates);
-                    console.log(`Автоочистка: удалено ${Object.keys(updates).length / 2} старых меток`);
+                    
+                    // Помечаем как неактивную
+                    markers[markerId].isActive = false;
+                    removedCount++;
                 }
             });
             
+            if (removedCount > 0) {
+                saveLocalMarkers();
+                updateMarkerCount();
+                console.log(`Автоочистка: удалено ${removedCount} старых меток`);
+            }
+            
+            // Повторяем каждые 5 минут
             setTimeout(cleanupOldMarkers, 5 * 60 * 1000);
-        }
-        
-        // ============ ЧАТ ============
-        function toggleChatWindow() {
-            const chatWindow = document.getElementById('chatWindow');
-            const chatButton = document.getElementById('chatButton');
-            const chatBadge = document.getElementById('chatBadge');
-            
-            if (chatWindowOpen) {
-                chatWindow.classList.remove('active');
-                chatWindowOpen = false;
-            } else {
-                chatWindow.classList.add('active');
-                chatWindowOpen = true;
-                
-                // Сбрасываем счетчик непрочитанных при открытии
-                unreadMessages = 0;
-                chatBadge.style.display = 'none';
-                
-                // Прокручиваем вниз
-                setTimeout(() => {
-                    const chatMessages = document.getElementById('chatMessages');
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 100);
-            }
-        }
-        
-        function sendChatMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const text = chatInput.value.trim();
-            
-            if (!text) return;
-            
-            if (text.length > MAX_CHAT_CHARS) {
-                alert(`Сообщение слишком длинное! Максимум ${MAX_CHAT_CHARS} символов.`);
-                return;
-            }
-            
-            const messageId = firebaseDatabase.ref('chat').push().key;
-            const messageData = {
-                text: text,
-                author: currentUserName,
-                authorId: currentUserId,
-                timestamp: Date.now(),
-                type: 'user'
-            };
-            
-            firebaseDatabase.ref('chat/' + messageId).set(messageData)
-                .then(() => {
-                    chatInput.value = '';
-                })
-                .catch(error => {
-                    console.error('Ошибка отправки сообщения:', error);
-                    alert('Ошибка отправки сообщения');
-                });
-        }
-        
-        function addChatMessage(type, text) {
-            const chatMessages = document.getElementById('chatMessages');
-            const now = new Date();
-            const messageTime = now.getHours().toString().padStart(2, '0') + ':' + 
-                              now.getMinutes().toString().padStart(2, '0');
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${type}`;
-            messageDiv.innerHTML = `
-                <span class="message-author">${type === 'system' ? '🚨 Система:' : ''}</span>
-                <span class="message-text">${text}</span>
-                <span class="message-time">${messageTime}</span>
-            `;
-            
-            chatMessages.appendChild(messageDiv);
-            
-            // Прокручиваем вниз если чат открыт
-            if (chatWindowOpen) {
-                setTimeout(() => {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 100);
-            } else {
-                // Увеличиваем счетчик непрочитанных
-                unreadMessages++;
-                const chatBadge = document.getElementById('chatBadge');
-                chatBadge.textContent = unreadMessages > 9 ? '9+' : unreadMessages;
-                chatBadge.style.display = 'flex';
-            }
-        }
-        
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                sendChatMessage();
-            }
-        }
-        
-        // ============ КОММЕНТАРИИ К МЕТКАМ ============
-        function updateCommentChars() {
-            const commentText = document.getElementById('commentText');
-            const commentChars = document.getElementById('commentChars');
-            const addButton = document.getElementById('addWithCommentBtn');
-            
-            const length = commentText.value.length;
-            commentChars.textContent = `${length}/${MAX_COMMENT_CHARS}`;
-            
-            // Изменяем цвет в зависимости от длины
-            commentChars.className = 'comment-chars';
-            if (length > MAX_COMMENT_CHARS * 0.8) {
-                commentChars.classList.add('warning');
-            }
-            if (length > MAX_COMMENT_CHARS) {
-                commentChars.classList.add('error');
-            }
-            
-            // Включаем/выключаем кнопку
-            addButton.disabled = length > MAX_COMMENT_CHARS;
         }
         
         // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
@@ -1983,6 +1600,11 @@
             const rank = calculateRank();
             document.getElementById('userRank').textContent = rank.name;
             document.getElementById('rankPoints').textContent = rank.progress + '%';
+            
+            // Обновляем модальное окно рейтинга
+            document.getElementById('modalPlayerPoints').textContent = points;
+            document.getElementById('modalPlayerMarkers').textContent = activity;
+            document.getElementById('modalPlayerRank').textContent = rank.name;
         }
         
         function calculateRank() {
@@ -2007,7 +1629,7 @@
                 let zoom = 15;
                 let useGeolocation = false;
                 
-                // ФИКС: Улучшенная геолокация
+                // Улучшенная геолокация
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
@@ -2018,7 +1640,6 @@
                         },
                         function(error) {
                             console.warn('Геолокация недоступна, используем Белоозерский:', error);
-                            addChatMessage('system', '📍 Используется карта Белоозерского');
                             createMap(center, zoom, useGeolocation);
                         },
                         {
@@ -2029,7 +1650,6 @@
                     );
                 } else {
                     console.log('Geolocation API не поддерживается');
-                    addChatMessage('system', '📍 Используется карта Белоозерского');
                     createMap(center, zoom, useGeolocation);
                 }
                 
@@ -2040,7 +1660,7 @@
                         controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
                     });
                     
-                    // ФИКС: Добавляем кнопку геолокации правильно
+                    // Добавляем кнопку геолокации
                     if (hasGeolocation) {
                         const geolocationControl = new ymaps.control.GeolocationControl({
                             options: {
@@ -2053,6 +1673,9 @@
                     
                     document.getElementById('loading').style.display = 'none';
                     
+                    // Отображаем сохраненные метки
+                    displayLocalMarkers();
+                    
                     // Обработчик кликов по карте
                     ymap.events.add('click', function(e) {
                         const coords = e.get('coords');
@@ -2062,7 +1685,7 @@
                             let minDistance = Infinity;
                             
                             Object.entries(markers).forEach(([id, marker]) => {
-                                if (marker.authorId === currentUserId && marker.isActive) {
+                                if (marker.isActive) {
                                     const distance = Math.sqrt(
                                         Math.pow(marker.coords.lat - coords[0], 2) + 
                                         Math.pow(marker.coords.lng - coords[1], 2)
@@ -2078,7 +1701,7 @@
                             if (closestMarker) {
                                 deleteMarker(closestMarker.id);
                             } else {
-                                alert('❌ Нет ваших меток рядом для удаления');
+                                alert('❌ Нет меток рядом для удаления');
                             }
                         } else {
                             pendingMarkerData = { coords, type: selectedTool };
@@ -2094,6 +1717,7 @@
                 }
                 
                 updateUI();
+                cleanupOldMarkers(); // Запускаем очистку старых меток
                 
             } catch (error) {
                 console.error('Ошибка карты:', error);
@@ -2106,6 +1730,28 @@
                     </button>
                 `;
             }
+        }
+        
+        // ============ КОММЕНТАРИИ К МЕТКАМ ============
+        function updateCommentChars() {
+            const commentText = document.getElementById('commentText');
+            const commentChars = document.getElementById('commentChars');
+            const addButton = document.getElementById('addWithCommentBtn');
+            
+            const length = commentText.value.length;
+            commentChars.textContent = `${length}/${MAX_COMMENT_CHARS}`;
+            
+            // Изменяем цвет в зависимости от длины
+            commentChars.className = 'comment-chars';
+            if (length > MAX_COMMENT_CHARS * 0.8) {
+                commentChars.classList.add('warning');
+            }
+            if (length > MAX_COMMENT_CHARS) {
+                commentChars.classList.add('error');
+            }
+            
+            // Включаем/выключаем кнопку
+            addButton.disabled = length > MAX_COMMENT_CHARS;
         }
         
         // ============ ЗАСТАВКА И ЗАПУСК ============
@@ -2151,7 +1797,7 @@
         }
         
         function initGame() {
-            console.log('🚔 Запуск игры...');
+            console.log('🚔 Запуск локальной игры...');
             
             if (window.ymaps) {
                 ymaps.ready(initMap);
@@ -2166,6 +1812,7 @@
         // ============ МОДАЛЬНЫЕ ОКНА ============
         function openRulesModal() {
             document.getElementById('rulesModal').style.display = 'flex';
+            document.getElementById('rulesMaxMarkers').textContent = MAX_MARKERS;
         }
         
         function openPlayersModal() {
@@ -2212,13 +1859,15 @@
             }
         }
         
-        function cleanupBeforeExit() {
-            if (firebaseDatabase) {
-                firebaseDatabase.ref('markers').off();
-                firebaseDatabase.ref('online').off();
-                firebaseDatabase.ref('chat').off();
-                
-                firebaseDatabase.ref('online/' + currentUserId).remove();
+        function clearAllMarkers() {
+            if (confirm('Вы уверены, что хотите удалить ВСЕ метки? Это действие нельзя отменить.')) {
+                if (ymap) {
+                    ymap.geoObjects.removeAll();
+                }
+                markers = {};
+                saveLocalMarkers();
+                updateMarkerCount();
+                alert('Все метки удалены!');
             }
         }
         
@@ -2239,16 +1888,6 @@
                         }
                     }
                 });
-                
-                // Закрытие чата по клику вне
-                const chatWindow = document.getElementById('chatWindow');
-                const chatButton = document.getElementById('chatButton');
-                if (chatWindowOpen && 
-                    !chatWindow.contains(event.target) && 
-                    !chatButton.contains(event.target) &&
-                    event.target !== chatButton) {
-                    toggleChatWindow();
-                }
             });
             
             // Предотвращаем растягивание окна
@@ -2261,6 +1900,11 @@
             // Предотвращаем масштабирование
             document.addEventListener('gesturestart', function(e) {
                 e.preventDefault();
+            });
+            
+            // Сохраняем данные перед закрытием страницы
+            window.addEventListener('beforeunload', function() {
+                saveLocalMarkers();
             });
         });
         
@@ -2277,10 +1921,8 @@
         window.closeCommentModal = closeCommentModal;
         window.addMarkerWithComment = addMarkerWithComment;
         window.addMarkerWithoutComment = addMarkerWithoutComment;
-        window.toggleChatWindow = toggleChatWindow;
-        window.sendChatMessage = sendChatMessage;
-        window.handleChatKeyPress = handleChatKeyPress;
         window.updateCommentChars = updateCommentChars;
+        window.clearAllMarkers = clearAllMarkers;
     </script>
 </body>
 </html>
